@@ -4,6 +4,15 @@
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
 
+<ul> 
+  <li> <span> Playing as: </span> <span class="username"></span></li>
+  <li class="num"> <span> Players in Game: </span> <span class="playerNames"></span></li>
+  <br>
+  <li> <span> Number of Cards in your hand: </span> <span class="numCards"></span></li>
+  <li> <span class="currentPlayerUsername"></span><span>'s turn</span></li>
+</ul>
+
+<span class="cardsInDeck"> </span>
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
 
@@ -27,8 +36,13 @@
   });
 
   socket.on('playCard', function(data) {
-    var imgsrc = data.cardString.toLowerCase().split(" ").join("_") + ".svg";
+    var imgsrc = data.card.cardString.toLowerCase().split(" ").join("_") + ".svg";
     $("#card").attr("src", "/cards/" + imgsrc);
+    updateGameStatus(data.gameState);
+  });
+
+  socket.on('clearDeck', function(){
+    $("#card").attr("src", "");
   });
 
   socket.on('slap', function(data) {
@@ -56,6 +70,7 @@
   function handleMessage(msg) {
     var message = $("<h3>" + msg + "</h3>");
     $("#messages-container").append(message);
+
     setTimeout(function() {
       message.fadeOut();
     }, 5000);
@@ -68,5 +83,22 @@
   function slap() {
     socket.emit('slap');
   }
+
+  function initGameStatus(){
+    $(".username").text(username);
+  }
+
+  function updateGameStatus(state){
+    $(".username").text(username);
+    $(".numCards").text(state.numCards[id]);
+    $(".playerNames").text(Object.keys(state.numCards).length);
+    $(".currentPlayerUsername").text(state.currentPlayerUsername);
+    $(".cardsInDeck").text(state.cardsInDeck);
+    $(".num").show();
+  }
+
+  // this is ugly.
+  $(".num").hide();
+
 
 </script>

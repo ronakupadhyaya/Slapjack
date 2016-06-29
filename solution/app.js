@@ -12,6 +12,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var Game = require('./game');
 var game = new Game();
+var _ = require('underscore');
 
 app.engine('hbs', exphbs({
   extname: 'hbs',
@@ -29,6 +30,27 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
+
+function getGameState(){
+  var numCards = {};
+  var currentPlayerUsername;
+  var players = "";
+  numCards = _.mapObject(game.players,(function(player, playerId){
+    if(playerId == game.currentPlayer){
+      currentPlayerUsername = player.username;
+    }
+    players += players.username + ", ";
+    return player.pile.length;
+  }));
+
+  return {
+      numCards: numCards || "You don't have cards yet",
+      currentPlayerUsername: currentPlayerUsername || "Game not started",
+      playersInGame: players,
+      cardsInDeck: game.pile.length,
+  }
+
+}
 
 io.on('connection', function(socket){
   socket.emit('username', false);
@@ -59,8 +81,25 @@ io.on('connection', function(socket){
       socket.emit('oopsie', 'Not your turn!');
       return console.error(e);
     }
-    socket.emit('playCard', card);
-    socket.broadcast.emit('playCard', card);
+
+    // var numCards = {};
+    // var currentPlayerUsername;
+    // numCards = _.mapObject(game.players,(function(player, playerId){
+    //   if(playerId == game.currentPlayer){
+    //     currentPlayerUsername = player.username;
+    //   }
+    //   return player.pile.length;
+    // }));
+
+    socket.emit('playCard', {
+      card: card,
+      gameState: getGameState()
+    });
+
+    socket.broadcast.emit('playCard', {
+      card: card,
+      gameState: getGameState()
+    });
   });
 
   socket.on('slap', function() {
@@ -73,6 +112,8 @@ io.on('connection', function(socket){
     socket.emit('slap', slap);
     socket.broadcast.emit('message', game.players[socket.playerId].username 
       + ' ' + slap.message);
+
+    socket.broadcast.emit('clearDeck');
   });
 
 });

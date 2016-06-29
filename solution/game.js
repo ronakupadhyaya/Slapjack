@@ -110,7 +110,7 @@ Game.prototype.playCard = function(playerId) {
   this.nextPlayer(playerId);
   return {
     card: newCard,
-    cardString: newCard.toString()
+    cardString: newCard.toString(),
   }
 };
 
