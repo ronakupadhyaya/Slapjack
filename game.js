@@ -156,7 +156,7 @@ Player.prototype.toObject = function() {
     id: this.id
   };
   ret.pile = this.pile.map(function(card) {
-    return card.toOject();
+    return card.toObject();
   });
   return ret;
 }
@@ -185,9 +185,10 @@ Game.prototype.toObject = function() {
     currentPlayer: this.currentPlayer,
     playerOrder: this.playerOrder
   };
-  ret.players = _.mapObject(this.players, function(id, player) {
-    return player.toObject();
-  });
+  ret.players = {};
+  for (var i in this.players) {
+    ret.players[i] = this.players[i].toObject();
+  }
   ret.pile = this.pile.map(function(card) {
     return card.toObject();
   });

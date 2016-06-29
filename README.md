@@ -6,7 +6,7 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Rules of Slapjack** 🃏
 * **Step 1:** Game Logic ♠️
 * **Step 2:** Displaying Your Game ♥️
-* **Step 3:** Persistence, and Redis ♣️
+* **Step 3:** Persistence, Sessions, and Redis ♣️
 * **The End:** Deploy, deploy, deploy! ♦️
 
 ## Rules of Slapjack 🃏
@@ -200,10 +200,34 @@ Below is a spec of the events that we want to emit back to the client and respon
 	
 #### Updating Other Game State Properties
 
+First you will need to create a function at the beginning of your `app.js` file, after you define the `new Game()` called `getGameStatus()`. This should return an object with the fields below:
 
+- `numCards`: an Object with the keys as playerIds and the value as the number of Cards
+- `currentPlayerUsername`: the username of the current players name
+- `playersInGame`: A string with the name of all the players in the game
+- `cardsInDeck`: How many cards are in the current pile
 
+Next you will need to emit this information to the client by creating a new event called `updateGame`. `updateGame` will  back the above information to all clients so that each player is looking at the game in the same state. 
 
-## Step 3: Persistence, and Redis ♣️
+* **Server Send (`views/index.js`):** `updateGame`
+	* Upon important user actions, such as `username` (a new Player entering the game), `playCard` (a Card being played by a user), and `slap` (any time a Player attempts a slap), we want to emit this event with the return result of `getGameStatus()`.
+	* Both emit and broadcast `updateGame` after these user actions so that all connected clients receive an up-to-date game state.
+
+* **Client Receive (`views/index.js`):** `updateGame`
+	* When receiving an `updateGame` event, you will use the information you received, to then populate the game state fields in html. Below is sample code of a helper function that takes  `state` passed from the received `updateGame` event and updates the content of the page accordingly.
+	
+	```javascript
+	function updateGameStatus(state){
+		$(".username").text(username);
+		$(".numCards").text(state.numCards[id]);
+		$(".playerNames").text(state.playersInGame);
+		$(".currentPlayerUsername").text(state.currentPlayerUsername);
+		$(".cardsInDeck").text(state.cardsInDeck);
+		$(".num").show();
+		window.state = state;
+	}
+	```
+## Step 3: Persistence, Sessions, and Redis ♣️
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
