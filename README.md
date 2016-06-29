@@ -56,7 +56,7 @@ Now that you have the fundamental properties for keeping track of Game state, ad
 	* Throw an error if the game has already started
 	* Throw an error if the username is empty
 	* Throw an error if the player's username is non-unique
-	* Otherwise, create a new `Player` object with a username and push them to both the `playerOrder` Array and `players` Object
+	* Otherwise, create a new `Player` object with a username and push its ID `playerOrder` Array and add the new `Player` to the `players` Object
 	* Return the ID of the new `Player`
 
 > **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
