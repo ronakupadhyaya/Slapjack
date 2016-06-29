@@ -18,23 +18,37 @@
   });
 
   socket.on('username', function(resp) {
+    if (!resp) {
+      var user = prompt("need valid username");
+      socket.emit('username', user);
+    } else {
+      socket.emit('username', resp);
+    }
 
   });
 
-  socket.on('playCard', function(data) {
 
+  socket.on('playCard', function(data) {
+    var str = data.split(" ").join("_") + ".svg";
+    
+    $('#card').attr('src', '/cards/' + str);
   });
 
   socket.on('slap', function(data) {
-
+    if (data.winning) {
+      socket.emit('message', "you won!");
+    } else {
+      $('#messages-container').text("You" + data.message).fadeOut(5000);
+    }
   });
 
   socket.on('start', function(data) {
+    $('#startGame').attr('disabled', true);
 
   });
 
   socket.on('message', function(data) {
-
+    
   });
 
   socket.on('disconnect', function() {
