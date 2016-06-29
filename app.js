@@ -10,6 +10,8 @@ var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var Game = require('./game');
+var game = new Game();
 
 app.engine('hbs', exphbs({
   extname: 'hbs',
@@ -29,11 +31,50 @@ app.get('/', function(req, res) {
 
 
 io.on('connection', function(socket){
-  console.log('a user connected');
-  socket.on('myping', function() {
-    console.log('myping');
-    socket.emit('mypong', true);
+  socket.emit('username', false);
+  socket.on('username', function(data) {
+    try {
+      var id = game.addPlayer(data);
+      socket.playerId = id;
+    } catch(e) {
+      socket.emit('username', false);
+      return console.error(e);
+    }
+    socket.emit('username', id);
   });
+
+  socket.on('start', function() {
+    try {
+      game.startGame();
+    } catch(e) {
+      return console.error(e);
+    }
+    socket.broadcast.emit('start');
+  });
+
+  socket.on('playCard', function() {
+    try {
+      var card = game.playCard(socket.playerId);
+    } catch(e) {
+      socket.emit('oopsie', 'Not your turn!');
+      return console.error(e);
+    }
+    socket.emit('playCard', card);
+    socket.broadcast.emit('playCard', card);
+  });
+
+  socket.on('slap', function() {
+    try {
+      var slap = game.slap(socket.playerId);
+    } catch(e) {
+      socket.emit('oopsie', e);
+      return console.error(e);
+    }
+    socket.emit('slap', slap);
+    socket.broadcast.emit('message', game.players[socket.playerId].username 
+      + ' ' + slap.message);
+  });
+
 });
 
 var port = process.env.PORT || 3000;

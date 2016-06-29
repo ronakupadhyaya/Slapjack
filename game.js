@@ -37,6 +37,7 @@ var Game = function() {
 
 Game.prototype.addPlayer = function(username) {
   if (this.isStarted) throw new Error("Game is already started!");
+  if (!username || username.trim().length === 0) throw new Error("Invalid username!");
   for (var i in this.players) {
     if (this.players[i].username === username) {
       throw new Error("Non-unique username!");
@@ -103,23 +104,38 @@ Game.prototype.playCard = function(playerId) {
   if (this.players[playerId].pile.length === 0) {
     throw new Error(this.players[playerId].username + " has no cards!");
   }
+  
+  var newCard = _.last(this.players[playerId].pile);
   this.pile.push(this.players[playerId].pile.pop());
   this.nextPlayer(playerId);
+  return {
+    card: newCard,
+    cardString: newCard.toString()
+  }
 };
 
 Game.prototype.slap = function(playerId) {
   var playerPile = this.players[playerId].pile;
+  var pile = this.pile;
   var n = this.pile.length - 1;
   if (!this.isStarted) throw new Error("Game is not started!");
-  if (this.pile[n].value === 11 
-    || this.pile[n].value === this.pile[n - 1].value
-    || this.pile[n].value === this.pile[n - 2].value) {
-    this.players[playerId].pile = playerPile.concat(this.pile);
+  console.log(pile);
+
+  if ((pile.length > 0 && pile[n].value === 11 )
+    || (pile.length > 1 && pile[n].value === pile[n - 1].value)
+    || (pile.length > 2 && pile[n].value === pile[n - 2].value)) {
+    this.players[playerId].pile = playerPile.concat(pile);
     this.pile = [];
-    return this.isWinning(playerId);
+    return {
+      winning: this.isWinning(playerId),
+      message: "got the pile!"
+    }
   } else {
     this.pile = this.pile.concat([playerPile.pop(), playerPile.pop(), playerPile.pop()]);
-    return false;
+    return {
+      winning: false,
+      message: "lost three cards!"
+    };
   }
 };
 
