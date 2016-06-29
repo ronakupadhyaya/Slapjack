@@ -1,0 +1,72 @@
+<h1>Slapjack</h1>
+
+<button type="button" id="startGame" onclick="start()" class="btn btn-primary">Start Game</button>
+<button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
+<button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
+
+<img id="card" src="" style="width: 200px; margin-top: 50px">
+<div id="messages-container"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+  var username = "";
+  var id = "";
+
+  socket.on('connect', function() {
+    console.log('connected');
+  });
+
+  socket.on('username', function(resp) {
+    if (!resp) {
+      username = prompt("Enter your username!");
+      socket.emit('username', username);
+    } else {
+      id = resp;
+    }
+  });
+
+  socket.on('playCard', function(data) {
+    var imgsrc = data.cardString.toLowerCase().split(" ").join("_") + ".svg";
+    $("#card").attr("src", "/cards/" + imgsrc);
+  });
+
+  socket.on('slap', function(data) {
+    handleMessage(data.message);
+  });
+
+  socket.on('start', startGame);
+  socket.on('message', handleMessage);
+
+  socket.on('oopsie', function(msg) {
+    alert(msg);
+  });
+
+  function start() {
+    socket.emit('start');
+    startGame();
+  }
+
+  function startGame() {
+    $("#startGame").css("pointer-events", "none");
+    $("#startGame").css("opacity", "0.5");
+    $("#startGame").text("Game Started");
+  }
+
+  function handleMessage(msg) {
+    var message = $("<h3>" + msg + "</h3>");
+    $("#messages-container").append(message);
+    setTimeout(function() {
+      message.fadeOut();
+    }, 5000);
+  }
+
+  function playCard() {
+    socket.emit('playCard');
+  }
+
+  function slap() {
+    socket.emit('slap');
+  }
+
+</script>
