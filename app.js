@@ -7,8 +7,9 @@ var express = require('express');
 var exphbs  = require('express-handlebars');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
 var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 app.engine('hbs', exphbs({
   extname: 'hbs',
@@ -26,6 +27,16 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('myping', function() {
+    console.log('myping');
+    socket.emit('mypong', true);
+  });
+});
+
 var port = process.env.PORT || 3000;
-app.listen(port);
-console.log('Express started. Listening to port', port);
+http.listen(port, function(){
+  console.log('Express started. Listening on %s', port);
+});
