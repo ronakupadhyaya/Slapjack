@@ -10,23 +10,23 @@ describe("The Game Object", function() {
     
     it("should create a new player object, add it to the player order, and return the id of the newly created player", function() {
       expect(g.playerOrder.length).toBe(0);
-      expect(g.addPlayer('Ethan')).toBe(jasmine.any(String));
+      expect(g.addPlayer('Ethan')).toEqual(jasmine.any(String));
       expect(g.playerOrder.length).toBe(1);
     });
     
     it("should throw an error when trying to add a username of someone already playing", function() {
       g.addPlayer('Ethan');
-      expect(g.addPlayer('Ethan')).toThrow();
+      expect(function(){g.addPlayer('Ethan');}).toThrow();
     });
     
     it("should throw an error trying to add a player when the game has started", function() {
       g.addPlayer('Ethan');
       g.isStarted = true;
-      expect(g.addPlayer('Ethan')).toThrow();
+      expect(function(){g.addPlayer('Ethan');}).toThrow();
     });
   });
   
-  decribe(".startGame", function() {
+  describe(".startGame", function() {
     var g;
     beforeEach(function() {
       g = new Game();
@@ -35,11 +35,11 @@ describe("The Game Object", function() {
     it("should throw an error if there are less than two people playing", function() {
       expect(g.playerOrder.length).toBe(0);
       g.addPlayer('Ethan');
-      expect(g.startGame()).toThrow();
+      expect(function(){g.startGame();}).toThrow();
     });
     
     it("should start the game only if more than two people have been added", function() {
-      expext(g.playerOrder.length).toBe(0);
+      expect(g.playerOrder.length).toBe(0);
       g.addPlayer('Ethan');
       g.addPlayer('Josh');
       g.startGame();
@@ -54,14 +54,14 @@ describe("The Game Object", function() {
     });
     
     it("should throw an error if game has not yet started", function() {
-      expect(g.isWinning('')).toThrow();
+      expect(function(){g.isWinning('');}).toThrow();
     });
     
     it("should return a boolean", function() {
       var id = g.addPlayer('Ethan');
       g.addPlayer('Josh');
       g.startGame();
-      expect(g.isWinning(id)).toBe(jasmine.any(Boolean));
+      expect(g.isWinning(id)).toEqual(jasmine.any(Boolean));
     });
     
   });
@@ -73,7 +73,7 @@ describe("The Game Object", function() {
     });
     
     it("should throw an error if game has not yet started", function() {
-      expect(g.playCard('')).toThrow();
+      expect(function(){g.playCard('');}).toThrow();
     });
     
     it("should throw an error if it's not that user's turn", function() {
@@ -86,7 +86,7 @@ describe("The Game Object", function() {
       g.addPlayer('Lando');
       g.isStarted = true;
       g.currentPlayer = "Josh";
-      expect(g.playCard(id)).toThrow();
+      expect(function(){g.playCard(id);}).toThrow();
     });
     
     it("should throw an error if the user has no more cards", function() {
@@ -98,10 +98,19 @@ describe("The Game Object", function() {
       g.addPlayer('Abhi');
       g.addPlayer('Lando');
       g.isStarted = true;
-      g.currentPlayer = "Josh";
-      g.players[joshId].pile = [];
-      expect(g.players[joshId].pile.length).toBe(0);
-      expect(g.playCard(id)).toThrow();
+      g.currentPlayer = id;
+      g.players[id].pile = [];
+      expect(g.players[id].pile.length).toBe(0);
+      expect(function(){g.playCard(id);}).toThrow();
+    });
+    
+    it("should cycle to the next user after someone has been played a card", function() {
+      g.addPlayer('Ethan');
+      var id = g.addPlayer('Josh');
+      g.startGame();
+      g.currentPlayer = id;
+      g.playCard(id);
+      expect(g.currentPlayer).not.toBe(id);
     });
     
     
@@ -115,7 +124,7 @@ describe("The Game Object", function() {
     });
     
     it("should throw an error if game has not yet started", function() {
-      expect(g.slap('')).toThrow();
+      expect(function(){g.slap('')}).toThrow();
     });
     
   });
