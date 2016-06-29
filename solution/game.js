@@ -1,4 +1,6 @@
 var _ = require('underscore');
+var persist = require('./persist');
+var readGame = false;
 
 var Card = function(suit, value) {
   this.value = value;
@@ -33,6 +35,7 @@ var Game = function() {
   this.players = {};
   this.playerOrder = [];
   this.pile = [];
+  this.persist();
 };
 
 Game.prototype.addPlayer = function(username) {
@@ -45,7 +48,9 @@ Game.prototype.addPlayer = function(username) {
   }
   var player = new Player(username);
   this.playerOrder.push(player.id);
-  return (this.players[player.id] = player).id;
+  this.players[player.id] = player
+  this.persist();
+  return player.id;
 };
 
 Game.prototype.nextPlayer = function(playerId) {
@@ -57,8 +62,8 @@ Game.prototype.nextPlayer = function(playerId) {
     return this.players[n].pile.length > 0;
   }.bind(this));
 
-
   this.currentPlayer = this.players[this.playerOrder[nextPlayer]].id;
+  this.persist();
 };
 
 Game.prototype.startGame = function() {
@@ -85,14 +90,17 @@ Game.prototype.startGame = function() {
     }
   }
   this.currentPlayer = this.playerOrder[0];
+  this.persist();
 };
 
 Game.prototype.isWinning = function(playerId) {
   if (!this.isStarted) throw new Error("Game is not started!");
   if(this.players[playerId].pile.length === 52) {
     this.isStarted = false;
+    this.persist();
     return true;
   }
+  this.persist();
   return false;
 };
 
@@ -132,11 +140,98 @@ Game.prototype.slap = function(playerId) {
     }
   } else {
     this.pile = this.pile.concat([playerPile.pop(), playerPile.pop(), playerPile.pop()]);
+    this.persist();
     return {
       winning: false,
       message: "lost three cards!"
     };
   }
 };
+
+// This is a function that takes a vanilla JavaScript object and
+// updates this Card based on it.
+Card.prototype.fromObject = function(object) {
+  this.value = object.value;
+  this.suit = object.suit;
+}
+
+// This is a function that turns this card into a JavaScript object.
+Card.prototype.toObject = function() {
+  return {
+    value: this.value,
+    suit: this.suit
+  };
+}
+
+Player.prototype.fromObject = function(object) {
+  this.username = object.username;
+  this.id = object.id;
+  this.pile = object.pile.map(function(card) {
+    var c = new Card();
+    c.fromObject(card);
+    return c;
+  });
+}
+
+Player.prototype.toObject = function() {
+  var ret = {
+    username: this.username,
+    id: this.id
+  };
+  ret.pile = this.pile.map(function(card) {
+    return card.toObject();
+  });
+  return ret;
+}
+Game.prototype.fromObject = function(object) {
+  this.isStarted = object.isStarted;
+  this.currentPlayer = object.currentPlayer;
+  this.playerOrder = object.playerOrder;
+
+  this.pile = object.pile.map(function(card) {
+    var c = new Card();
+    c.fromObject(card);
+    return c;
+  });
+
+  this.players = _.mapObject(object.players, function(player) {
+    var p = new Player();
+    p.fromObject(player);
+    return p;
+  });
+}
+
+Game.prototype.toObject = function() {
+  var ret = {
+    isStarted: this.isStarted,
+    currentPlayer: this.currentPlayer,
+    playerOrder: this.playerOrder
+  };
+  ret.players = {};
+  for (var i in this.players) {
+    ret.players[i] = this.players[i].toObject();
+  }
+  ret.pile = this.pile.map(function(card) {
+    return card.toObject();
+  });
+  return ret;
+}
+
+Game.prototype.fromJSON = function(jsonString) {
+  this.fromObject(JSON.parse(jsonString));
+}
+
+Game.prototype.toJSON = function() {
+  return JSON.stringify(this.toObject());
+}
+
+Game.prototype.persist = function() {
+  if (readGame && persist.hasExisting()) {
+    this.fromJSON(persist.read());
+    readGame = true;
+  } else {
+    persist.write(this.toJSON());
+  }
+}
 
 module.exports = Game;
