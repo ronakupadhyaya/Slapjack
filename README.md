@@ -125,7 +125,7 @@ All messages sent between client and server on WebSockets happens in terms of "e
 
 <sub>Client</sub>
 
-```
+```javascript
 socket.emit("cake", "Here is some strawberry cake"); // 1
 socket.on("cake", function(data) {
 	// Alerts with "The server said thank you for cake"
@@ -134,7 +134,7 @@ socket.on("cake", function(data) {
 ``` 
 <sub>Server</sub>
 
-```
+```javascript
 socket.on("cake", function(data) {
 	console.log(data); // Logs "Here is some strawberry cake" // 2
 	socket.emit("cake", "thank you for cake"); // 3
