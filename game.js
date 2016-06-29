@@ -1,4 +1,6 @@
 var _ = require('underscore');
+var persist = require('./persist');
+var readGame = false;
 
 var Card = function(suit, value) {
   this.value = value;
@@ -7,21 +9,6 @@ var Card = function(suit, value) {
 
 Card.prototype.toString = function() {
 };
-
-// This is a function that takes a vanilla JavaScript object and
-// updates this Card based on it.
-Card.prototype.fromObject = function(object) {
-  this.value = object.value;
-  this.suit = object.suit;
-}
-
-// This is a function that turns this card into a JavaScript object.
-Card.prototype.toObject = function() {
-  return {
-    value: this.value,
-    suit: this.suit
-  };
-}
 
 var Player = function(username) {
   this.username = username;
@@ -38,31 +25,6 @@ Player.prototype.generateId = function() {
   return id() + id();
 };
 
-// Write a function that takes a JSON string and updates this
-// player based on the contents of the JSON string.
-Player.prototype.fromObject = function(object) {
-  this.username = object.username;
-  this.id = object.id;
-  this.pile = object.pile.map(function(card) {
-    var c = new Card();
-    c.fromObject(card);
-    return c;
-  });
-}
-
-// Write a function that turns current player into a JSON string
-// player based on the contents of the JSON string.
-Player.prototype.toObject = function() {
-  var ret = {
-    username: this.username,
-    id: this.id
-  };
-  ret.pile = this.pile.map(function(card) {
-    return card.toOject();
-  });
-  return ret;
-}
-
 var Game = function() {
   this.Card = Card;
   this.Player = Player;
@@ -73,8 +35,6 @@ var Game = function() {
   this.pile = [];
 };
 
-Game.fromJson = function(jsonString) {
-}
 
 // Make sure the game is not started and the username is valid
 // Add Player to playerOlder
@@ -118,6 +78,54 @@ Game.prototype.slap = function(playerId) {
 
 };
 
+
+
+// PERSISTENCE FUNCTIONS
+
+// Start here after completing Step 2!
+// We have written a persist() function for you
+// to save your game state to a store.json file.
+
+// Determine in which gameplay functions above
+// you want to persist and save your data. We will
+// do a code-along later today to show you how 
+// to convert this from saving to a file to saving
+// to Redis, a persistent in-memory datastore!
+
+Card.prototype.fromObject = function(object) {
+  this.value = object.value;
+  this.suit = object.suit;
+}
+
+Card.prototype.toObject = function() {
+  return {
+    value: this.value,
+    suit: this.suit
+  };
+}
+
+
+Player.prototype.fromObject = function(object) {
+  this.username = object.username;
+  this.id = object.id;
+  this.pile = object.pile.map(function(card) {
+    var c = new Card();
+    c.fromObject(card);
+    return c;
+  });
+}
+
+Player.prototype.toObject = function() {
+  var ret = {
+    username: this.username,
+    id: this.id
+  };
+  ret.pile = this.pile.map(function(card) {
+    return card.toOject();
+  });
+  return ret;
+}
+
 Game.prototype.fromObject = function(object) {
   this.isStarted = object.isStarted;
   this.currentPlayer = object.currentPlayer;
@@ -142,7 +150,7 @@ Game.prototype.toObject = function() {
     currentPlayer: this.currentPlayer,
     playerOrder: this.playerOrder
   };
-  ret.players = this.players.map(function(player) {
+  ret.players = _.mapObject(this.players, function(id, player) {
     return player.toObject();
   });
   ret.pile = this.pile.map(function(card) {
@@ -151,12 +159,21 @@ Game.prototype.toObject = function() {
   return ret;
 }
 
-Game.prototype.fromJson = function(jsonString) {
+Game.prototype.fromJSON = function(jsonString) {
   this.fromObject(JSON.parse(jsonString));
 }
 
 Game.prototype.toJSON = function() {
   return JSON.stringify(this.toObject());
+}
+
+Game.prototype.persist = function() {
+  if (readGame && persist.hasExisting()) {
+    this.fromJSON(persist.read());
+    readGame = true;
+  } else {
+    persist.write(this.toJSON());
+  }
 }
 
 module.exports = Game;
