@@ -25,7 +25,18 @@ Players can gain cards by "slapping" the pile - in which case they either gain t
 Additionally, only one person can slap a winning pile; all players slapping immediately after the first lose 3 cards.
 
 ## Step 1: Game Logic
+### Cards and Players - `game.js`
+
+### Game Starter - `game.js`
+
+### Gameplay Functions - `game.js`
+
 
 ## Step 2: Displaying Your Game
+
+### WebSockets Events - `views/index.hbs`
+
+### Displaying Cards - `views/index.hbs`
+
 
 ## Step 3: Deploying to Heroku
