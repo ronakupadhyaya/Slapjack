@@ -8,6 +8,8 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+    var output = this.value + ' of ' + this.suit;
+    return output;
 };
 
 var Player = function(username) {
@@ -41,12 +43,44 @@ var Game = function() {
 // return player id
 Game.prototype.addPlayer = function(username) {
 
+  if(this.isStarted) {
+    throw "game has already started";
+  }
+
+  if(!username) {
+    throw "username is empty";
+  }
+
+  for (var p in this.players) {
+    if (this.players.hasOwnProperty(p)) {
+        if(this.players[p].username === username) {
+          throw "this username has already been taken";
+        }
+    }
+  }
+
+  var newPlayer = new Player(username);
+  this.players[newPlayer.id] = newPlayer;
+  this.playerOrder.push(newPlayer.id);
+
+  this.persist();
+
+  return newPlayer.id;
 };
 
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
 
+  console.log('inside nextPlayer function');
+
+  for(var i = 0; i < this.playerOrder.length; i++) {
+    if(this.playerOrder[i] === this.currentPlayer) {
+      this.currentPlayer = this.playerOrder[++i];
+      break;
+    }
+  }
+   
 };
 
 
@@ -56,18 +90,95 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
+  if(this.isStarted) {
+    throw "game has already started";
+    return;
+  }
+
+  if(this.playerOrder.length < 2) {
+    throw "game has less than two people";
+    return;
+  }
+
+  this.isStarted = true;
+
+  var values = _.range(1, 14);
+  var suits = ['clubs', 'diamonds', 'hearts', 'spades'];
+
+  for(var i = 0; i < values.length; i++) {
+    for(var j = 0; j < suits.length; j++) {
+      var card = new Card(suits[j], values[i]);
+      this.pile.push(card);
+    }
+  }
+
+  this.pile = _.shuffle(this.pile);
+
+  var remainder = 52%this.playerOrder.length;
+
+  var toDistribute = 52-remainder;
+
+  for(var i = 0; i < toDistribute-1; i++) {
+    this.players[this.playerOrder[i%this.playerOrder.length]].pile.push(this.pile.pop());
+  }
+
+  this.currentPlayer = this.playerOrder[0];
 
 };
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
+  if(!this.isStarted) {
+    throw "game have not started yet";
+    return;
+  }
+
+  var score = this.players[playerId].pile.length;
+  var isWin = true;
+
+  for (var p in this.players) {
+    if (this.players.hasOwnProperty(p)) {
+        if(this.players[p].pile.length >= score) {
+          isWin = false;
+        }
+    }
+  }
+
+  if(isWin) {
+    this.isStarted = false;
+    return isWin;
+  } else {
+    return isWin;
+  }
 
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
 
+  if(!this.isStarted) {
+    throw "game have not started yet";
+    return;
+  }
+
+  if(this.currentPlayer !== playerId) {
+    throw "it's not your turn yet your retarded";
+    return;
+  }
+
+  if(this.players[playerId].pile.length === 0) {
+    throw "you ran out of cards, good luck looser";
+    return;
+  }
+
+  var card = this.players[playerId].pile.pop();
+
+  this.pile.push(card);
+
+  this.nextPlayer();
+
+  return card.toString();
 };
 
 
@@ -75,6 +186,42 @@ Game.prototype.playCard = function(playerId) {
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
+  if(!this.isStarted) {
+    throw "game have not started yet";
+    return;
+  }
+
+  var lastCard = this.pile[this.pile.length-1];
+  var secondLastCard = this.pile[this.pile.length-2];
+  var thirdLastCard = this.pile[this.pile.length-3];
+
+  var isSlap = false;
+
+  if(lastCard.value === 11) {
+    isSlap = true;
+  }
+
+  if(lastCard.value === secondLastCard.value) {
+    isSlap = true;
+  }
+
+  if(lastCard.value === thirdLastCard.value) {
+    isSlap = true;
+  }
+
+  if(isSlap) {
+    this.players.pile = this.pile.concat(this.players.pile);
+    var winning = this.isWinning(playerId);
+    return {winning: winning, message: "git the pile!"};
+  } else {
+    var take = [];
+    take.push(this.players[playerId].pile.pop());
+    take.push(this.players[playerId].pile.pop());
+    take.push(this.players[playerId].pile.pop());
+
+    this.pile = take.concat(this.pile);
+    return {winning: false, message: "lost 3 cards!"};
+  }
 
 };
 
@@ -150,7 +297,7 @@ Game.prototype.toObject = function() {
     currentPlayer: this.currentPlayer,
     playerOrder: this.playerOrder
   };
-  ret.players = _.mapObject(this.players, function(id, player) {
+  ret.players = _.mapObject(this.players, function(player, id) {
     return player.toObject();
   });
   ret.pile = this.pile.map(function(card) {
