@@ -54,6 +54,7 @@ function getGameState(){
 
 io.on('connection', function(socket){
   socket.emit('username', false);
+
   socket.on('username', function(data) {
     try {
       var id = game.addPlayer(data);
@@ -82,15 +83,6 @@ io.on('connection', function(socket){
       return console.error(e);
     }
 
-    // var numCards = {};
-    // var currentPlayerUsername;
-    // numCards = _.mapObject(game.players,(function(player, playerId){
-    //   if(playerId == game.currentPlayer){
-    //     currentPlayerUsername = player.username;
-    //   }
-    //   return player.pile.length;
-    // }));
-
     socket.emit('playCard', {
       card: card,
       gameState: getGameState()
@@ -109,10 +101,11 @@ io.on('connection', function(socket){
       socket.emit('oopsie', e);
       return console.error(e);
     }
-    socket.emit('slap', slap);
+    socket.emit('slap', { slap: slap, gameState: getGameState()});
     socket.broadcast.emit('message', game.players[socket.playerId].username 
       + ' ' + slap.message);
 
+    socket.emit('clearDeck');
     socket.broadcast.emit('clearDeck');
   });
 
