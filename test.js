@@ -113,8 +113,6 @@ describe("The Game Object", function() {
       expect(g.currentPlayer).not.toBe(id);
     });
     
-    
-    
   });
   
   describe(".slap", function() {
@@ -124,7 +122,22 @@ describe("The Game Object", function() {
     });
     
     it("should throw an error if game has not yet started", function() {
-      expect(function(){g.slap('')}).toThrow();
+      expect(function(){g.slap('');}).toThrow();
+    });
+    
+    it("should return a boolean", function() {
+      var e = g.addPlayer('Ethan');
+      var j = g.addPlayer('Josh');
+      g.startGame();
+      g.playCard(e);
+      g.playCard(j);
+      g.playCard(e);
+      g.playCard(j);
+      g.playCard(e);
+      g.playCard(j);
+      g.playCard(e);
+      g.playCard(j);
+      expect(g.slap(j)).toEqual(jasmine.any(Boolean));
     });
     
   });
