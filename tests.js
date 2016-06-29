@@ -131,6 +131,7 @@ describe("The Game Object", function() {
       g.startGame();
       g.playCard(e);
       g.playCard(j);
+      console.log('here');
       g.playCard(e);
       g.playCard(j);
       g.playCard(e);

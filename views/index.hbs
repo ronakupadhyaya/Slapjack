@@ -18,6 +18,15 @@
   });
 
   socket.on('username', function(resp) {
+ 
+    if (!resp) {
+      var username = prompt('enter a username');
+      socket.emit('username', username);
+    }
+    else {
+      id = resp;
+    }
+
 
   });
 
@@ -30,7 +39,7 @@
   });
 
   socket.on('start', function(data) {
-
+    startGame();
   });
 
   socket.on('message', function(data) {
