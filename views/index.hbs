@@ -1,1 +1,18 @@
 <h1>Slapjack</h1>
+
+<button type="button" onclick="ping()" class="btn btn-primary">Ping</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+  socket.on('connect', function() {
+    console.log('connected');
+  })
+  function ping() {
+    console.log('myping');
+    socket.emit('myping', "string");
+  }
+  socket.on('mypong', function() {
+    alert('mypong');
+  });
+</script>
