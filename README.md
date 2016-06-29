@@ -167,6 +167,7 @@ Below is a spec of the events that we want to emit back to the client and respon
 	* Attempt to call `slap` with `socket.playerId` (which you set earlier on the `username` event)
 	* If the game throws an error, emit back `message` with the error (note: a failed slap does not throw an error!)
 	* Otherwise, emit a `slap` event with the return result of `game.slap` and broadcast a `message` event with "_their username_ just " + `[*return result game.slap*].message`, i.e. "Ethan just lost 3 cards!" or "Ethan just won the pile!"
+		* **Note:** if the return result of `game.slap` is `true`, broadcast a `message` event with "_their username_ just won the game!"
 	
 
 ### Receiving WebSockets Events - `views/index.hbs`
@@ -184,13 +185,15 @@ Move over to your **`views/index.hbs`** file now to write the logic for emitting
 	* Update your view to display a card - you will be only showing one card in the pile at a time. 
 	* **Note:** We have placed some nice, open-source SVG graphics of cards named like `10_of_spades.svg`, `ace_of_hearts.svg`, etc. Update the `src` of an `<img>` element! - perhaps with the data you receive from a `playCard` event? Think about how you will turn "King of hearts" to simply "king_of_hearts.svg"!
 * **Receive:** `slap`
-	* Display a temporary message on the screen with the data received (from the `response.message`) for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
+	* If the `response.winning` property is `true`, display a message saying that you won!
+	* Otherwise, display a temporary message on the screen with the data received (from the `response.message`) for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
 		* This message will be either "lost 3 cards!" or "won the pile!" - since you are the only one handling this event, you can append "You" to the message to make it "You lost 3 cards!" or "You won the pile!"
 
 * **Receive:** `message`
-	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
+	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it.
 
-
-### Displaying Cards - `views/index.hbs`
 
 ## Step 3: Persisting with Redis
+
+
+
