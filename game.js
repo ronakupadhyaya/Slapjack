@@ -48,8 +48,8 @@ Game.prototype.addPlayer = function(username) {
     var newPlayer = new Player(username)
     this.playerOrder.push(newPlayer.id)
     this.players[newPlayer.id] = newPlayer
-    return newPlayer.id
     this.persist()
+    return newPlayer.id
   } else  {
     throw new Error()
   }
@@ -58,12 +58,14 @@ Game.prototype.addPlayer = function(username) {
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
+  console.log('\nnext player called')
   if (!this.isStarted) {throw new Error()}
   var index = (this.playerOrder.indexOf(this.currentPlayer)+1)%this.playerOrder.length
   while (this.players[this.playerOrder[index]].pile.length===0) {
     index = (index+1)%this.playerOrder.length
   }
   this.currentPlayer = this.playerOrder[index]
+  console.log(this.currentPlayer)
 }; 
 
 /* Make sure to
@@ -71,7 +73,8 @@ Game.prototype.nextPlayer = function() {
   2. Shuffle the Deck
   3. Distribute cards from the pile
 */
-Game.prototype.startGame = function() {
+Game.prototype.startGame = function() { 
+  console.log('\nstart game called')
   if (this.playerOrder.length<2) {
     throw new Error()
   }
@@ -101,7 +104,8 @@ Game.prototype.isWinning = function(playerId) {
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
-  if (!this.isStarted || this.players[this.currentPlayer].pile.length===0) {throw new Error()}
+  console.log('\nplay card called')
+  if (!this.isStarted || this.players[this.currentPlayer].pile.length===0 || this.currentPlayer!==playerId) {throw new Error()}
   this.pile.push(this.players[this.currentPlayer].pile.pop())
   this.nextPlayer()
 };
@@ -111,12 +115,16 @@ Game.prototype.playCard = function(playerId) {
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
+  console.log('\nslap called')
   if (!this.isStarted) {throw new Error()}
+  console.log('past the error')
   var top = this.pile.slice(-3)
   if (top[2].value===10 || top[2].value===top[1].value || top[0].value===top[2].value) {
     this.players[playerId].pile.concat(_.shuffle(this.pile))
+    console.log('pile won!')
     return {winning: this.isWinning(playerId), message:'got the pile!'}
   } else {
+    console.log('cards lost!')
     this.pile.concat(this.players[playerId].pile.splice(3,3))
     return {winning:false, message:'lost three cards!'}
   }

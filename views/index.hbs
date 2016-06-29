@@ -4,6 +4,13 @@
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
 
+<ul>
+  <li><span>Playing as:</span><span class="username"></span></li>
+  <li><span>Current player:</span><span class="current"></span></li>
+  <li><span>Hand size:</span><span class="handSize"></span></li>
+  <li><span>Pile size:</span><span class="pileSize"></span></li>
+</ul>
+
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
 
@@ -18,23 +25,42 @@
   });
 
   socket.on('username', function(resp) {
-
+    if (!resp) {
+      username = prompt('Enter a username')
+      socket.emit('username', username)
+    } else {
+      id = resp
+    }
+    $('.username').text(' '+username)
   });
 
   socket.on('playCard', function(data) {
-
+    console.log('card play recieved')
+    console.log(data)
+    $('#card').attr('src',parseCard(data))
   });
 
   socket.on('slap', function(data) {
-
+    if (data.winning) {
+      $('#messages-container').text('YOU WON!')
+      $('#card').attr('src','')
+    } else {
+      $('#messages-container').text('You '+data.message)
+      $('#messages-container').fadeOut(3000)
+    }
   });
 
   socket.on('start', function(data) {
-
+    $('#startGame').css('display','none')
+    $('.current').text(' '+'????')
   });
 
   socket.on('message', function(data) {
-
+    $('#messages-container').text(data.message)
+    $('#messages-container').fadeOut(3000, function() {
+      $('#messages-container').text('')
+      $('#messages-container').css('display','block')
+    })
   });
 
   socket.on('disconnect', function() {
@@ -54,4 +80,31 @@
     socket.emit('slap');
   }
 
+  function parseCard(data) {
+    var svgLoc = ''
+    switch (data[0].value) {
+      case 0: svgLoc+='ace'
+        break
+      case 12: svgLoc+='king'
+        break
+      case 11: svgLoc+='queen'
+        break
+      case 10: svgLoc+='jack'
+        break
+      default: svgLoc+=(data[0].value+1)
+    }
+    svgLoc+='_of_'
+    switch (data[0].suit) {
+      case 0: svgLoc+='spades'
+        break
+      case 1: svgLoc+='hearts'
+        break
+      case 2: svgLoc+='diamonds'
+        break
+      case 3: svgLoc+='clubs'
+        break
+    }
+    console.log(svgLoc)
+    return '/cards/'+svgLoc+'.svg'
+  }
 </script>
