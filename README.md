@@ -147,28 +147,49 @@ To **broadcast an event** to all connected clients, call `socket.broadcast.emit`
 
 Below is a spec of the events that we want to emit back to the client and respond to from the client: use the scaffold to update game logic within these events and pass back to the client necessary game information.
 
-**Events Received on Server** - `app.js`
+**Events Sent & Received on Server** - `app.js`
 
-* `username` (receives String, username)
+* **Receive:** `connection` (when a client initially connects)
+	* Immediately emit a `username` event back to the client with `false`
+* **Receive:** `username` (receives String, username)
 	* Attempt to add the user to the game
 	* If the game throws an error, emit back `username` with `false`
 	* Otherwise, set `socket.playerId` equal to the new ID of the player and emit back `username` with the new ID (received back from `addPlayer`)
-* `start`
+* **Receive:** `start`
 	* Attempt to start the game
 	* If the game throws an error, emit back `message` with "Cannot start game yet!"
 	* Otherwise, emit a `start` event and broadcast a `start` event to all clients
-* `playCard`
+* **Receive:** `playCard`
 	* Attempt to call `playCard` with `socket.playerId` (which you set earlier on the `username` event)
 	* If the game throws an error, emit back `message` with "Not your turn yet!"
 	* Otherwise, emit a `playCard` event and broadcast a `playCard` event with the return result of `game.playCard` (the new Card just played).
-* `slap`
+* **Receive:** `slap`
 	* Attempt to call `slap` with `socket.playerId` (which you set earlier on the `username` event)
 	* If the game throws an error, emit back `message` with the error (note: a failed slap does not throw an error!)
 	* Otherwise, emit a `slap` event with the return result of `game.slap` and broadcast a `message` event with "_their username_ just " + `[*return result game.slap*].message`, i.e. "Ethan just lost 3 cards!" or "Ethan just won the pile!"
 	
 
-
 ### Receiving WebSockets Events - `views/index.hbs`
+
+Move over to your **`views/index.hbs`** file now to write the logic for emitting and receiving events on the client.
+
+**Events Sent & Received on Client** - `views/index.hbs`
+
+* **Receive:** `username`
+	* If the data passed in is `false`, prompt (you can use `.prompt` to get input) the user for a username and save it. Then, emit a `username` event back with the saved username.
+	* Otherwise, save the response. If the response is not `false`, it is your client's player's ID.
+* **Receive:** `start`
+	* Disable your Start Game button (_hint: you have jQuery!_)
+* **Receive:** `playCard` (receives a String representation of the Card just played)
+	* Update your view to display a card - you will be only showing one card in the pile at a time. 
+	* **Note:** We have placed some nice, open-source SVG graphics of cards named like `10_of_spades.svg`, `ace_of_hearts.svg`, etc. Update the `src` of an `<img>` element! - perhaps with the data you receive from a `playCard` event? Think about how you will turn "King of hearts" to simply "king_of_hearts.svg"!
+* **Receive:** `slap`
+	* Display a temporary message on the screen with the data received (from the `response.message`) for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
+		* This message will be either "lost 3 cards!" or "won the pile!" - since you are the only one handling this event, you can append "You" to the message to make it "You lost 3 cards!" or "You won the pile!"
+
+* **Receive:** `message`
+	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
+
 
 ### Displaying Cards - `views/index.hbs`
 
