@@ -50,19 +50,38 @@ io.on('connection', function(socket){
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
-    
+    try {
+      game.addPlayer(data)
+    } catch (e) {
+      socket.emit('username', false)
+      return
+    }
+    socket.emit('username',game.playerOrder.slice(-1))
   });
 
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
-    
+    try {
+      game.startGame()
+    } catch (e) {
+      socket.emit('not enough players')
+      return
+    }
+    socket.broadcast.emit('game started')
+    socket.emit('game started')
   });
   
   
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
-
+    try {
+      game.playCard(this.currentPlayer)
+    } catch(e) {
+      socket.emit('error')
+      return
+    }
+    socket.broadcast.emit()
   });
 
   // Try to slap! Emit, broadcast, and handle errors accordingly 

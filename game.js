@@ -95,7 +95,7 @@ Game.prototype.startGame = function() {
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
-  if (!this.isStarted) {throw new Error()}
+  if (!this.isStarted || this.currentPlayer !== playerId) {throw new Error()}
   return this.players[this.currentPlayer].pile.length === 52
 };
 
