@@ -43,13 +43,17 @@ function getGameState(){
     return player.pile.length;
   }));
 
+
+  game.players.forEach(function(player){
+    console.log(player.username, player.pile);
+  })
+
   return {
       numCards: numCards || "You don't have cards yet",
       currentPlayerUsername: currentPlayerUsername || "Game not started",
       playersInGame: players,
       cardsInDeck: game.pile.length,
   }
-
 }
 
 io.on('connection', function(socket){
