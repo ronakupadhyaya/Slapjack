@@ -10,8 +10,6 @@ var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var Game = require('./game');
-var game = new Game();
 
 app.engine('hbs', exphbs({
   extname: 'hbs',
@@ -29,6 +27,9 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
+// Here is your new Game!
+var Game = require('./game');
+var game = new Game();
 
 io.on('connection', function(socket){
   
