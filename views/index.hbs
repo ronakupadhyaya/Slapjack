@@ -1,5 +1,4 @@
-<h1>Slapjack</h1>
-​
+<h1>Slapjack</h1> ​
 <button type="button" id="startGame" onclick="start()" class="btn btn-primary">Start Game</button>
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
@@ -11,30 +10,41 @@
 <script>
   var socket = io();
   var username = "";
-  var id = "";
-​
+  var id = "";​
   socket.on('connect', function() {
     console.log('connected');
-  });
-​
+  });​
   socket.on('username', function(resp) {
-    
-  });
-​
-  socket.on('playCard', function(data) {
+    if (!resp) {
+      var username = prompt("Please enter a username");
+      socket.emit('username', username);
+    } else {
+      id = resp;
+    }
+  });​
 
-  });
-​
+  socket.on('playCard', function(data) {
+    var cardName = data.toLowerCase();
+    cardName = cardName.split(' ').join('_');
+    cardName = cardName + '.svg'
+    console.log(cardName);
+    $('#card').attr('src', './cards/' + cardName);
+  });​
+
   socket.on('slap', function(data) {
-   
+    if (data.winning) {
+      $('#messages-container').text('You Won!');
+    } else {
+      $('#messages-container').text('You ' + data.message).fadeOut(5000);
+    }
   });
-  
+
   socket.on('start', function(data) {
-​
-  });
-​
-  socket.on('message', function(data) {
-​
+    $("#startGame").prop("disabled", true);
+  });​
+
+  socket.on('message', function(data) {​
+    $('#messages-container').text(data).fadeOut(5000);
   });
 
   socket.on('disconnect', function() {
@@ -44,14 +54,11 @@
 
   function start() {
     socket.emit('start');
-  }
-​
+  }​
   function playCard() {
     socket.emit('playCard');
-  }
-​
+  }​
   function slap() {
     socket.emit('slap');
-  }
-​
+  }​
 </script>
