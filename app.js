@@ -43,6 +43,20 @@ io.on('connection', function(socket){
     
   });
 
+  //socket.broadcast.emit : will send to everyone but current user
+  //library= socket io
+  //socket: connection between server and client
+  //index.hbs= server side (client action)
+  //app.js= client side (server receives)
+
+  //socket.emit on index.hbs: click handler on start
+
+  ///ssend theevents and need to create the listeners
+  //both server and browser sending and receiving events so have to listen on both sides
+  //.broadcat: send to everyone but the one who initiates the evetn
+  //emit: message only sent to initiator
+  // will need to update others of user's move
+  //run tests with npm test (after npm install)
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
