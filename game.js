@@ -8,6 +8,7 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  return this.suit + " of " + this.value;
 };
 
 var Player = function(username) {
@@ -40,7 +41,16 @@ var Game = function() {
 // Add Player to playerOlder
 // return player id
 Game.prototype.addPlayer = function(username) {
-
+  if (this.isStarted) throw ("Game has already started");
+  if (!username) throw ("username is empty");
+  for (var key in this.players) {
+    if (this.players[key].username === username) throw ("username already exists");
+  }
+  var p = new Player(username);
+  this.playerOrder.push(p);
+  this.players[p.id] = p;
+  this.persist();
+  return p.id;
 };
 
 
