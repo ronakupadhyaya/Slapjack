@@ -58,10 +58,10 @@ describe("The Game Object", function() {
     });
     
     it("should return a boolean", function() {
-      g.addPlayer('Ethan');
+      var id = g.addPlayer('Ethan');
       g.addPlayer('Josh');
       g.startGame();
-      expect(g.isWinning('Ethan')).toBe(jasmine.any(Boolean));
+      expect(g.isWinning(id)).toBe(jasmine.any(Boolean));
     });
     
   });
@@ -75,6 +75,36 @@ describe("The Game Object", function() {
     it("should throw an error if game has not yet started", function() {
       expect(g.playCard('')).toThrow();
     });
+    
+    it("should throw an error if it's not that user's turn", function() {
+      var id = g.addPlayer('Ethan');
+      g.addPlayer('Josh');
+      g.addPlayer('Moose');
+      g.addPlayer('Lane');
+      g.addPlayer('Darwish');
+      g.addPlayer('Abhi');
+      g.addPlayer('Lando');
+      g.isStarted = true;
+      g.currentPlayer = "Josh";
+      expect(g.playCard(id)).toThrow();
+    });
+    
+    it("should throw an error if the user has no more cards", function() {
+      g.addPlayer('Ethan');
+      var id = g.addPlayer('Josh');
+      g.addPlayer('Moose');
+      g.addPlayer('Lane');
+      g.addPlayer('Darwish');
+      g.addPlayer('Abhi');
+      g.addPlayer('Lando');
+      g.isStarted = true;
+      g.currentPlayer = "Josh";
+      g.players[joshId].pile = [];
+      expect(g.players[joshId].pile.length).toBe(0);
+      expect(g.playCard(id)).toThrow();
+    });
+    
+    
     
   });
   
