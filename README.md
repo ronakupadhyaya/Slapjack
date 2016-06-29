@@ -3,13 +3,13 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 
 ## Table of Contents
 
-* **Rules of Slapjack**
-* **Step 1:** Game Logic
-* **Step 2:** Displaying Your Game
-* **Step 3:** Persistence, and Redis
-* **The End:** Deploy, deploy, deploy!
+* **Rules of Slapjack** 🃏
+* **Step 1:** Game Logic ♠️
+* **Step 2:** Displaying Your Game ♥️
+* **Step 3:** Persistence, and Redis ♣️
+* **The End:** Deploy, deploy, deploy! ♦️
 
-## Rules of Slapjack
+## Rules of Slapjack 🃏
 In Slapjack, the objective of the game is to have the entire deck of cards.
 
 At the beginning of a game of Slapjack, each player is dealt an equal number of cards facedown (players are not able to see their own cards or anyone else's cards). 
@@ -25,10 +25,10 @@ Players can gain cards by "slapping" the pile - in which case they either gain t
 
 Additionally, only one person can slap a winning pile; all players slapping immediately after the first lose 3 cards.
 
-## Step 1: Game Logic
+## Step 1: Game Logic ♠️
 We will isolate all of your Slapjack game's logic into a single module inside of `game.js`. Before you begin, make sure to run `npm install` to get all the dependencies you need to both start and test the application. In this step, you won't ever need to `npm start` - just run `npm test` when prompted to! In the next step, we'll be serving up the game to your connected users.
 
-### Cards and Players - `game.js`
+### Cards and Players 🦄 - `game.js`
 Begin with your `Card` object - we should only have two properties and a function for any given `Card` object:
 
 * The value of the playing card, from 1-13 (where Ace is 1, Jack is 11, Queen is 12, King is 13)
@@ -63,7 +63,7 @@ Now that you have the fundamental properties for keeping track of Game state, ad
 > **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
 
-### Game Starter - `game.js`
+### Game Starter 💥 - `game.js`
 
 Next, we'll tackle the game logic for setting up a game. Implement the following function to handle setting up a new game:
 
@@ -85,7 +85,7 @@ To finish setup, implement the following function to allow you to change your cu
 
 > **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
-### Gameplay Functions - `game.js`
+### Gameplay Functions 🚧 - `game.js`
 Time to implement the most important functions to support your Game - the gameplay functions! Use the following stubs to write your gameplay functions:
 
 * `Game.prototype.isWinning` - should take a Player ID and return whether or not the Player corresponding to that ID has won
@@ -115,10 +115,10 @@ Time to implement the most important functions to support your Game - the gamepl
 
 > **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
-## Step 2: Displaying Your Game
+## Step 2: Displaying Your Game ♥️
 Now that your game is setup and running, we are going to build out the front end of it so that your game doesn't just live in a variable on your Node server, but communicating with all connected clients and updating their views simultaneously. 
 
-### Sending WebSockets Events - `app.js`
+### Sending WebSockets Events ☝️ - `app.js`
 First, a little crash course on using the [socket.io](http://socket.io) library we are using to send and receive events between our clients and server with WebSockets:
 
 All messages sent between client and server on WebSockets happens in terms of "events" that are emitted and received. On both the client and server, `emit` sends an event back _to_ the other, and `.on` creates a handler to receive an event _from_ the other. For example:
@@ -170,7 +170,7 @@ Below is a spec of the events that we want to emit back to the client and respon
 		* **Note:** if the return result of `game.slap` is `true`, broadcast a `message` event with "_their username_ just won the game!"
 	
 
-### Receiving WebSockets Events - `views/index.hbs`
+### Receiving WebSockets Events 📲 - `views/index.hbs`
 
 Move over to your **`views/index.hbs`** file now to write the logic for emitting and receiving events on the client.
 
@@ -193,7 +193,7 @@ Move over to your **`views/index.hbs`** file now to write the logic for emitting
 	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it.
 
 
-## Step 3: Persistence, and Redis
+## Step 3: Persistence, and Redis ♣️
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
