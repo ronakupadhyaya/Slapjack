@@ -8,6 +8,8 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  var faceCards = {1: "Ace", 11: "Jack", 12: "Queen", 13:"King"}
+   return (faceCards[this.value]  || this.value) + "of" + this.suit
 };
 
 var Player = function(username) {
@@ -40,7 +42,22 @@ var Game = function() {
 // Add Player to playerOlder
 // return player id
 Game.prototype.addPlayer = function(username) {
-
+if(this.isStarted) {
+  throw new Error("Error, the game already started")
+}
+if(username.trim().length === 0 || !username){
+  throw new Error("User cannot be blank")
+}
+for(var i in this.players){
+  if (this.players[i] === username){
+    throw new Error("User already exists")
+  }
+}
+var player = new Player(username);
+this.playerOrder.push(player.id);
+this.players[player.id] = player // push to object
+this.persist()
+return player.id ;
 };
 
 
@@ -56,8 +73,26 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
-
+if(this.isStarted) {
+  throw new Error("Error, the game already started");
 };
+if(this.players.keys.length < 2){
+  throw new Error("Error, the game has fewer than two people added")
+}
+this.isStarted = true;
+var deck = [];
+var suits = {1: "Diamonds", 2: "Hearts", 3: "Spades", 4: "Clubs"}
+for (var i in suits){
+  for (var j=1; j<=13; j++){
+deck.push(j+suits[i])
+
+  }
+ }
+ var shuffleDeck = _.shuffle(deck)
+  console.log(shuffleDeck)
+
+
+}
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
