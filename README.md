@@ -227,7 +227,52 @@ Next you will need to emit this information to the client by creating a new even
 		window.state = state;
 	}
 	```
+	
 ## Step 3: Persistence, Sessions, and Redis ♣️
+
+### Implementing Sessions
+
+#### Persisting the ID for the Client - `views/index.hbs`
+You may have noticed during testing that every time you refreshed your browser while the server was running, it would prompt you for another username, not alloinwg you to jump back into the game as the same user you played with before. We will implement a simple form of sessions using the unique IDs of the users to overcome this problem.
+
+Firstly, to preserve the ID and username of the user we are currently playing the game with, use `LocalStorage` rather than a variable to save the ID we get back from the received `username` event. To set something with a browser's `LocalStorage` looks like the following:
+
+```javascript
+localStorage.setItem("cake", "strawberry"); // first parameter is key, second parameter is value
+```
+
+Getting an item back from `LocalStorage` is very similar; just change the name of the method to `getItem` and pass in a key:
+
+```javascript
+var cake = localStorage.getItem("cake"); // variable cake is now "strawberry"
+```
+
+Note that if `getItem` is called with a key that is not defined or found in `LocalStorage`, it will return null. Thus, rather than initially setting our ID variable of the user playing to an empty string, we want something along the lines of:
+
+```javascript
+var id = localStorage.getItem("id") || "";
+```
+
+Here, if `LocalStorage` does not have our item, `id` will be set to empty string.
+
+Wrap your existing `.on` event handler for a received `username` event into a conditional that checks if `localStorage.getItem("id")` is null - this means that the user has not played yet and we need to prompt for a username. Additionally, when we initially get an ID back from the `username` event now, **we want to make sure that we are saving it** to `LocalStorage` with `setItem`.
+
+In the case where `localStorage.getItem("id")` is non-null, on the other hand, we need to send an event back to the server presenting an ID of a currently playing user. To make the distinction between a new player and an existing player attempting to re-join, we will emit a `username` event with an Object formatted like the following to the server:
+
+`{ id: "XXXXXXXXX" }`
+
+We'll deal with re-associating the new `socket` connection with the existing player in the next section.
+
+#### Re-setting the ID on the Server - `app.js`
+
+We now need to modify the event handler on the server for `username` to check if we are receiving a String (in which case, a new user is attempting to join the game) or we are receiving an Object with an ID (in which case, an existing user with a different Socket connection is attempting to re-join the game).
+
+Wrap your existing event handler for receiving the `username` event on the server in a conditional that checks for the type of the `data` we receive, which should be `true` in this conditional for types of "string".
+
+Otherwise, if the `data` we receive is an Object, simply set `socket.playerId` to the ID received from the Object in `data` so that additional calls to `slap` or `playCard` will be using the correct Player ID. Finally, emit back a `start` event and an `updateGame` event back to the socket so that it can be up-to-date with all other players of the game.
+
+
+### Implementing Persistence
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
