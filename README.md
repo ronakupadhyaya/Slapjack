@@ -56,8 +56,7 @@ Now that you have the fundamental properties for keeping track of Game state, ad
 	* Throw an error if the game has already started
 	* Throw an error if the username is empty
 	* Throw an error if the player's username is non-unique
-	* Otherwise, create a new `Player` object with a username and push them to both the `playerOrder` Array and `players` Object
-	* Call `this.persist()` 
+	* Otherwise, create a new `Player` object with a username and push its ID `playerOrder` Array and add the new `Player` to the `players` Object
 	* Return the ID of the new `Player`
 
 > **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
@@ -227,7 +226,53 @@ Next you will need to emit this information to the client by creating a new even
 		window.state = state;
 	}
 	```
+	
 ## Step 3: Persistence, Sessions, and Redis ♣️
+
+### Implementing Sessions
+
+#### Persisting the ID for the Client - `views/index.hbs`
+You may have noticed during testing that every time you refreshed your browser while the server was running, it would prompt you for another username, not allowing you to jump back into the game as the same user you played with before. We will implement a simple form of sessions using unique IDs.
+
+We will store unique IDs in `LocalStorage`. [`LocalStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) is a mechanism for storing key-value pairs in the browser on a per-website basis. When we get back a unique User ID from the server with the `username` event, we will store it in `LocalStorage` rather than in a variable. To set something with a browser's `LocalStorage` looks like the following:
+
+```javascript
+localStorage.setItem("cake", "strawberry"); // first parameter is key, second parameter is value
+```
+
+Getting an item back from `LocalStorage` is very similar; just change the name of the method to `getItem` and pass in a key:
+
+```javascript
+var cake = localStorage.getItem("cake"); // variable cake is now "strawberry"
+```
+
+Note that if `getItem` is called with a key that is not defined or found in `LocalStorage`, it will return null. Thus, rather than initially setting our ID variable of the user playing to an empty string, we want something along the lines of:
+
+```javascript
+var id = localStorage.getItem("id") || "";
+```
+
+Here, if `LocalStorage` does not have our item, `id` will be set to empty string.
+
+Wrap your existing `.on` event handler for a received `username` event into a conditional that checks if `localStorage.getItem("id")` is null - this means that the user has not played yet and we need to prompt for a username. Additionally, when we initially get an ID back from the `username` event now, **we want to make sure that we are saving it** to `LocalStorage` with `setItem`.
+
+In the case where `localStorage.getItem("id")` is non-null, on the other hand, we need to send an event back to the server presenting an ID of a currently playing user. To make the distinction between a new player and an existing player attempting to re-join, we will emit a `username` event with an Object formatted like the following to the server:
+
+`{ id: "XXXXXXXXX" }`
+
+We'll deal with re-associating the new `socket` connection with the existing player in the next section.
+
+#### Re-setting the ID on the Server - `app.js`
+
+Modify the `username` event handler on the server to check if we are receiving a String (in which case, a new user is attempting to join the game) or if we are receiving an Object with an ID (in which case, an existing user is re-joining the game).
+
+Your new `username` event halder should:
+
+1. If the data received is a String, do the same thing as before.
+2. Otherwise, if the `data` we receive is an Object, set `socket.playerId` to `data.id`. Now, additional calls to `slap` or `playCard` will be using the correct Player ID. Finally, send (i.e. emit) back `start` and `updateGame` events to initialize the game state of the player who is re-joining.
+
+
+### Implementing Persistence
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
