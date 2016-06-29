@@ -53,6 +53,17 @@ describe("The Game Object", function() {
       g = new Game();
     });
     
+    it("should throw an error if game has not yet started", function() {
+      expect(g.isWinning('')).toThrow();
+    });
+    
+    it("should return a boolean", function() {
+      g.addPlayer('Ethan');
+      g.addPlayer('Josh');
+      g.startGame();
+      expect(g.isWinning('Ethan')).toBe(jasmine.any(Boolean));
+    });
+    
   });
   
   describe(".playCard", function() {
@@ -61,12 +72,20 @@ describe("The Game Object", function() {
       g = new Game();
     });
     
+    it("should throw an error if game has not yet started", function() {
+      expect(g.playCard('')).toThrow();
+    });
+    
   });
   
   describe(".slap", function() {
     var g;
     beforeEach(function() {
       g = new Game();
+    });
+    
+    it("should throw an error if game has not yet started", function() {
+      expect(g.slap('')).toThrow();
     });
     
   });
