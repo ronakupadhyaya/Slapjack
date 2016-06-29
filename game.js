@@ -49,7 +49,7 @@ if(username.trim().length === 0 || !username){
   throw new Error("User cannot be blank")
 }
 for(var i in this.players){
-  if (this.players[i] === username){
+  if (this.players[i].username === username){
     throw new Error("User already exists")
   }
 }
@@ -63,9 +63,16 @@ return player.id ;
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
-
+if(!this.isStarted) {
+  throw new Error("Error, the game already started");
 };
 
+  for (var i = 0 ; i < this.playerOrder.length; i++){
+    if (this.players[this.playerOrder[i]].pile.length>0){
+      this.currentPlayer = this.playerOrder[i];
+    }
+  }
+};
 
 /* Make sure to
   1. Create the Deck
@@ -76,7 +83,7 @@ Game.prototype.startGame = function() {
 if(this.isStarted) {
   throw new Error("Error, the game already started");
 };
-if(this.players.keys.length < 2){
+if(Object.keys(this.players).length < 2){
   throw new Error("Error, the game has fewer than two people added")
 }
 this.isStarted = true;
@@ -89,23 +96,43 @@ deck.push(j+suits[i])
   }
  }
  var shuffleDeck = _.shuffle(deck)
-  console.log(shuffleDeck)
+ var playerIds = Object.keys(this.players)
 
 
+for (var i=0 ; i<52; i++){
+  var player = this.players[playerIds[i % playerIds.length]]
+  player.pile.push(shuffleDeck[i])
 }
+this.currentPlayer = this.playerOrder[0]
+}
+
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
-
+if(!this.isStarted) {
+  throw new Error("Error, the game already started");
+};
+if(this.players[playerId].pile.length === 52){
+  this.isStarted = false;
+  return true
+} else {
+  return false
+}
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
-
+if(!this.isStarted) {
+  throw new Error("Error, the game already started");
 };
-
-
+if(this.currentPlayer !== playerId)
+  throw new Error("Not your turn, respect the rules!");
+};
+if(this.players[playerId].pile.length === 0){
+  throw new Error("You already lost, looser!");
+}
+this.currentPlayer[playerId].pile.pop()
 // If there is valid slap, move all items of the pile into the players Pile,
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
