@@ -36,16 +36,21 @@ function getGameState(){
   var currentPlayerUsername;
   var players = "";
   numCards = _.mapObject(game.players,(function(player, playerId){
+    
+
     if(playerId == game.currentPlayer){
       currentPlayerUsername = player.username;
     }
-    players += players.username + ", ";
+    players += player.username + ", ";
+
+
+
     return player.pile.length;
   }));
 
 
   _.forEach(game.players,function(player, playerId){
-    console.log(player.username, player.pile);
+    console.log(player.username, player.pile.length, game.pile.length);
   })
 
   return {
@@ -68,6 +73,8 @@ io.on('connection', function(socket){
       return console.error(e);
     }
     socket.emit('username', id);
+    socket.emit('updateGame', getGameState());
+    socket.broadcast.emit('updateGame', getGameState());
   });
 
   socket.on('start', function() {
@@ -76,7 +83,13 @@ io.on('connection', function(socket){
     } catch(e) {
       return console.error(e);
     }
-    socket.broadcast.emit('start');
+    socket.emit('start', {
+      gameState: getGameState()
+    });
+
+    socket.broadcast.emit('start', {
+      gameState: getGameState()
+    });
   });
 
   socket.on('playCard', function() {
@@ -105,7 +118,10 @@ io.on('connection', function(socket){
       socket.emit('oopsie', e);
       return console.error(e);
     }
+
     socket.emit('slap', { slap: slap, gameState: getGameState()});
+    socket.broadcast.emit('slap', { slap: slap, gameState: getGameState()});
+    
     socket.broadcast.emit('message', game.players[socket.playerId].username 
       + ' ' + slap.message);
 

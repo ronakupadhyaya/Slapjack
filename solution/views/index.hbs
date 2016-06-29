@@ -5,11 +5,11 @@
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
 
 <ul> 
-  <li> <span> Playing as: </span> <span class="username"></span></li>
-  <li class="num"> <span> Players in Game: </span> <span class="playerNames"></span></li>
-  <br>
-  <li> <span> Number of Cards in your hand: </span> <span class="numCards"></span></li>
-  <li> <span class="currentPlayerUsername"></span><span>'s turn</span></li>
+	<li> <span> Playing as: </span> <span class="username"></span></li>
+	<li class="num"> <span> Players in Game: </span> <span class="playerNames"></span></li>
+	<br>
+	<li> <span> Number of Cards in your hand: </span> <span class="numCards"></span></li>
+	<li> <span class="currentPlayerUsername"></span><span>'s turn</span></li>
 </ul>
 
 <h1> <span class="cardsInDeck"> </span> <span> cards in pile </span> </h1>
@@ -18,90 +18,96 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  var socket = io();
-  var username = "";
-  var id = "";
+	var socket = io();
+	var username = "";
+	var id = "";
 
-  socket.on('connect', function() {
-    console.log('connected');
-  });
+	socket.on('connect', function() {
+		console.log('connected');
+	});
 
-  socket.on('username', function(resp) {
-    if (!resp) {
-      username = prompt("Enter your username!");
-      socket.emit('username', username);
-    } else {
-      id = resp;
-    }
-    $(".username").text(username);
-  });
+	socket.on('username', function(data) {
+		if (!data) {
+			username = prompt("Enter your username!");
+			socket.emit('username', username);
+		} else {
+			id = data;
+		}
+		console.log
+		$(".username").text(username);
+	});
 
-  socket.on('playCard', function(data) {
-    var imgsrc = data.card.cardString.toLowerCase().split(" ").join("_") + ".svg";
-    $("#card").attr("src", "/cards/" + imgsrc);
-    updateGameStatus(data.gameState);
-  });
+	socket.on('playCard', function(data) {
+		var imgsrc = data.card.cardString.toLowerCase().split(" ").join("_") + ".svg";
+		$("#card").attr("src", "/cards/" + imgsrc);
+		updateGameStatus(data.gameState);
+	});
 
-  socket.on('clearDeck', function(){
-    console.log("received clear deck");
-    $("#card").attr("src", "");
-  });
+	socket.on('clearDeck', function(){
+		console.log("received clear deck");
+		$("#card").attr("src", "");
+	});
 
-  socket.on('slap', function(data) {
-    handleMessage(data.slap.message);
-    updateGameStatus(data.gameState);
-  });
+	socket.on('slap', function(data) {
+		handleMessage(data.slap.message);
+		updateGameStatus(data.gameState);
+	});
 
-  socket.on('start', function(data){
-    startGame()
-    updateGameStatus(data.gameState);
-  });
+	socket.on('start', function(data){
+		startGame()
+		updateGameStatus(data.gameState);
+	});
 
-  socket.on('message', handleMessage);
+	socket.on("updateGame", function(gameState){
+		updateGameStatus(gameState);
+	})
 
-  socket.on('oopsie', function(msg) {
-    alert(msg);
-  });
+	socket.on('message', handleMessage);
 
-  function start() {
-    socket.emit('start');
-    startGame();
-  }
+	socket.on('oopsie', function(msg) {
+		alert(msg);
+	});
 
-  function startGame() {
-    $("#startGame").css("pointer-events", "none");
-    $("#startGame").css("opacity", "0.5");
-    $("#startGame").text("Game Started");
-  }
+	function start() {
+		socket.emit('start');
+		startGame();
+	}
 
-  function handleMessage(msg) {
-    var message = $("<h3>" + msg + "</h3>");
-    $("#messages-container").append(message);
+	function startGame() {
+		$("#startGame").css("pointer-events", "none");
+		$("#startGame").css("opacity", "0.5");
+		$("#startGame").text("Game Started");
+	}
 
-    setTimeout(function() {
-      message.fadeOut();
-    }, 5000);
-  }
+	function handleMessage(msg) {
+		var message = $("<h3>" + msg + "</h3>");
+		$("#messages-container").append(message);
 
-  function playCard() {
-    socket.emit('playCard');
-  }
+		setTimeout(function() {
+			message.fadeOut();
+		}, 5000);
+	}
 
-  function slap() {
-    socket.emit('slap');
-  }
+	function playCard() {
+		socket.emit('playCard');
+	}
 
-  function initGameStatus(){
-    $(".username").text(username);
-  }
+	function slap() {
+		socket.emit('slap');
+	}
 
-  function updateGameStatus(state){
-    $(".username").text(username);
-    $(".numCards").text(state.numCards[id]);
-    $(".playerNames").text(playersInGame);
-    $(".currentPlayerUsername").text(state.currentPlayerUsername);
-    $(".cardsInDeck").text(state.cardsInDeck);
-    $(".num").show();
-  }
+	function initGameStatus(){
+		$(".username").text(username);
+	}
+
+	function updateGameStatus(state){
+		$(".username").text(username);
+		$(".numCards").text(state.numCards[id]);
+		$(".playerNames").text(state.playersInGame);
+		$(".currentPlayerUsername").text(state.currentPlayerUsername);
+		$(".cardsInDeck").text(state.cardsInDeck);
+		$(".num").show();
+		window.state = state;
+	}
 
 </script>
