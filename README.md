@@ -6,7 +6,8 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Rules of Slapjack**
 * **Step 1:** Game Logic
 * **Step 2:** Displaying Your Game
-* **Step 3:** Deploying to Heroku
+* **Step 3:** Persisting with Redis
+* **The End:** Deploy, deploy, deploy!
 
 ## Rules of Slapjack
 In Slapjack, the objective of the game is to have the entire deck of cards.
@@ -57,15 +58,52 @@ Now that you have the fundamental properties for keeping track of Game state, ad
 	* Throw an error if the player's username is non-unique
 	* Otherwise, create a new `Player` object with a username and push them to both the `playerOrder` Array and `players` Object
 	* Call `this.persist()` 
+	* Return the ID of the new `Player`
 
-> **Test:** 
+> **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
 
 ### Game Starter - `game.js`
 
+Next, we'll tackle the game logic for setting up a game. Implement the following function to handle setting up a new game:
 
+* `Game.prototype.startGame` - begin game setup
+	* Throw an error if the game has already started
+	* Throw an error if the game has fewer than two people added
+	* Otherwise, set your `isStarted` (or equivalent) boolean to `true`
+	* Create a standard deck of 52 playing cards and shuffle them
+		* **Hint:** You may find Underscore's `.shuffle` method helpful for implementing a Fisher-Yates shuffle!
+	* Distribute the cards evenly amongst all players and place the remaining cards in the game pile
+	* Set the current Player ID variable to the first person in the Player order
+	
+To finish setup, implement the following function to allow you to change your current Player ID variable as you move through your game in the functions to follow:
+
+* `Game.prototype.nextPlayer` - move to next Player ID in Player order Array
+	* Throw an error if the game is not already started
+	* Find the next Player able to play (a Player with a non-zero pile length) in the Player order Array
+	* Set the next Player available to the current Player ID variable
+
+> **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
 ### Gameplay Functions - `game.js`
+Time to implement the most important functions to support your Game - the gameplay functions! Use the following stubs to write your gameplay functions:
+
+* `Game.prototype.isWinning` - should take a Player ID and return whether or not the Player corresponding to that ID has won
+	* Throw an error if the game is not already started
+	* Check for a winning condition of a Player corresponding to the `playerId` passed in and, if a win occurred, set your `isStarted` Boolean or equivalent to `false` and return true.
+	* Otherwise, return `false` - the Player did not meet a winning condition.
+	
+* `Game.prototype.playCard` - should take a Player ID of the Player attempting to play a Card and return a String representation of the card played
+	* Throw an error if the game is not already started
+	* Throw an error if the current Player ID variable does not match the passed-in Player ID (this means a player is attempting to play a card out of turn)
+	* Throw an error if the Player corresponding to the passed-in Player ID has a pile length of zero
+	* Otherwise, move the top card of a Player's pile onto the top card of the Game pile.
+	* Call `this.nextPlayer()` to set the next player's ID to the current Player ID variable.
+	* Return a String representation of the Card that was played.
+
+* `Game.prototype.slap` - should take a Player ID of the Player attempting to slap and return an Object with 
+	* 
+
 
 
 ## Step 2: Displaying Your Game
@@ -77,6 +115,3 @@ Now that you have the fundamental properties for keeping track of Game state, ad
 ### Displaying Cards - `views/index.hbs`
 
 ## Step 3: Persisting with Redis
-
-
-## Step 4: Deploying to Heroku
