@@ -44,7 +44,7 @@ function getGameState(){
   }));
 
 
-  game.players.forEach(function(player){
+  _.forEach(game.players,function(player, playerId){
     console.log(player.username, player.pile);
   })
 
