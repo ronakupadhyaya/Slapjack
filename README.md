@@ -101,10 +101,19 @@ Time to implement the most important functions to support your Game - the gamepl
 	* Call `this.nextPlayer()` to set the next player's ID to the current Player ID variable.
 	* Return a String representation of the Card that was played.
 
-* `Game.prototype.slap` - should take a Player ID of the Player attempting to slap and return an Object with 
-	* 
+* `Game.prototype.slap` - should take a Player ID of the Player attempting to slap and return an Object (format described below)
+	* Throw an error if the game is not already started
+	* Check for any of the winning slap conditions 
+		* If the top card of the pile is a Jack
+		* If the top two cards of the pile are of the same value
+		* If the top card and third-to-top card are of the same value (sandwich)
+	* If there is a winning slap condition, move the pile into the back of the pile of the Player corresponding to the passed-in Player ID
+		* Call `this.isWinning()` with the passed-in Player ID to check for a game win
+		* Return an object with property `winning` as the result of `this.isWinning` and property `message` of "got the pile!"
+	* Otherwise, take the top 3 cards from the pile of the Player corresponding to the passed-in Player ID and add it to the bottom of the game pile
+		* Return an object with property `winning` as `false` and property `message` of "lost 3 cards!"
 
-
+> **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
 ## Step 2: Displaying Your Game
 
