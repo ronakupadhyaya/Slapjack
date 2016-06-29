@@ -6,7 +6,7 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Rules of Slapjack**
 * **Step 1:** Game Logic
 * **Step 2:** Displaying Your Game
-* **Step 3:** Persisting with Redis
+* **Step 3:** Persistence, and Redis
 * **The End:** Deploy, deploy, deploy!
 
 ## Rules of Slapjack
@@ -193,7 +193,9 @@ Move over to your **`views/index.hbs`** file now to write the logic for emitting
 	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it.
 
 
-## Step 3: Persisting with Redis
+## Step 3: Persistence, and Redis
 
+Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
+Later today, we will have a code-along to show you how to save to Redis, a persistent in-memory data store rather than a simple JSON file.
 
