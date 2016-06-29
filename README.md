@@ -116,8 +116,37 @@ Time to implement the most important functions to support your Game - the gamepl
 > **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
 
 ## Step 2: Displaying Your Game
+Now that your game is setup and running, we are going to build out the front end of it so that your game doesn't just live in a variable on your Node server, but communicating with all connected clients and updating their views simultaneously. 
 
 ### Sending WebSockets Events - `app.js`
+First, a little crash course on using the [socket.io](http://socket.io) library we are using to send and receive events between our clients and server with WebSockets:
+
+All messages sent between client and server on WebSockets happens in terms of "events" that are emitted and received. On both the client and server, `emit` sends an event back _to_ the other, and `.on` creates a handler to receive an event _from_ the other. For example:
+
+<sub>Client</sub>
+
+```
+socket.emit("cake", "Here is some strawberry cake"); // 1
+socket.on("cake", function(data) {
+	// Alerts with "The server said thank you for cake"
+	alert("The server said " + data); // 4
+})
+``` 
+<sub>Server</sub>
+
+```
+socket.on("cake", function(data) {
+	console.log(data); // Logs "Here is some strawberry cake" // 2
+	socket.emit("cake", "thank you for cake"); // 3
+});
+```
+
+Super simple, and fast!
+
+Below is a spec of the events that we want to emit back to the client and respond to from the client: use the scaffold to update game logic within these events and pass back to the client necessary game information.
+
+* 
+
 
 ### Receiving WebSockets Events - `views/index.hbs`
 
