@@ -8,7 +8,7 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
-  return this.value + " to " + this.suit;
+  return this.value + " of " + this.suit;
 };
 
 var Player = function(username) {
@@ -38,16 +38,49 @@ var Game = function() {
 
 
 // Make sure the game is not started and the username is valid
-// Add Player to playerOlder
+// Add Player to playerOrder
 // return player id
 Game.prototype.addPlayer = function(username) {
+  var newPlayer = new Player(username);
+  
+  if (this.isStarted) {
+    throw "Game already started";
+  }
+  if (username === "" || username === undefined) {
+    throw "Please enter a valid username";
+  }
 
+  for (var key in this.players) {
+    if (this.players[key].username === username) {
+      throw "Username already taken";
+    }
+  }
+
+  this.players[newPlayer.id] = newPlayer;
+  this.playerOrder.push(newPlayer.id);
+
+  // this.persist();
+  return newPlayer.id;
 };
 
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
+  if (! this.isStarted) {
+    throw "Game hasn't started yet";
+  }
 
+  var currentIndex = this.playerOrder.indexOf(this.currentPlayer); //find where the current player is in PlayerOrder
+
+  for (var i=currentIndex + 1; i <= this.playerOrder.length; i++) {
+    if (i === this.playerOrder.length) { // if at end, cycle back to beginning
+      i = 0;
+    }
+    var player = this.players[this.playerOrder[i]];
+    if(player.pile.length > 0) { // check if still in game
+      this.currentPlayer = player.id;
+    }
+  }
 };
 
 
@@ -57,18 +90,83 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
+  if (this.isStarted) {
+    throw "game has already started";
+  }
+  if (Object.keys(this.players).length < 2) {
+    throw "Please add another player to start";
+  }
+  // populate pile with full deck of cards
+  var suitArray = ['hearts', 'diamonds', 'clubs', 'spades'];
+  for (var i = 1; i <= 13; i++) {
+    for (var j = 0; j < suitArray.length; j++) {
+      this.pile.push(new Card(suitArray[j], i));
+    }
+  }
 
+  this.pile = _.shuffle(this.pile);
+
+  //distribute the pile
+  var mod = this.pile.length % Object.keys(this.players).length;
+  for (var i=this.pile.length-1; i>0; i--) {
+    if (this.pile.length === mod) {
+      break;
+    }
+    else {
+      for (var key in this.players) {
+        this.players[key].pile.push(this.pile[i]);
+        this.pile.pop();
+        i--;
+      }
+    }
+  }
+
+  this.currentPlayer = this.playerOrder[0];
+  this.isStarted = true;
 };
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
+  if (! this.isStarted) {
+    throw "Game has not yet started";
+  }
 
+  for (var key in this.players) {
+    if(this.players[key].id === playerId) {
+      if(this.players[key].pile.length === 52) {
+        this.isStarted = false;
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+  }
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
-
+  if (! this.isStarted) {
+    throw "Game has not yet started";
+  }
+  if (this.currentPlayer !== playerId) {
+    throw "It is not your turn yet";
+  }
+  for(var key in this.players) {
+    console.log("Pile: " + this.players[key].pile);
+    // ;
+    if(this.players[key].id === playerId) {
+      if(this.players[key].pile.length === 0) {
+        throw "Player has already lost the game";
+      }
+      else {
+        // this.pile.push(this.players[key].pile[this.players[key].pile.length-1]);
+        // this.nextPlayer();
+        return this.toString(players[key].pile.pop());
+      }
+    }
+  }
 };
 
 
@@ -76,7 +174,9 @@ Game.prototype.playCard = function(playerId) {
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
-
+  if (! this.isStarted) {
+    throw "Game has not yet started";
+  }
 };
 
 

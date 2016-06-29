@@ -35,6 +35,7 @@ describe("The Game Object", function() {
     it("should throw an error if there are less than two people playing", function() {
       expect(g.playerOrder.length).toBe(0);
       g.addPlayer('Ethan');
+      console.log(g.isStarted);
       expect(function(){g.startGame();}).toThrow();
     });
     
