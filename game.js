@@ -8,6 +8,8 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  var faceCards = {1: "Ace", 11: "Jack", 12: "Queen", 13: "King"}
+  return (faceCards[this.value] || this.value) + " of " + this.suit;
 };
 
 var Player = function(username) {
@@ -37,10 +39,25 @@ var Game = function() {
 
 
 // Make sure the game is not started and the username is valid
-// Add Player to playerOlder
+// Add Player to playerOrder
 // return player id
 Game.prototype.addPlayer = function(username) {
-
+  if (!this.isStarted) {
+    throw new Error("Game has already started");
+  }
+  if (username.trim().length === 0 || !username) {
+    throw new Error("Username cannot be blank");
+  }
+  for (var i in this.players) {
+    if (this.players[i] === username) {
+      throw new Error("User already exists");
+    }
+  }
+  var player = new Player(username);
+  this.playerOrder.push(player.username);
+  this.players[player.username] = player //push to object
+  this.persist();
+  return player.id;
 };
 
 
@@ -56,7 +73,12 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
-
+  if (!this.isStarted) {
+    throw new Error("Game has already started");
+  }
+  if (Object.keys(this.players).length < 2) {
+    throw new Error("Not enough players in the game");
+  }
 };
 
 
