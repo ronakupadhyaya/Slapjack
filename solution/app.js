@@ -10,6 +10,8 @@ var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var Game = require('./game');
+var game = new Game();
 
 app.engine('hbs', exphbs({
   extname: 'hbs',
@@ -27,37 +29,50 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
-// Here is your new Game!
-var Game = require('./game');
-var game = new Game();
 
 io.on('connection', function(socket){
-  
-  
   socket.emit('username', false);
-  
-  // Try to add a player to the game. 
-  // If you can't, emit('username', false), return out of callback
-  // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
-    
+    try {
+      var id = game.addPlayer(data);
+      socket.playerId = id;
+    } catch(e) {
+      socket.emit('username', false);
+      return console.error(e);
+    }
+    socket.emit('username', id);
   });
 
-
-  // Start the game & broadcast to entire socket 
   socket.on('start', function() {
-    
+    try {
+      game.startGame();
+    } catch(e) {
+      return console.error(e);
+    }
+    socket.broadcast.emit('start');
   });
-  
-  
-  // call game.playCard, emit the result the broadcast it 
+
   socket.on('playCard', function() {
-
+    try {
+      var card = game.playCard(socket.playerId);
+    } catch(e) {
+      socket.emit('oopsie', 'Not your turn!');
+      return console.error(e);
+    }
+    socket.emit('playCard', card);
+    socket.broadcast.emit('playCard', card);
   });
 
-  // Try to slap! Emit, broadcast, and handle errors accordingly 
   socket.on('slap', function() {
-    
+    try {
+      var slap = game.slap(socket.playerId);
+    } catch(e) {
+      socket.emit('oopsie', e);
+      return console.error(e);
+    }
+    socket.emit('slap', slap);
+    socket.broadcast.emit('message', game.players[socket.playerId].username 
+      + ' ' + slap.message);
   });
 
 });
