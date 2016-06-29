@@ -6,7 +6,8 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
-
+  var faces = {1: "Ace", 11: "Jack", 12: "Queen", 13: "King"};
+  return (faces[this.value] || this.value) + " of " + this.suit;
 };
 
 var Player = function(username) {
