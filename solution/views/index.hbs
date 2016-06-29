@@ -98,7 +98,7 @@
   function updateGameStatus(state){
     $(".username").text(username);
     $(".numCards").text(state.numCards[id]);
-    $(".playerNames").text(Object.keys(state.numCards).length);
+    $(".playerNames").text(playersInGame);
     $(".currentPlayerUsername").text(state.currentPlayerUsername);
     $(".cardsInDeck").text(state.cardsInDeck);
     $(".num").show();
