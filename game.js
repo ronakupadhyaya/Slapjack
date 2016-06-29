@@ -8,6 +8,22 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  switch (this.value) {
+    case 1:
+      this.value = "ace";
+      break;
+    case 11:
+      this.value = "jack";
+      break;
+    case 12:
+      this.value = "queen";
+      break;
+    case 13:
+      this.value = "king"; 
+    default: 
+      this.value = this.value;
+  }
+  return this.value + " of " + this.suit;
 };
 
 var Player = function(username) {
@@ -27,6 +43,7 @@ Player.prototype.generateId = function() {
 
 var Game = function() {
   this.Card = Card;
+  //can be accessed with players[id]
   this.Player = Player;
   this.isStarted = false;
   this.currentPlayer = null;
@@ -37,16 +54,52 @@ var Game = function() {
 
 
 // Make sure the game is not started and the username is valid
-// Add Player to playerOlder
+// Add Player to playerOrder
 // return player id
 Game.prototype.addPlayer = function(username) {
-
+  // for (var i = 0; i < this.players.length; i++) {
+  //     var id = this.playerOrder[i];
+  //     if (this.players[id].username == username) {
+  //       throw "Pick a unique username"
+  //     }
+    //loop through an object, players is an object of Player objects
+    //accessible by player IDs. So loop through the players object, 
+    //loop through the ids, and access the playerObject through
+    //this.playters[id]
+    console.log(this.players)
+  for (var playerIdKey in this.players) {
+    if (this.players[playerIdKey].username === username) {
+        throw "Not a unique username"
+    }
+  }
+  if (this.isStarted) {
+    throw "Game has already started."
+  } else if (!username) {
+    throw "Must enter a username"
+  }
+  if (!this.isStarted && username) {
+      var newPlayer = new Player(username);
+      //add newPlayer to this.players!!!!
+      this.players[newPlayer.id] = newPlayer;
+      this.playerOrder.push(newPlayer.id);
+      // this.persist();
+      return newPlayer.id 
+  }
 };
 
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
-
+  if (!this.isStarted) {
+    throw "Game has not started"
+  } else {
+    var indexCurrent = this.playerOrder.indexOf(this.currentPlayer)
+    var indexNext = indexCurrent + 1;
+    if (indexNext === this.playerOrder.length) {
+      indexNext = 0;
+    }
+    this.currentPlayer = this.playerOrder[indexNext];
+  }
 };
 
 
@@ -56,18 +109,59 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
-
+  if (this.isStarted) {
+    throw "Game already started"
+  } else if (this.playerOrder.length < 2) {
+    throw "Waiting for another player"
+  } else {
+    this.isStarted = true;
+    for (var i = 1; i < 14; i++){
+      var heart = new Card("hearts", i)
+      var spades = new Card("spades", i)
+      var diamonds = new Card("diamonds", i)
+      var clubs = new Card("clubs", i)
+      this.pile.push(heart, spades, diamonds, clubs)
+    } 
+    this.pile = _.shuffle(this.pile);
+    var remainingCards = this.pile.length%this.playerOrder.length;
+    var numPerPerson = (this.pile.length-remainingCards)/this.playerOrder.length;
+    //have to bind because it's a function within a function
+    //and therefore "this" doesn't work 
+    this.playerOrder.forEach(function(playerId){
+      for (var i = 0; i < numPerPerson; i++){
+        this.players[playerId].pile.push(this.pile.pop())
+      }
+    }.bind(this))
+    this.currentPlayer = this.playerOrder[0]
+  }
 };
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
-
+  if (!this.isStarted) {
+    throw "Game has not started"
+  }
+  if (this.players[playerId].pile.length === 52) {
+    this.isStarted = false;
+    return true;
+  } return false;
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
-
+  if (!this.isStarted) {
+    throw "Game has not started"
+  } else if (this.currentPlayer !== playerId) {
+    throw "It is not your turn."
+  } else if (this.players[playerId].pile.length === 0) {
+    throw "You have no cards"
+  } else {
+    var popped = this.players[playerId].pile.pop();
+    this.pile.push(popped);
+    this.nextPlayer();
+    return popped.toString();
+  }
 };
 
 
@@ -75,7 +169,28 @@ Game.prototype.playCard = function(playerId) {
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
-
+  if (!this.isStarted) {
+    throw "Game has not started"
+  } else if ((this.pile[this.pile.length-1].value === 11) || (this.pile[this.pile.length-1].value === "jack") || (this.pile[this.pile.length-1].value === this.pile[this.pile.length-2].value) || (this.pile[this.pile.length-1].value === this.pile[this.pile.length-3].value)) {
+      for (var i = 0; i < this.pile.length; i++){
+        this.players[playerId].pile.push(this.pile.pop());
+      }
+      var result = this.isWinning(playerId);
+      console.log("this is result" + result);
+      if (result) { 
+        return {winning: true, message: "got the pile!"};
+      } 
+    } else {
+      var newArr = [];
+      for (var j = 0; j < 3; j++) {
+        newArr.push(this.players[playerId].pile.pop());
+      }
+      for (var k = 0; k < this.pile.length; k++){
+        newArr.push(this.pile[k])
+      }
+      this.pile = newArr;
+      return {winning: false, message: "lost 3 cards!"}
+  } 
 };
 
 

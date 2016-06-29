@@ -16,3 +16,8 @@ socket.on('click', function() {
 Sockets will first initialize the game socket and then handle the gaming
 stuff like play card, slap, etc. 
 Click handlers for different buttons have already been added. 
+
+.broadcast means that if you click start in one window, on start the value
+shows up in the other person's window. And vice versa. 
+Will have to broadcast some things to everyone, broadcast other things
+to everyone BUT that player. Etc. 
