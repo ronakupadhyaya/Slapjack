@@ -6,7 +6,7 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Rules of Slapjack** 🃏
 * **Step 1:** Game Logic ♠️
 * **Step 2:** Displaying Your Game ♥️
-* **Step 3:** Persistence, and Redis ♣️
+* **Step 3:** Persistence, Sessions, and Redis ♣️
 * **The End:** Deploy, deploy, deploy! ♦️
 
 ## Rules of Slapjack 🃏
@@ -203,7 +203,7 @@ Below is a spec of the events that we want to emit back to the client and respon
 
 
 
-## Step 3: Persistence, and Redis ♣️
+## Step 3: Persistence, Sessions, and Redis ♣️
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
