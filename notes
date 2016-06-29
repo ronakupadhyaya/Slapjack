@@ -1,0 +1,18 @@
+socket.broadcast.emit();
+
+socket.on('hello', function(val) {
+	console.log('hello', val) 
+	socket.emit('helloBack', val * 2)
+})
+
+socket.on('start', function() {
+	socket.broadcast.emit('click', 'click')
+})
+
+socket.on('click', function() {
+	console.log('click')
+})
+
+Sockets will first initialize the game socket and then handle the gaming
+stuff like play card, slap, etc. 
+Click handlers for different buttons have already been added. 
