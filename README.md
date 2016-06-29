@@ -233,9 +233,9 @@ Next you will need to emit this information to the client by creating a new even
 ### Implementing Sessions
 
 #### Persisting the ID for the Client - `views/index.hbs`
-You may have noticed during testing that every time you refreshed your browser while the server was running, it would prompt you for another username, not alloinwg you to jump back into the game as the same user you played with before. We will implement a simple form of sessions using the unique IDs of the users to overcome this problem.
+You may have noticed during testing that every time you refreshed your browser while the server was running, it would prompt you for another username, not allowing you to jump back into the game as the same user you played with before. We will implement a simple form of sessions using unique IDs.
 
-Firstly, to preserve the ID and username of the user we are currently playing the game with, use `LocalStorage` rather than a variable to save the ID we get back from the received `username` event. To set something with a browser's `LocalStorage` looks like the following:
+We will store unique IDs in `LocalStorage`. [`LocalStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) is a mechanism for storing key-value pairs in the browser on a per-website basis. When we get back a unique User ID from the server with the `username` event, we will store it in `LocalStorage` rather than in a variable. To set something with a browser's `LocalStorage` looks like the following:
 
 ```javascript
 localStorage.setItem("cake", "strawberry"); // first parameter is key, second parameter is value
@@ -265,11 +265,12 @@ We'll deal with re-associating the new `socket` connection with the existing pla
 
 #### Re-setting the ID on the Server - `app.js`
 
-We now need to modify the event handler on the server for `username` to check if we are receiving a String (in which case, a new user is attempting to join the game) or we are receiving an Object with an ID (in which case, an existing user with a different Socket connection is attempting to re-join the game).
+Modify the `username` event handler on the server to check if we are receiving a String (in which case, a new user is attempting to join the game) or if we are receiving an Object with an ID (in which case, an existing user is re-joining the game).
 
-Wrap your existing event handler for receiving the `username` event on the server in a conditional that checks for the type of the `data` we receive, which should be `true` in this conditional for types of "string".
+Your new `username` event halder should:
 
-Otherwise, if the `data` we receive is an Object, simply set `socket.playerId` to the ID received from the Object in `data` so that additional calls to `slap` or `playCard` will be using the correct Player ID. Finally, emit back a `start` event and an `updateGame` event back to the socket so that it can be up-to-date with all other players of the game.
+1. If the data received is a String, do the same thing as before.
+2. Otherwise, if the `data` we receive is an Object, set `socket.playerId` to `data.id`. Now, additional calls to `slap` or `playCard` will be using the correct Player ID. Finally, send (i.e. emit) back `start` and `updateGame` events to initialize the game state of the player who is re-joining.
 
 
 ### Implementing Persistence
