@@ -13,6 +13,10 @@
   var username = "";
   var id = "";
 
+  socket.on('click', function() {
+    console.log('click');
+  })
+
   socket.on('connect', function() {
     console.log('connected');
   });

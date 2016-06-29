@@ -33,7 +33,10 @@ var game = new Game();
 
 io.on('connection', function(socket){
   
-  
+  // socket.emit('hello', 10);
+  // socket.on('helloBack', function(val) {
+  //   console.log('helloBack', val);
+  // })
   socket.emit('username', false);
   
   // Try to add a player to the game. 
@@ -46,7 +49,7 @@ io.on('connection', function(socket){
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
-    
+    socket.emit('click', 'click');
   });
   
   
