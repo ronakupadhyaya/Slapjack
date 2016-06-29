@@ -141,11 +141,31 @@ socket.on("cake", function(data) {
 });
 ```
 
-Super simple, and fast!
+Super simple, and fast! **Note that `socket.emit` only emits to one connected socket at a time** (where each client is represented by a single socket). 
+
+To **broadcast an event** to all connected clients, call `socket.broadcast.emit` with the same parameters.
 
 Below is a spec of the events that we want to emit back to the client and respond to from the client: use the scaffold to update game logic within these events and pass back to the client necessary game information.
 
-* 
+**Events Received on Server** - `app.js`
+
+* `username` (receives String, username)
+	* Attempt to add the user to the game
+	* If the game throws an error, emit back `username` with `false`
+	* Otherwise, set `socket.playerId` equal to the new ID of the player and emit back `username` with the new ID (received back from `addPlayer`)
+* `start`
+	* Attempt to start the game
+	* If the game throws an error, emit back `message` with "Cannot start game yet!"
+	* Otherwise, emit a `start` event and broadcast a `start` event to all clients
+* `playCard`
+	* Attempt to call `playCard` with `socket.playerId` (which you set earlier on the `username` event)
+	* If the game throws an error, emit back `message` with "Not your turn yet!"
+	* Otherwise, emit a `playCard` event and broadcast a `playCard` event with the return result of `game.playCard` (the new Card just played).
+* `slap`
+	* Attempt to call `slap` with `socket.playerId` (which you set earlier on the `username` event)
+	* If the game throws an error, emit back `message` with the error (note: a failed slap does not throw an error!)
+	* Otherwise, emit a `slap` event with the return result of `game.slap` and broadcast a `message` event with "_their username_ just " + `[*return result game.slap*].message`, i.e. "Ethan just lost 3 cards!" or "Ethan just won the pile!"
+	
 
 
 ### Receiving WebSockets Events - `views/index.hbs`
