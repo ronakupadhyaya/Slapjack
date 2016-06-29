@@ -18,6 +18,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+<<<<<<< HEAD
 	var socket = io();
 	var username = "";
 	var id = "";
@@ -100,6 +101,11 @@
 		$(".username").text(username);
 	}
 
+  socket.on('disconnect', function() {
+    // refresh on disconnect
+    window.location = window.location;
+  });
+
 	function updateGameStatus(state){
 		$(".username").text(username);
 		$(".numCards").text(state.numCards[id]);
@@ -109,5 +115,4 @@
 		$(".num").show();
 		window.state = state;
 	}
-
 </script>
