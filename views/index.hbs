@@ -37,6 +37,11 @@
 ​
   });
 
+  socket.on('disconnect', function() {
+    // refresh on disconnect
+    window.location = window.location;
+  });
+
   function start() {
     socket.emit('start');
   }
