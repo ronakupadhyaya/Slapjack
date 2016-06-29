@@ -8,6 +8,7 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  return this.value + " to " + this.suit;
 };
 
 var Player = function(username) {
