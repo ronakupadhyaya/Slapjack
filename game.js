@@ -8,6 +8,7 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  return this.value + " of " + this.suit;
 };
 
 var Player = function(username) {
@@ -27,6 +28,7 @@ Player.prototype.generateId = function() {
 
 var Game = function() {
   this.Card = Card;
+  // You should be able to access Players from this object with players[id].
   this.Player = Player;
   this.isStarted = false;
   this.currentPlayer = null;
@@ -37,9 +39,29 @@ var Game = function() {
 
 
 // Make sure the game is not started and the username is valid
-// Add Player to playerOlder
+// Add Player to playerOrder
 // return player id
 Game.prototype.addPlayer = function(username) {
+
+  if (this.isStarted) {
+    throw "The game has already started";
+  }
+  else if (!username) {
+    throw "Not a valid username";
+  }
+  else {
+    console.log(this.players);
+    for (var playerId in this.players) {
+      console.log('im here');
+      if (this.players[playerId].username === username) {
+        throw "This username has been taken";
+      }
+    }
+
+    var newPlayer = new Player(username);
+    this.playerOrder.push(newPlayer.id);
+    return newPlayer.id;
+   }
 
 };
 
