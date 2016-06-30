@@ -32,6 +32,7 @@ var Game = require('./game');
 var game = new Game();
 
 io.on('connection', function(socket){
+  console.log("IS THIS WORKNG")
   
   
   socket.emit('username', false);
@@ -40,24 +41,71 @@ io.on('connection', function(socket){
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
+
+    try {
+      var id = game.addPlayer(data);
+      socket.playerId = id;
+    } catch(e) {
+      socket.emit('username', false);
+      return console.error(e);
+    }
     
   });
 
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
+    try{
+      game.startGame();
+      socket.emit('start');
+      socket.broadcast.emit('start');
+    } catch(e) {
+      socket.emit('message', "Cannot start game yet!")
+      return console.log(e);
+    }
     
   });
   
   
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
+    try {
+      var won = game.isWinning(socket.playerId);
+      if (won) {
+        var message = game.players[socket.playerId].username + "just won the game!"; 
+        socket.emit('message', "You just won the game!"); 
+        socket.broadcast.emit('message', message );       
+      }
+      var resp = game.playCard(socket.playerId);
+      socket.emit('playCard', resp);
+      socket.broadcast.emit('playCard', resp);
+    } catch(e) {
+      socket.emit('message', "Not your turn yet!")
+      return console.log(e);
+    }
 
   });
 
   // Try to slap! Emit, broadcast, and handle errors accordingly 
   socket.on('slap', function() {
-    
+    try {
+      var slap = game.slap(socket.playerId);
+      if (slap.winning) {
+        var message = game.players[socket.playerId].username + "just won the game!";
+        console.log(message);
+        socket.broadcast.emit('message', message);
+      } else {
+        var message = game.players[socket.playerId].username + " just " + slap.message;
+        console.log(slap)
+        console.log(message);
+        socket.broadcast.emit('message', message );
+      }
+    } catch(e) {
+      console.log(e);
+      socket.emit('message', e);
+      return console.log(e);
+    }
+    socket.emit('slap', slap);
   });
 
 });

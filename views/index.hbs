@@ -18,22 +18,45 @@
   });
 
   socket.on('username', function(resp) {
+    console.log("WHY YOU NO WORK")
+    if(!resp) {
+      username = prompt("Please enter your username");
+      socket.emit('username', username);
+    } else {
+      id = resp;
+    }
 
   });
 
   socket.on('playCard', function(data) {
-
+    console.log(data + "data here")
+    var imgsrc = data.toLowerCase().split(" ").join("_") + ".svg";
+    $("#card").attr("src", "/cards/" + imgsrc);
   });
 
   socket.on('slap', function(data) {
-
+    console.log(data + " slap data");
+    if (data.winning) {
+      alert("You just won the game!");
+      $("#startGame").prop("disabled", false);
+    } else {
+      if (data) {
+        $("#messages-container").show();
+        $("#messages-container").text("You just " + data.message).fadeOut(5000);
+      }
+    };
   });
 
   socket.on('start', function(data) {
-
-  });
+      $("#startGame").prop("disabled", true);
+    });
 
   socket.on('message', function(data) {
+    console.log(data + " message data")
+    if (data) {
+      $("#messages-container").show();
+      $("#messages-container").text(data).fadeOut(5000);
+    }
 
   });
 
