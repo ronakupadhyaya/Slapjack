@@ -155,7 +155,7 @@ Game.prototype.isWinning = function(playerId) {
     throw "Game has not started";
   }
   else {
-      if (this.players[playerId].pile.length === 52) {
+      if (this.players[playerId].pile.length + this.pile.length === 52) {
         this.isStarted = false;
         return true;
       }
@@ -194,17 +194,17 @@ Game.prototype.slap = function(playerId) {
   if (!this.isStarted) {
     throw "The game has not started"
   }
-  else if ((this.pile[this.pile.length-1].value === 11) || (this.pile[this.pile.length-1].value === "jack") || 
+  else if ((this.pile[this.pile.length-1].value === "jack") || (this.pile[this.pile.length-1].value === 11) || 
     (this.pile[this.pile.length-1].value === this.pile[this.pile.length-2].value) ||
      (this.pile[this.pile.length-1].value === this.pile[this.pile.length-3].value)) {
-        for (var k = 0; k < this.pile.length; k++) {
+        while(this.pile.length !== 0) {
            this.players[playerId].pile.push(this.pile.pop());
         }
        var result = this.isWinning(playerId);
        
-       if (result) {
-        return {winning: true, message: "got the pile!"};
-       } 
+        return {winning: result, message: "got the pile!"};
+       
+       
   }
   console.log('CRAP');
         var newArr = [];

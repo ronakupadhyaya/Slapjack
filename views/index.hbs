@@ -1,17 +1,41 @@
 <h1>Slapjack</h1>
-
+<div id="count">
+<h3>{{remaining}}</h3>
+</div>
 <button type="button" id="startGame" onclick="start()" class="btn btn-primary">Start Game</button>
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
 
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
+<div id="num">
+<h3>Username: </h3><div id="username"></div>
+<h3>Number of Cards You Have: </h3><div id="numCards"></div>
+<h3>List of Player Names: </h3><div id="playerNames"></div>
+<h3>Current Player Username: </h3><div id="currentPlayerUsername"></div>
+<h3>Cards Remaining in Game Deck: </h3><div id="cardsInDeck"></div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
   var socket = io();
   var username = "";
   var id = "";
+
+  function updateGameStatus(state){
+    $("#username").text(username);
+    $("#numCards").text(state.numCards[id]);
+    $("#playerNames").text(state.playersInGame);
+    $("#currentPlayerUsername").text(state.currentPlayerUsername);
+    $("#cardsInDeck").text(state.cardsInDeck);
+    $("#num").show();
+    window.state = state;
+}
+
+  socket.on('updateGame', function(data) {
+    console.log("do I get here?");
+    updateGameStatus(data);
+  })
 
   socket.on('connect', function() {
     console.log('connected');
@@ -38,7 +62,6 @@
     if (data.winning) {
       $('#messages-container').append('You have won!!!');
     } else {
-      //fadeout
       $('#messages-container').append("You " + data.message);
     }
 
@@ -50,7 +73,6 @@
   });
 
   socket.on('message', function(data) {
-    //fadeout
     $('#messages-container').append(data);
   });
 
@@ -70,5 +92,9 @@
   function slap() {
     socket.emit('slap');
   }
+
+$(document).click(function(e) {
+  $('#count').load(document.URL + ' #count');
+})
 
 </script>

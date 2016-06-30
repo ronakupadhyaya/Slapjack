@@ -23,6 +23,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(morgan('combined'));
 
+
 app.get('/', function(req, res) {
   res.render('index');
 });
@@ -30,6 +31,26 @@ app.get('/', function(req, res) {
 // Here is your new Game!
 var Game = require('./game');
 var game = new Game();
+
+function getGameStatus() {
+  var numCards = {};
+  var currentPlayerUsername = game.players[game.currentPlayer].username;
+  var playersInGame = "";
+  for (var playerId in game.players) {
+    numCards[playerId] = game.players[playerId].pile.length;
+    playersInGame += game.players[playerId].username + " ";
+  }
+
+  var cardsInDeck = game.pile.length;
+
+  return {
+    numCards: numCards,
+    currentPlayerUsername: currentPlayerUsername,
+    playersInGame: playersInGame,
+    cardsInDeck: cardsInDeck
+  }
+  
+}
 
 io.on('connection', function(socket){
   
@@ -51,6 +72,12 @@ io.on('connection', function(socket){
    
      socket.emit('username', socket.playerId);
 
+     if (game.isStarted) {
+       socket.emit('updateGame', getGameStatus());
+    socket.broadcast.emit('updateGame', getGameStatus());
+     }
+    
+
   });
 
 
@@ -65,12 +92,16 @@ io.on('connection', function(socket){
 
     socket.broadcast.emit('start');
     socket.emit('start');
+    
       
   });
   
   
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
+    for(var i in game.players) {
+      console.log(i, game.players[i].pile.length, game.pile.length);
+    }
     var result;
     try {
       result = game.playCard(socket.playerId);
@@ -83,6 +114,8 @@ io.on('connection', function(socket){
 
     socket.broadcast.emit('playCard', result);
     socket.emit('playCard', result);
+    socket.emit('updateGame', getGameStatus());
+    socket.broadcast.emit('updateGame', getGameStatus());
 
   });
 
@@ -99,14 +132,21 @@ io.on('connection', function(socket){
     if (!result.winning) {
        socket.broadcast.emit('message', 
       game.players[socket.playerId].username + " just " + result.message);
+       socket.emit('updateGame', getGameStatus());
+    socket.broadcast.emit('updateGame', getGameStatus());
       }
     else {
       socket.broadcast.emit('message', game.players[socket.playerId].username + 
         " just won the game!");
+     
+      socket.emit('updateGame', getGameStatus());
+    socket.broadcast.emit('updateGame', getGameStatus());
         
     }
    
   });
+
+ 
 
 });
 
