@@ -18,19 +18,30 @@
   });
 
   socket.on('username', function(resp) {
-
+    // console.log("this is resp",resp)
+    // console.log("this is equals", resp===false)
+    if(resp == false){
+      var answer = prompt("enter username");
+      console.log(resp)
+      socket.emit("username", answer)
+    }else{
+      id = resp;
+    }
   });
 
   socket.on('playCard', function(data) {
-
+  var str = data.card.cardString.toLowerCase().split(" ").join("_") + ".svg";
+    $("#card").attr("src", str);
   });
 
   socket.on('slap', function(data) {
-
+    handleMessage(data.slap.message);
   });
 
   socket.on('start', function(data) {
+    //startGame();
 
+    
   });
 
   socket.on('message', function(data) {
@@ -43,8 +54,18 @@
   });
 
   function start() {
-    socket.emit('start');
+    //socket.emit('start');
+    //startGame();
+    $('#startGame').on('click',function(){
+      $(this).prop('disabled',true);
+    });
   }
+
+  // function startGame(){
+  //   $('#startGame').on('click',function(){
+  //     $(this).prop('disabled',true);
+  //   })
+  // }
 
   function playCard() {
     socket.emit('playCard');
