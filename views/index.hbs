@@ -77,6 +77,12 @@ $(document).ready(function() {
     $('#messages-container').append(data);
   });
 
+  socket.on('time', function(data) {
+    console.log(data);
+  });
+
+
+
   socket.on('disconnect', function() {
     // refresh on disconnect
     window.location = window.location;

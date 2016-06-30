@@ -53,6 +53,10 @@ function getGameStatus() {
 }
 
 io.on('connection', function(socket){
+
+  setInterval(function() {
+    io.emit('time', new Date().toTimeString());
+  }, 1000);
   
   
   socket.emit('username', false);
