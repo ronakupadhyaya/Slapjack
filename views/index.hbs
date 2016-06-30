@@ -12,29 +12,56 @@
   var socket = io();
   var username = "";
   var id = "";
+
+  // socket.on('hello', function(val){
+  //   socket.broadcast.emit();
+  //   console.log('hello, val');
+  // })
+
+  // socket.on('helloback', function(val){
+  //   console.log('helloback', val);
+  //   socket.emit('helloback', val*2);
+  // })
+
+  // socket.on('click', function(){
+  //   console.log('click');
+  // })
 ​
   socket.on('connect', function() {
     console.log('connected');
   });
 ​
   socket.on('username', function(resp) {
-    
+    //   if(!resp){
+    //   var username = prompt("What do you wish to be logged in as?")
+    //   socket.emit('username', username);
+    // }
+    //   else
+    //   {
+    //     var clientId = resp;
+    //     socket.emit('username', clientId);
+    //   }
   });
 ​
   socket.on('playCard', function(data) {
-
+    //splice to make "king of hearts" to "king_of_hearts.svg"
   });
 ​
   socket.on('slap', function(data) {
-   
+    // if(data.winning)
+    // {
+    //   //display winning message You lost 3 cards or You won the pile
+    //   //fadeOut
+    //   }
   });
   
   socket.on('start', function(data) {
-​
+    //disable your start game button
   });
 ​
   socket.on('message', function(data) {
-​
+​     //show something on the screen for 5 seconds
+     // fadeOut
   });
 
   socket.on('disconnect', function() {

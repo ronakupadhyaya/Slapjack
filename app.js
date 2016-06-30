@@ -40,25 +40,55 @@ io.on('connection', function(socket){
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
-    
+    // if(!game.addPlayer(data))
+    // {
+    //   socket.emit('username', false)
+    // }
+    //   else
+    //   {
+    //     socket.playerId = game.addPlayer(data);
+    //     socket.emit('username',socket.playerId);
+    //   }
   });
 
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
-    
+    // socket.broadcast.emit('click', 'click');
+    // if(!game.startGame())
+    // {
+    //   socket.emit('start', "Cannot start game yet");
+    // }
+    //   else
+    //   {
+    //     socket.broadcast.emit('start', 'start');
+    //   }
   });
   
   
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
-
+    // if(!game.playCard('socket.playerId'))
+    // {
+    //   socket.emit('playCard', "Not your turn yet");
+    // }
+    //   else
+    //   {
+    //     socket.emit('playCard', game.playCard('socket.playerId'));
+    //   }
   });
 
   // Try to slap! Emit, broadcast, and handle errors accordingly 
   socket.on('slap', function() {
-    
-  });
+  //   if(!game.slap('socket.playerId'))
+  //   {
+  //     socket.emit('slap', "You cannot slap at this time");
+  //   }
+  //     else
+  //     {
+  //       socket.broadcast.emit('slap', game.slap('socket.playerId').winning ,socket.playerId + " just " + game.slap('socket.playerId').message)
+  //     }
+  // });
 
 });
 
