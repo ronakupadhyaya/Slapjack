@@ -36,6 +36,8 @@
   });
 
   socket.on('start', function(data) {
+    if(start()){
+      console.log('returned')
       if(data!==false){
           $(".btn-sucess").on('cjkljllick', function(){
             console.log('this reaches here')
@@ -44,7 +46,9 @@
       })
     }
     else{
+      console.log("Cannot start playing yet!")
       socket.broadcast.emit("Cannot start playing yet!");
+    }
     }
   });
 
