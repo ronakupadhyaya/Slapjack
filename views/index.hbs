@@ -18,7 +18,13 @@
   });
 
   socket.on('username', function(resp) {
-
+    if(resp===false){
+    username=prompt("Add a user")
+    socket.emit('username', username)
+    }
+    else{
+    socket.id=resp
+   }
   });
 
   socket.on('playCard', function(data) {
@@ -30,7 +36,16 @@
   });
 
   socket.on('start', function(data) {
-
+      if(data!==false){
+          $(".btn-sucess").on('cjkljllick', function(){
+            console.log('this reaches here')
+        $(this).prop("disabled",true)
+      socket.broadcast.emit(data);
+      })
+    }
+    else{
+      socket.broadcast.emit("Cannot start playing yet!");
+    }
   });
 
   socket.on('message', function(data) {
@@ -43,6 +58,7 @@
   });
 
   function start() {
+   console.log('clicked')
     socket.emit('start');
   }
 

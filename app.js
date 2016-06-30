@@ -40,6 +40,12 @@ io.on('connection', function(socket){
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
+    try {
+     var id = game.addPlayer(data)
+      socket.emit('username',id)
+    } catch(e) {
+      socket.emit('username',false)
+    }
     
   });
 
@@ -60,6 +66,16 @@ io.on('connection', function(socket){
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
+    //console.log('received')
+    try{
+      var start = game.startGame()
+      console.log('start')
+      socket.broadcast.emit('start',start)
+    }
+    catch(e){
+      console.log('err')
+      socket.broadcast.emit('start',false)
+    }
     
   });
   
