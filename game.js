@@ -55,7 +55,8 @@ Game.prototype.addPlayer = function(username) {
   var player = new Player(username);
   this.players[player.id] = player;
   this.playerOrder.push(player.id);
-  // this.persist();
+  this.currentPlayer = player.id;
+  this.persist();
   return player.id;
 };
 
@@ -127,7 +128,7 @@ Game.prototype.playCard = function(playerId) {
   if (this.players[playerId].pile.length == 0) throw 'Empty pile';
 
   var card = this.players[playerId].pile.shift();
-  this.pile.splice(0, 0, card);
+  this.pile.push(card);
   this.nextPlayer();
   return card.toString();
 };
@@ -139,8 +140,8 @@ Game.prototype.playCard = function(playerId) {
 Game.prototype.slap = function(playerId) {
   if (!this.isStarted) throw 'Game has not started';
   var win1 = (this.pile[this.pile.length - 1].value == 11);
-  var win2 = (this.pile[this.pile.length - 1].value == this.pile[this.pile.length - 2].value);
-  var win3 = (this.pile[this.pile.length - 1].value == this.pile[this.pile.length - 3].value);
+  var win2 = (this.pile.length >= 2) && (this.pile[this.pile.length - 1].value == this.pile[this.pile.length - 2].value);
+  var win3 = (this.pile.length >= 3) && (this.pile[this.pile.length - 1].value == this.pile[this.pile.length - 3].value);
   if (win1 || win2 || win3) {
     this.players[playerId].pile.push.apply(this.players[playerId].pile, this.pile);
     this.pile = [];

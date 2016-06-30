@@ -33,8 +33,34 @@ app.get('/', function(req, res) {
 var Game = require('./game');
 var game = new Game();
 
-io.on('connection', function(socket) {
+var getGameStatus = function() {
+  var numCards = {};
+  for (var i in game.playerOrder) {
+    numCards[game.playerOrder[i]] = game.players[game.playerOrder[i]].pile.length;
+  }
+  var currentPlayerUsername = game.players[game.currentPlayer].username;
+  var playersInGame = [];
+  for (var i in game.playerOrder) {
+    playersInGame.push(game.players[game.playerOrder[i]].username);
+  }
+  playersInGame = playersInGame.join(' ');
+  var cardsInDeck = game.pile.length;
+  if (cardsInDeck > 0) {
+    var lastCard = game.pile[game.pile.length - 1].toString();
+  } else {
+    var lastCard = '';
+  }
 
+  return {
+    numCards: numCards,
+    currentPlayerUsername: currentPlayerUsername,
+    playersInGame: playersInGame,
+    cardsInDeck: cardsInDeck,
+    lastCard: lastCard,
+  }
+}
+
+io.on('connection', function(socket) {
 
   socket.emit('username', false);
 
@@ -42,11 +68,28 @@ io.on('connection', function(socket) {
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
+    console.log(data);
     try {
-      var id = game.addPlayer(data);
-      socket.playerId = id;
-      socket.emit('username', id);
+      if (typeof data == 'string') {
+        var id = game.addPlayer(data);
+        socket.playerId = id;
+        socket.emit('username', id);
+        socket.emit('updateGame', getGameStatus());
+        socket.broadcast.emit('updateGame', getGameStatus());
+      } else {
+        if (game.playerOrder.indexOf(data.id) == -1) {
+          socket.emit('newUser');
+        } else {
+          socket.playerId = data.id;
+          if (game.isStarted) {
+            socket.emit('start');
+          }
+          socket.emit('updateGame', getGameStatus());
+          socket.broadcast.emit('updateGame', getGameStatus());
+        }
+      }
     } catch (err) {
+      console.log(err);
       socket.emit('username', false);
     }
   });
@@ -58,6 +101,8 @@ io.on('connection', function(socket) {
       game.startGame();
       socket.emit('start');
       socket.broadcast.emit('start');
+      socket.emit('updateGame', getGameStatus());
+      socket.broadcast.emit('updateGame', getGameStatus());
     } catch (err) {
       socket.emit('message', 'Cannot start game yet!');
     }
@@ -69,7 +114,9 @@ io.on('connection', function(socket) {
     try {
       var card = game.playCard(socket.playerId);
       socket.emit('playCard', card);
-      socket.emit('playCard', card)
+      socket.broadcast.emit('playCard', card);
+      socket.emit('updateGame', getGameStatus());
+      socket.broadcast.emit('updateGame', getGameStatus());
     } catch (err) {
       socket.emit('Not your turn yet');
     }
@@ -85,9 +132,15 @@ io.on('connection', function(socket) {
       } else {
         socket.broadcast.emit('message', slapResult.username + ' just ' + slapResult.message);
       }
+      socket.emit('updateGame', getGameStatus());
+      socket.broadcast.emit('updateGame', getGameStatus());
     } catch (err) {
       socket.emit('message', 'Cannot slap rn');
     }
+  });
+
+  socket.on('updateGame', function() {
+
   });
 
 });

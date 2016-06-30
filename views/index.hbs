@@ -4,6 +4,15 @@
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
 
+<ul>
+  <li> <span> Playing as: </span> <span class="username"></span></li>
+  <li class="num"> <span> Players in Game: </span> <span class="playerNames"></span></li>
+  <br>
+  <li> <span> Number of Cards in your hand: </span> <span class="numCards"></span></li>
+  <li> <span class="currentPlayerUsername"></span><span>'s turn</span></li>
+</ul>
+
+<h1> <span class="cardsInDeck"> </span> <span> cards in pile </span> </h1>
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
 
@@ -11,26 +20,42 @@
 <script>
   var socket = io();
   var username = "";
+  var id = localStorage.getItem("id") || "";
 
-  var id = "";
   socket.on('connect', function() {
     console.log('connected');
   });
 
   socket.on('username', function(resp) {
-    if (!resp) {
-      var username = prompt("Please enter a username");
-      socket.emit('username', username);
+    if (!id) {
+      if (!resp) {
+        username = prompt("Please enter a username", 'test1');
+        socket.emit('username', username);
+      } else {
+        id = resp;
+        localStorage.setItem('id', resp);
+      }
     } else {
-      id = resp;
+      if (resp) {
+        id = resp;
+        localStorage.setItem('id', resp);
+      } else {
+        var res = {};
+        res['id'] = id;
+        socket.emit('username', res);
+      }
     }
   });
+
+  socket.on('newUser', function() {
+    username = prompt("Please enter a username", 'test1');
+    socket.emit('username', username);
+  })
 
   socket.on('playCard', function(data) {
     var cardName = data.toLowerCase();
     cardName = cardName.split(' ').join('_');
     cardName = cardName + '.svg'
-    console.log(cardName);
     $('#card').attr('src', './cards/' + cardName);
   });
 
@@ -44,15 +69,19 @@
 
   socket.on('start', function(data) {
     $("#startGame").prop("disabled", true);
-  });​
+  });
 
-  socket.on('message', function(data) {​
+  socket.on('message', function(data) {
     $('#messages-container').text(data).fadeOut(5000);
   });
 
   socket.on('disconnect', function() {
     // refresh on disconnect
     window.location = window.location;
+  });
+
+  socket.on('updateGame', function(data) {
+    updateGameStatus(data);
   });
 
   function start() {
@@ -65,5 +94,21 @@
 
   function slap() {
     socket.emit('slap');
+  }
+
+  function updateGameStatus(state) {
+    $(".username").text(username);
+    $(".numCards").text(state.numCards[id]);
+    $(".playerNames").text(state.playersInGame);
+    $(".currentPlayerUsername").text(state.currentPlayerUsername);
+    $(".cardsInDeck").text(state.cardsInDeck);
+    $(".num").show();
+    if (!!state.lastCard) {
+      var cardName = state.lastCard.toLowerCase();
+      cardName = cardName.split(' ').join('_');
+      cardName = cardName + '.svg'
+      $('#card').attr('src', './cards/' + cardName);
+    }
+    window.state = state;
   }
 </script>
