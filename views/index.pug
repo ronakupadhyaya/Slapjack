@@ -20,10 +20,10 @@ block content
         | Slap!
         .ripple-container
      ul#list
-       li Playing as:
+       li.username Playing as:
        li Players in a game:
        li Number of cards in your hand:
-       li 's turn:
+       li.current 's turn:
     +card('Heart', '11')
 
 mixin suit(type, color, dimension)
@@ -261,3 +261,92 @@ mixin card(suit, rank, color)
           - }
 
     +panel('bottom', suit, rank, color)
+
+  script(src='/socket.io/socket.io.js')
+  script.
+    var socket = io();
+    var username = "";
+    var id = "";
+    socket.on('connect', function() {
+    console.log('connected');
+    });
+    socket.on('username', function(resp) {
+    if (!resp || resp.length===0) {
+    username = prompt('Enter a username')
+    socket.emit('username', username)
+    } else {
+    id = resp
+    }
+    $('.username').append(' '+username)
+    });
+    socket.on('playCard', function(data) {
+    console.log('card play recieved')
+    $('#card').attr('src',parseCard(data.card))
+    $('.current').prepend(' '+data.current)
+    $('.pileSize').text(' '+data.pile)
+    if (data.hand) {
+    $('.handSize').text(' '+data.hand)
+    }
+    });
+    socket.on('slap', function(data) {
+    if (data.winning) {
+    $('#messages-container').text('YOU WON!')
+    $('#card').attr('src','')
+    } else {
+    $('#messages-container').text('You '+data.message)
+    $('#messages-container').fadeOut(3000)
+    }
+    });
+    socket.on('start', function(data) {
+    $('#startGame').css('display','none')
+    $('.current').text(' '+data.current)
+    $('.pileSize').text(' '+data.pile)
+    });
+    socket.on('message', function(data) {
+    console.log('message received')
+    $('#messages-container').text(data)
+    $('#messages-container').fadeOut(3000, function() {
+    $('#messages-container').text('')
+    $('#messages-container').css('display','block')
+    })
+    });
+    socket.on('disconnect', function() {
+    // refresh on disconnect
+    window.location = window.location;
+    });
+    function start() {
+    socket.emit('start');
+    }
+    function playCard() {
+    socket.emit('playCard');
+    }
+    function slap() {
+    socket.emit('slap');
+    }
+    function parseCard(data) {
+    var svgLoc = ''
+    switch (data[0].value) {
+    case 0: svgLoc+='ace'
+    break
+    case 12: svgLoc+='king'
+    break
+    case 11: svgLoc+='queen'
+    break
+    case 10: svgLoc+='jack'
+    break
+    default: svgLoc+=(data[0].value+1)
+    }
+    svgLoc+='_of_'
+    switch (data[0].suit) {
+    case 0: svgLoc+='spades'
+    break
+    case 1: svgLoc+='hearts'
+    break
+    case 2: svgLoc+='diamonds'
+    break
+    case 3: svgLoc+='clubs'
+    break
+    }
+    console.log(svgLoc)
+    return '/cards/'+svgLoc+'.svg'
+    }
