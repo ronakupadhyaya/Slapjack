@@ -57,14 +57,19 @@ io.on('connection', function(socket){
     } catch(e) {
       socket.emit('message', 'cannot start game yet');
     }
-    socket.broadcast.emit('starting', )
+    socket.broadcast.emit('starting', game.startGame());
 
   });
   
   
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
-
+    try {
+      game.playCard();
+    } catch(e) {
+      socket.emit('message', 'not your turn yet');
+    }
+    socket.broadcast.emit('playCard', playCard());
   });
 
   // Try to slap! Emit, broadcast, and handle errors accordingly 

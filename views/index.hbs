@@ -31,7 +31,8 @@
   });
 
   socket.on('playCard', function(data) {
-
+    var imgSrc = data.replace(/ /g,'_') + 'svg';
+    $("#card").attr("src", "/cards/" + imgSrc);
   });
 
   socket.on('slap', function(data) {
