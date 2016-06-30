@@ -41,6 +41,7 @@ app.get('/', function(req, res) {
 // Here is your new Game!
 var Game = require('./game');
 var game = new Game();
+var slapped = false
 
 io.on('connection', function(socket){
   
@@ -70,13 +71,18 @@ io.on('connection', function(socket){
       socket.emit('Cannot start game yet, not enough players!')
       return
     }
-    socket.broadcast.emit('start', 'game started')
-    socket.emit('start', 'game started')
+    var msg = {
+      current: game.players[game.currentPlayer].username,
+      pileSize: 0
+    }
+    socket.broadcast.emit('start', msg)
+    socket.emit('start', msg)
   });
   
   
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
+    slapped = false
     console.log('card play attempted')
     try {
       game.playCard(socket.playerId)
@@ -84,25 +90,35 @@ io.on('connection', function(socket){
       socket.emit('message', 'Not your turn yet!')
       return
     }
-    socket.emit('playCard', game.pile.slice(-1))
-    socket.broadcast.emit('playCard', game.pile.slice(-1))
+    var msg = {
+      card:game.pile.slice(-1), 
+      current:game.players[game.currentPlayer].username,
+      pile: game.pile.length
+    }
+    socket.emit('playCard', msg)
+    msg.hand=game.players[socket.playerId].pile.length
+    socket.broadcast.emit('playCard', msg)
   });
 
   // Try to slap! Emit, broadcast, and handle errors accordingly 
   socket.on('slap', function() {
+    if (slapped) {return}
+    console.log('*****first slap!')
+    console.log(Math.random())
     try {
       var result = game.slap(socket.playerId)
     } catch(e) {
       socket.emit('message',e)
       return
     }
+    slapped = true
     console.log(result)
     socket.emit('slap',result)
     if (result.winning) {
-      socket.broadcast.emit('message',game.players[socket.playerId]+'just won the game!')  
+      socket.broadcast.emit('message',game.players[socket.playerId].username+'just won the game!')  
     }
     else {
-      socket.broadcast.emit('message',game.players[socket.playerId]+'just'+result.message)
+      socket.broadcast.emit('message',game.players[socket.playerId].username+'just'+result.message)
     }
   });
 

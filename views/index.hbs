@@ -25,7 +25,7 @@
   });
 
   socket.on('username', function(resp) {
-    if (!resp) {
+    if (!resp || resp.length===0) {
       username = prompt('Enter a username')
       socket.emit('username', username)
     } else {
@@ -36,8 +36,12 @@
 
   socket.on('playCard', function(data) {
     console.log('card play recieved')
-    console.log(data)
-    $('#card').attr('src',parseCard(data))
+    $('#card').attr('src',parseCard(data.card))
+    $('.current').text(' '+data.current)
+    $('.pileSize').text(' '+data.pile)
+    if (data.hand) {
+      $('.handSize').text(' '+data.hand)
+    }
   });
 
   socket.on('slap', function(data) {
@@ -52,11 +56,13 @@
 
   socket.on('start', function(data) {
     $('#startGame').css('display','none')
-    $('.current').text(' '+'????')
+    $('.current').text(' '+data.current)
+    $('.pileSize').text(' '+data.pile)
   });
 
   socket.on('message', function(data) {
-    $('#messages-container').text(data.message)
+    console.log('message received')
+    $('#messages-container').text(data)
     $('#messages-container').fadeOut(3000, function() {
       $('#messages-container').text('')
       $('#messages-container').css('display','block')
