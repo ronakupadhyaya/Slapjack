@@ -67,6 +67,7 @@ if (!this.isStarted) {
    throw new Error("Game has not already started");
  }
  var currentPlayerPos = this.playerOrder.indexOf(this.currentPlayer);
+
  var nextPlayer = 0;
  if (currentPlayerPos !== this.playerOrder.length - 1) {
    nextPlayer = currentPlayerPos + 1;
@@ -77,6 +78,8 @@ if (!this.isStarted) {
  }.bind(this));
 
  this.currentPlayer = this.players[this.playerOrder[nextPlayer]].id;
+
+
 }
 /* Make sure to
   1. Create the Deck
@@ -96,10 +99,7 @@ var suits = {1: "Diamonds", 2: "Hearts", 3: "Spades", 4: "Clubs"}
 for (var i in suits){
   var values = {1: "Ace", 2: "2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7", 8:"8", 9:"9", 10:"10", 11:"Jack", 12:"Queen", 13:"King"}
   for (var j in values){
-deck.push(new Card (suits[i], values[j]))
-
-
-
+    deck.push(new Card (suits[i], values[j]))
 
   }
  }
@@ -118,21 +118,23 @@ this.currentPlayer = this.playerOrder[0]
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
-if(!this.isStarted) {
-  throw new Error("Error, the game already started");
-};
-if(this.players[playerId].pile.length + this.pile.length === 52){
-  this.isStarted = false;
-  return true
-} else {
-  return false
-}
+  if(!this.isStarted) {
+    throw new Error("Error, the game already started");
+  };
+  if(this.players[playerId].pile.length + this.pile.length === 52){
+    this.isStarted = false;
+    this.pile = [];
+
+    return true
+  } else {
+    return false
+  }
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
 if(!this.isStarted) {
-  throw new Error("Error, the game already started");
+  throw new Error("Error, the game has not started");
 };
 if(this.currentPlayer !== playerId){
   throw new Error("Not your turn, respect the rules!");
@@ -141,8 +143,8 @@ if(this.players[playerId].pile.length === 0){
   throw new Error("You already lost, looser!");
 }
 
-this.pile.push(this.players[playerId].pile[this.players[playerId].pile.length-1]);
 var popped = this.players[playerId].pile.pop();
+this.pile.push(popped);
 this.nextPlayer();
 return popped.toString()
 
@@ -155,17 +157,14 @@ if(!this.isStarted) {
   throw new Error("Error, the game already started");
 };
 
-if(this.pile[this.pile.length-1].value === "Jack" ||
-
-   this.pile[this.pile.length-1].value === this.pile[this.pile.length-2].value ||
-   this.pile[this.pile.length-1].value === this.pile[this.pile.length-3].value){
+var p = this.pile;
+if(p.length >= 1 &&p[p.length-1].value === "Jack" ||
+   p.length >= 2 &&p[p.length-1].value === p[p.length-2].value ||
+   p.length >= 3 &&p[p.length-1].value === p[p.length-3].value){
    
    while(this.pile.length > 0 ){
-   this.players[playerId].pile.push(this.pile.pop())
+     this.players[playerId].pile.push(this.pile.pop())
    }
-
-   
-
       var slapObject =  {
       winning : this.isWinning(playerId),
       message : "got the pile!" 

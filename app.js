@@ -113,7 +113,7 @@ io.on('connection', function(socket){
       return socket.emit("message", "note: a failed slap does not throw an error!")
     }
     socket.emit("slap", slap)
-    socket.broadcast.emit("message", game.players[socket.playerID].username + slap.message)
+    socket.broadcast.emit("message", game.players[socket.playerId].username + slap.message)
     socket.emit('updateGame', getGameStatus());
     socket.broadcast.emit('updateGame', getGameStatus());
   
