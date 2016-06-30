@@ -1,12 +1,12 @@
 <h1>Slapjack</h1>
-​
+
 <button type="button" id="startGame" onclick="start()" class="btn btn-primary">Start Game</button>
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
-​
+
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
-​
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
   var socket = io();
@@ -30,8 +30,9 @@
   socket.on('connect', function() {
     console.log('connected');
   });
-​
+
   socket.on('username', function(resp) {
+
     //   if(!resp){
     //   var username = prompt("What do you wish to be logged in as?")
     //   socket.emit('username', username);
@@ -42,26 +43,31 @@
     //     socket.emit('username', clientId);
     //   }
   });
-​
+
   socket.on('playCard', function(data) {
     //splice to make "king of hearts" to "king_of_hearts.svg"
   });
-​
+
   socket.on('slap', function(data) {
+
     // if(data.winning)
     // {
     //   //display winning message You lost 3 cards or You won the pile
     //   //fadeOut
     //   }
   });
-  
+
   socket.on('start', function(data) {
+
     //disable your start game button
+
   });
-​
+
   socket.on('message', function(data) {
+
 ​     //show something on the screen for 5 seconds
      // fadeOut
+
   });
 
   socket.on('disconnect', function() {
@@ -72,13 +78,13 @@
   function start() {
     socket.emit('start');
   }
-​
+
   function playCard() {
     socket.emit('playCard');
   }
-​
+
   function slap() {
     socket.emit('slap');
   }
-​
+
 </script>
