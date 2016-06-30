@@ -137,7 +137,7 @@ describe("The Game Object", function() {
       g.playCard(j);
       g.playCard(e);
       g.playCard(j);
-      expect(g.slap(j)).toEqual(jasmine.any(Boolean));
+      expect(g.slap(j)).toEqual(jasmine.any(Object));
     });
     
   });

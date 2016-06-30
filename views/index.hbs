@@ -3,9 +3,21 @@
 <button type="button" id="startGame" onclick="start()" class="btn btn-primary">Start Game</button>
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
-
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
+<div id="num">
+<h3>Username:</h3>
+<div id="username"></div>
+<h3>Number of cards:</h3>
+<div id="numCards"></div>
+<h3>Player names:</h3>
+<div id="playerNames"></div>
+<h3>Current player username:</h3>
+<div id="currentPlayerUsername"></div>
+<h3>Number of cards in deck:</h3>
+<div id="cardsInDeck"></div>
+</div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -13,28 +25,54 @@
   var username = "";
   var id = "";
 
+$("#num").hide();
+  function updateGameStatus(state){
+    $("#username").text(username);
+    $("#numCards").text(state.numCards[id]);
+    $("#playerNames").text(state.playersInGame);
+    $("#currentPlayerUsername").text(state.currentPlayerUsername);
+    $("#cardsInDeck").text(state.cardsInDeck);
+    $("#num").show();
+    window.state = state;
+}
+socket.on("updateGame", function(response){
+  updateGameStatus(response);
+})
   socket.on('connect', function() {
     console.log('connected');
   });
 
   socket.on('username', function(resp) {
-
+    if(resp === false){
+      username = prompt("Please write a valid name")
+      socket.emit('username', username)
+    } else{
+      id = resp;
+    }
   });
 
   socket.on('playCard', function(data) {
-
+var imgsrc = data.toLowerCase().split(" ").join("_") + ".svg";
+   $("#card").attr("src", "/cards/" + imgsrc);
+      
   });
 
   socket.on('slap', function(data) {
+ if(data.winning === true){
+      $("#messages-container").text("You won")
+    } else { 
+      $("#messages-container").text(data.message).fadeOut(5000);
 
+    }
   });
 
   socket.on('start', function(data) {
-
+    $("#startGame").hide();
+    startGame();
   });
 
   socket.on('message', function(data) {
-
+      $("#messages-container").append(data);
   });
 
   socket.on('disconnect', function() {

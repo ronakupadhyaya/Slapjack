@@ -9,7 +9,7 @@ var Card = function(suit, value) {
 
 Card.prototype.toString = function() {
   var faceCards = {1: "Ace", 11: "Jack", 12: "Queen", 13:"King"}
-   return (faceCards[this.value]  || this.value) + "of" + this.suit
+   return (faceCards[this.value]  || this.value) + " of " + this.suit
 };
 
 var Player = function(username) {
@@ -63,17 +63,21 @@ return player.id ;
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
-if(!this.isStarted) {
-  throw new Error("Error, the game already started");
-};
+if (!this.isStarted) {
+   throw new Error("Game has not already started");
+ }
+ var currentPlayerPos = this.playerOrder.indexOf(this.currentPlayer);
+ var nextPlayer = 0;
+ if (currentPlayerPos !== this.playerOrder.length - 1) {
+   nextPlayer = currentPlayerPos + 1;
+ }
 
-  for (var i = 0 ; i < this.playerOrder.length; i++){
-    if (this.players[this.playerOrder[i]].pile.length>0){
-      this.currentPlayer = this.playerOrder[i];
-    }
-  }
-};
+ nextPlayer += _.findIndex(this.playerOrder.slice(nextPlayer), function(n) {
+   return this.players[n].pile.length > 0;
+ }.bind(this));
 
+ this.currentPlayer = this.players[this.playerOrder[nextPlayer]].id;
+}
 /* Make sure to
   1. Create the Deck
   2. Shuffle the Deck
@@ -83,15 +87,19 @@ Game.prototype.startGame = function() {
 if(this.isStarted) {
   throw new Error("Error, the game already started");
 };
-if(Object.keys(this.players).length < 2){
+if(this.playerOrder.length < 2){
   throw new Error("Error, the game has fewer than two people added")
 }
 this.isStarted = true;
 var deck = [];
 var suits = {1: "Diamonds", 2: "Hearts", 3: "Spades", 4: "Clubs"}
 for (var i in suits){
-  for (var j=1; j<=13; j++){
-deck.push(j+suits[i])
+  var values = {1: "Ace", 2: "2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7", 8:"8", 9:"9", 10:"10", 11:"Jack", 12:"Queen", 13:"King"}
+  for (var j in values){
+deck.push(new Card (suits[i], values[j]))
+
+
+
 
   }
  }
@@ -113,7 +121,7 @@ Game.prototype.isWinning = function(playerId) {
 if(!this.isStarted) {
   throw new Error("Error, the game already started");
 };
-if(this.players[playerId].pile.length === 52){
+if(this.players[playerId].pile.length + this.pile.length === 52){
   this.isStarted = false;
   return true
 } else {
@@ -126,19 +134,57 @@ Game.prototype.playCard = function(playerId) {
 if(!this.isStarted) {
   throw new Error("Error, the game already started");
 };
-if(this.currentPlayer !== playerId)
+if(this.currentPlayer !== playerId){
   throw new Error("Not your turn, respect the rules!");
-};
+}
 if(this.players[playerId].pile.length === 0){
   throw new Error("You already lost, looser!");
 }
-this.currentPlayer[playerId].pile.pop()
+
+this.pile.push(this.players[playerId].pile[this.players[playerId].pile.length-1]);
+var popped = this.players[playerId].pile.pop();
+this.nextPlayer();
+return popped.toString()
+
+};
 // If there is valid slap, move all items of the pile into the players Pile,
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
-
+if(!this.isStarted) {
+  throw new Error("Error, the game already started");
 };
+
+if(this.pile[this.pile.length-1].value === "Jack" ||
+
+   this.pile[this.pile.length-1].value === this.pile[this.pile.length-2].value ||
+   this.pile[this.pile.length-1].value === this.pile[this.pile.length-3].value){
+   
+   while(this.pile.length > 0 ){
+   this.players[playerId].pile.push(this.pile.pop())
+   }
+
+   
+
+      var slapObject =  {
+      winning : this.isWinning(playerId),
+      message : "got the pile!" 
+      } 
+   return slapObject
+   } else {
+
+    this.pile.push(this.players[playerId].pile.pop());
+    this.pile.push(this.players[playerId].pile.pop());
+    this.pile.push(this.players[playerId].pile.pop());
+
+    var slapObject = {
+    winning : false,
+    message : "You lost 3 cards" }
+}
+return slapObject
+};
+
+
 
 
 
