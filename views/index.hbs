@@ -76,12 +76,6 @@
     $('#messages-container').append(data);
   });
 
-  socket.on('time', function(data) {
-    console.log(data);
-  });
-
-
-
   socket.on('disconnect', function() {
     // refresh on disconnect
     window.location = window.location;
@@ -99,8 +93,5 @@
     socket.emit('slap');
   }
 
-$(document).click(function(e) {
-  $('#count').load(document.URL + ' #count');
-})
 
 </script>

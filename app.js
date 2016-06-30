@@ -53,10 +53,6 @@ function getGameStatus() {
 }
 
 io.on('connection', function(socket){
-
-  setInterval(function() {
-    io.emit('time', new Date().toTimeString());
-  }, 1000);
   
   
   socket.emit('username', false);
@@ -65,7 +61,7 @@ io.on('connection', function(socket){
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
-    console.log(data);
+   
     try {
        socket.playerId = game.addPlayer(data);
       
