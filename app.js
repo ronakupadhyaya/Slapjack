@@ -1,5 +1,9 @@
 "use strict";
 
+// ------------------------------------\\
+// Built with <3 by Cole & YH          \\
+// ------------------------------------\\
+
 var path = require('path');
 var morgan = require('morgan');
 var path = require('path');
@@ -35,7 +39,7 @@ app.use(morgan('combined'));
 
 
 app.get('/', function(req, res) {
-  res.render('index');
+  res.render('index', {title:'TEST', message:'TEST!'});
 });
 
 // Here is your new Game!
