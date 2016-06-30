@@ -3,6 +3,19 @@ var persist = require('./persist');
 var readGame = false;
 
 var Card = function(suit, value) {
+  if(value === 1) {
+    value = "Ace"
+  }
+  if(value === 11) {
+    value = "Jack"
+  }
+  if(value === 12) {
+    value = "Queen"
+  }
+  if(value === 13) {
+    value = "King"
+  }
+
   this.value = value;
   this.suit = suit;
 };
@@ -79,6 +92,7 @@ Game.prototype.nextPlayer = function() {
     var player = this.players[this.playerOrder[i]];
     if(player.pile.length > 0) { // check if still in game
       this.currentPlayer = player.id;
+      return;
     }
   }
 };
@@ -154,16 +168,14 @@ Game.prototype.playCard = function(playerId) {
     throw "It is not your turn yet";
   }
   for(var key in this.players) {
-    console.log("Pile: " + this.players[key].pile);
-    // ;
     if(this.players[key].id === playerId) {
       if(this.players[key].pile.length === 0) {
         throw "Player has already lost the game";
       }
       else {
-        // this.pile.push(this.players[key].pile[this.players[key].pile.length-1]);
-        // this.nextPlayer();
-        return this.toString(players[key].pile.pop());
+        this.pile.push(this.players[key].pile[this.players[key].pile.length-1]);
+        this.nextPlayer();
+        return this.toString(this.players[key].pile.pop());
       }
     }
   }
@@ -176,6 +188,34 @@ Game.prototype.playCard = function(playerId) {
 Game.prototype.slap = function(playerId) {
   if (! this.isStarted) {
     throw "Game has not yet started";
+  }
+
+  if(this.pile[this.pile.length-1].value === "Jack"
+     || this.pile[this.pile.length-1].value === this.pile[this.pile.length-2].value
+     || this.pile[this.pile.length-1].value === this.pile[this.pile.length-3].value) {
+    for (var key in this.players) {
+      if(this.players[key].id === playerId) {
+        this.players[key].pile.push(this.pile);
+        return {
+          winning: this.isWinning(playerId),
+          message: "got the pile!"
+        }
+      }
+    }
+  }
+  else {
+    for (var key in this.players) {
+      if(this.players[key].id === playerId) {
+        var splice = this.players[key].pile.splice(this.players[key].pile.length-3, 3);
+        this.pile.push(splice[0]);
+        this.pile.push(splice[1]);
+        this.pile.push(splice[2]);
+        return {
+          winning: false,
+          message: "lost 3 cards!"
+        }
+      }
+    }
   }
 };
 
