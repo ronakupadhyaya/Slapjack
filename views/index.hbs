@@ -21,7 +21,7 @@
   var socket = io();
   var username = "";
   var id = "";
-
+   $("#num").hide();
   function updateGameStatus(state){
     $("#username").text(username);
     $("#numCards").text(state.numCards[id]);
