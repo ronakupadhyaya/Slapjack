@@ -6,6 +6,12 @@
 
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
+<div class="username"></div>
+<div class="numCards"></div>
+<div class="playerNames"></div>
+<div class="currentPlayerUsername"></div>
+<div class="cardsInDeck"></div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -18,24 +24,45 @@
   });
 
   socket.on('username', function(resp) {
-
+    if (resp === false) {
+      username = prompt("Enter Username");
+      socket.emit('username', username);
+    } else {
+      id = resp;
+    }
   });
 
   socket.on('playCard', function(data) {
-
+    if (data) {
+      var str = "/cards/" + data.toLowerCase().split(" ").join("_") + '.svg'
+      $('#card').attr('src', str).show();
+    } else {
+      $("#card").hide();
+    }
   });
 
-  socket.on('slap', function(data) {
-
+  socket.on('slap', function(data) {  
+    $('#messages-container').empty();
+    $('#messages-container').css('display', 'block');
+    $('#messages-container').text(data).fadeOut(5000);
   });
 
   socket.on('start', function(data) {
-
+    $('#startGame').attr('disabled', true);
   });
 
   socket.on('message', function(data) {
-
+    alert(data);
   });
+
+  socket.on('updateGame', function(data) {
+    console.log(data);
+    $(".username").text("Username: " + username);
+    $(".numCards").text("Cards in hand: " + data.numCards[id]);
+    $(".playerNames").text("Current players: " + data.playersInGame);
+    $(".currentPlayerUsername").text(data.currentPlayerUsername + "'s turn");
+    $(".cardsInDeck").text("Cards in pile: " + data.cardsInDeck);
+  })
 
   socket.on('disconnect', function() {
     // refresh on disconnect
