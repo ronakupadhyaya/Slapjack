@@ -8,6 +8,52 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  var cardstring ="";
+  switch( this.value ){
+    case 1:
+      cardstring+="Ace";
+      break;
+    case 2:
+      cardstring+=value;
+      break;
+    case 3:
+      cardstring+=value;
+      break;
+    case 4:
+      cardstring+=value;
+      break;
+    case 5:
+      cardstring+=value;
+      break;
+    case 6:
+      cardstring+=value;
+      break;
+    case 7:
+      cardstring+=value;
+      break;
+    case 8:
+      cardstring+=value;
+      break;
+    case 9:
+      cardstring+=value;
+      break;
+    case 10:
+      cardstring+=value;
+      break;
+    case 11:
+      cardstring+="Jack";
+      break;
+    case 12:
+      cardstring+="Queen";
+      break;
+    case 13:
+      cardstring+="King";
+      break;
+  }
+  cardstring+=" of ";
+  cardstring+=this.suit;
+
+  return cardstring;
 };
 
 var Player = function(username) {
@@ -26,10 +72,12 @@ Player.prototype.generateId = function() {
 };
 
 var Game = function() {
+  this.isStarted = false;
+
   this.Card = Card;
   this.Player = Player;
-  this.isStarted = false;
-  this.currentPlayer = null;
+
+  this.currentPlayer = null; //string to store the ID of the current player
   this.players = {};
   this.playerOrder = [];
   this.pile = [];
@@ -37,10 +85,25 @@ var Game = function() {
 
 
 // Make sure the game is not started and the username is valid
-// Add Player to playerOlder
+// Add Player to playerOrder
 // return player id
 Game.prototype.addPlayer = function(username) {
+  if(this.isStarted){
+    throw new Error("Game has already started");
+  }
+  if(username){
+    throw new Error("No username");
+  }
 
+  for(player in this.players){
+    if(player.username === username)
+      throw new Error("Username already exists");
+  }
+
+  var newPlayer = new Player(username);
+  this.playerOrder.push(newPlayer.id);
+  this.players[newPlayer.id] = newPlayer;
+  return newPlayer.id;
 };
 
 
@@ -88,7 +151,7 @@ Game.prototype.slap = function(playerId) {
 
 // Determine in which gameplay functions above
 // you want to persist and save your data. We will
-// do a code-along later today to show you how 
+// do a code-along later today to show you how
 // to convert this from saving to a file to saving
 // to Redis, a persistent in-memory datastore!
 
