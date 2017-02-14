@@ -91,12 +91,14 @@ Game.prototype.addPlayer = function(username) {
   if(this.isStarted){
     throw new Error("Game has already started");
   }
-  if(username){
+  if(!username){
     throw new Error("No username");
   }
 
-  for(player in this.players){
-    if(player.username === username)
+  // console.log(username);
+  for(id in this.players){
+    // console.log('player:', player.username);
+    if(this.players[id].username === username)
       throw new Error("Username already exists");
   }
 
@@ -119,6 +121,14 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
+  if(this.isStarted){
+    throw new Error("Game has already started");
+  }
+  if(this.playerOrder.length < 2){
+    throw new Error("Not enough players");
+  }
+  this.isStarted = true;
+  //Create deck and Shuffle
 
 };
 
