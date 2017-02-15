@@ -4,6 +4,11 @@
 <button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
 <button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
 
+<p>You are <span class="username"></span></p>
+<p>Current Players: <span class="playerNames"></span></p>
+<p>Number of Cards in hand: <span class="numCards"></span></p>
+<p>Current Player: <span class="currentPlayerUsername"></span></p>
+
 <img id="card" src="" style="width: 200px; margin-top: 50px">
 <div id="messages-container"></div>
 
@@ -18,29 +23,75 @@
   });
 
   socket.on('username', function(resp) {
-
+    if (!resp) {
+      username = prompt("Put username here son.")
+      socket.emit('username', username)
+    } else {
+      id = resp
+    }
   });
 
   socket.on('playCard', function(data) {
-
+    var cardString = '/cards/'
+    cardString += data.card.replace(/ /g, "_")
+    cardString += '.svg'
+    console.log(cardString, "THE CARD")
+    $("#card").attr("src", cardString)
+    updateGameStatus(data.gameState);
   });
 
   socket.on('slap', function(data) {
+    if (data.slap.winning === true) {
+      var message = $("<h2>You won!</h2>");
+  		$("#messages-container").append(message);
+    } else {
+      var message = $("<h2>You " + data.slap.message + "</h2>");
+  		$("#messages-container").append(message);
 
+  		setTimeout(function() {
+  			message.fadeOut();
+  		}, 5000);
+    }
+    updateGameStatus(data.gameState);
   });
 
   socket.on('start', function(data) {
-
+    $('#startGame').prop('disabled', true)
+    updateGameStatus(data.gameState);
   });
 
   socket.on('message', function(data) {
+    var message = $("<h2>" + data + "</h2>");
+    $("#messages-container").append(message);
 
+    setTimeout(function() {
+      message.fadeOut();
+    }, 5000);
   });
+
+  socket.on("updateGameStatus", function(gameState){
+		updateGameStatus(gameState);
+	})
+
+  socket.on('clearDeck', function(){
+		console.log("received clear deck");
+		$("#card").attr("src", "");
+	});
 
   socket.on('disconnect', function() {
     // refresh on disconnect
     window.location = window.location;
   });
+
+  function updateGameStatus(state){
+    $(".username").text(username);
+    $(".numCards").text(state.numCards[id]);
+    $(".playerNames").text(state.playersInGame);
+    $(".currentPlayerUsername").text(state.currentPlayerUsername);
+    $(".cardsInDeck").text(state.cardsInDeck);
+    $(".num").show();
+    window.state = state;
+  }
 
   function start() {
     socket.emit('start');

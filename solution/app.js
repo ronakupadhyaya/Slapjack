@@ -36,10 +36,11 @@ function getGameState(){
   var currentPlayerUsername;
   var players = "";
   numCards = _.mapObject(game.players,(function(player, playerId){
-    
 
-    if(playerId == game.currentPlayer){
-      currentPlayerUsername = player.username;
+    if (game.currentPlayer) {
+      if(playerId == game.currentPlayer){
+        currentPlayerUsername = player.username;
+      }
     }
     players += player.username + ", ";
 
@@ -121,8 +122,8 @@ io.on('connection', function(socket){
 
     socket.emit('slap', { slap: slap, gameState: getGameState()});
     socket.broadcast.emit('slap', { slap: slap, gameState: getGameState()});
-    
-    socket.broadcast.emit('message', game.players[socket.playerId].username 
+
+    socket.broadcast.emit('message', game.players[socket.playerId].username
       + ' ' + slap.message);
 
     socket.emit('clearDeck');
