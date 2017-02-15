@@ -189,6 +189,10 @@ Game.prototype.slap = function(playerId) {
     return {winning: this.isWinning(playerId), message: "got the pile!"};
   } else {
     this.pile = (this.players[playerId].pile.splice(-3)).concat(this.pile)
+    if (this.players[playerId].pile.length === 0) {
+      this.nextPlayer()
+      return {winning: false, message: "lost all cards!"}
+    }
     return {winning: false, message: "lost 3 cards!"}
   }
 };

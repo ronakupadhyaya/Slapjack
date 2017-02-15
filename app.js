@@ -119,16 +119,19 @@ io.on('connection', function(socket){
       return console.log(err)
     }
     socket.emit('slap', { slap: slap, gameState: getGameStatus()});
-    socket.broadcast.emit('slap', { slap: slap, gameState: getGameStatus()});
+    socket.broadcast.emit('slap', {gameState: getGameStatus()});
 
-    if (game.slap.winning === true) {
+    if (slap.winning === true) {
       socket.broadcast.emit('message', game.players[socket.playerId].username + ' just won the game!')
     } else {
       socket.broadcast.emit('message', game.players[socket.playerId].username
         + ' ' + slap.message);
     }
-    socket.emit('clearDeck');
-    socket.broadcast.emit('clearDeck');
+
+    if (slap.message === "got the pile!") {
+      socket.emit('clearDeck');
+      socket.broadcast.emit('clearDeck');
+    }
   });
 
 });

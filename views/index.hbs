@@ -35,7 +35,6 @@
     var cardString = '/cards/'
     cardString += data.card.replace(/ /g, "_")
     cardString += '.svg'
-    console.log(cardString, "THE CARD")
     $("#card").attr("src", cardString)
     updateGameStatus(data.gameState);
   });
