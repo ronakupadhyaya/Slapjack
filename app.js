@@ -40,12 +40,32 @@ io.on('connection', function(socket){
   // If you can't, emit('username', false), return out of callback
   // If you successfully add the player, emit ('username', id)
   socket.on('username', function(data) {
+
+    try{
+      var userId = Game.addPlayer(data);
+      socket.playerId = userId;
+    } catch(e){
+      socket.emit('username', false);
+      return console.error(e);
+    }
+    socket.emit('username', userId);
     
   });
 
 
   // Start the game & broadcast to entire socket 
   socket.on('start', function() {
+
+    try{
+      game.startGame();
+    } catch(e){
+      socket.emit('message', 'Cannot start game yet!');
+      return console.error(e);
+    }
+    //Otherwise, emit a start event and broadcast a start event to all clients
+    socket.emit('start', 'starting game');
+    socket.emit.broadcast('start', 'starting game');
+
     
   });
   

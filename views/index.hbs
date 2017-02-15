@@ -17,11 +17,25 @@
     console.log('connected');
   });
 
-  socket.on('username', function(resp) {
+  socket.on('username', function(data) {
+
+    if(!data){
+
+      username = prompt("Enter your username!");
+      socket.emit('username', username);
+    } else{
+
+      id = data;
+      $(".username").text(username);
+
+    }
+
+
 
   });
 
   socket.on('playCard', function(data) {
+
 
   });
 

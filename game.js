@@ -8,6 +8,23 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+
+  var valueStr = "";
+
+  if(this.value === 1){
+    valueStr = "Ace";
+  } else if(this.value === 11){
+    valueStr = "Jack";
+  } else if(this.value === 12){
+    valueStr = "Queen";
+  } else if(this.value === 13){
+    valueStr = "King";
+  } else{
+    valueStr = this.value.toString();
+  }
+
+  return valueStr + " of " + this.suit;
+
 };
 
 var Player = function(username) {
@@ -41,11 +58,58 @@ var Game = function() {
 // return player id
 Game.prototype.addPlayer = function(username) {
 
+  if(this.isStarted){
+
+    throw "Game has already started.";
+
+  } else{
+
+    if(username === ""){
+
+      throw "Username is empty.";
+    } 
+
+    for(var k in this.players){
+
+      if(this.players[k].username === username){
+        throw "Username is not unique.";
+      }
+    }
+
+
+    var newPlayer = new Player(username);
+
+    this.playerOrder.push(newPlayer.id);
+    this.players[newPlayer.id] = newPlayer;
+
+    return newPlayer.id;
+
+  }
+
 };
 
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
+
+  if(!this.isStarted){
+    throw "Game hasn't started yet.";
+  }
+
+  var currentPlayerId = this.currentPlayer;
+
+  for(var i=0; i<this.playerOrder.length; i++){
+
+    if(this.playerOrder[i] === currentPlayerId){
+      if(i === this.playerOrder.length-1){
+
+        this.currentPlayer = this.playerOrder[0];
+
+      } else{
+        this.currentPlayer = this.playerOrder[i+1];
+      }
+    }
+  }
 
 };
 
@@ -57,16 +121,113 @@ Game.prototype.nextPlayer = function() {
 */
 Game.prototype.startGame = function() {
 
+  if(this.isStarted){
+    throw "Game has already started."
+  }
+
+  if(this.playerOrder.length < 2){
+    throw "Fewer than 2 people in game."
+  }
+
+  this.isStarted = true;
+
+  // Create a standard deck of 52 playing cards and shuffle them
+
+  var deck = [];
+
+  for(var j=0; j<4; j++){
+    for(var i=0; i<13; i++){
+
+      var suit = "";
+      if(j === 0){
+        suit = "hearts";
+      }else if(j === 1){
+        suit = "spades";
+      }else if(j === 2){
+        suit = "clubs";
+      }else{
+        suit = "diamonds";
+      }
+      var newCard = new Card(suit, i);
+
+      deck.push(newCard);
+    }
+  }
+
+  deck = _.shuffle(deck);
+
+  while(deck.length > this.playerOrder.length){
+
+    for(var k in this.players){
+      var newCard = deck.pop();
+      this.players[k].pile.push(newCard);
+    }
+  }
+
+  for(var i=0; i<deck.length; i++){
+
+    var newCard = deck.pop();
+    this.pile.push(newCard);
+  }
+
+  this.currentPlayer = this.playerOrder[0];
+
+
 };
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
 
+  if(!this.isStarted){
+    throw "Game hasn't started yet.";
+  }
+
+  var idToNumCards = [];
+
+  for(var k in this.players){
+
+    idToNumCards.push({id: this.players[k].id, numCards: this.players[k].pile.length});
+
+  }
+
+  var max = 0;
+  var maxId;
+  for(var i=0; i<idToNumCards.length; i++){
+
+    if(idToNumCards[i].numCards > max){
+      max = idToNumCards[i].numCards;
+      maxId = idToNumCards[i].id;
+    }
+  }
+
+  if(maxId === playerId && max === 52){
+    return true;
+  } else{
+    return false;
+  }
+
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
+
+  if(!this.isStarted){
+    throw "Game hasn't started yet.";
+  }
+
+  if(this.currentPlayer !== playerId){
+    throw "Current Player ID variable does not match the passed-in Player ID.";
+  }
+
+  if(this.players[playerId].pile.length === 0){
+    throw "Player corresponding to the passed-in Player ID has a pile length of zero";
+  }
+
+  var card = this.players[playerId].pile.pop();
+  this.pile.push(card);
+  this.nextPlayer();
+  return card.toString();
 
 };
 
@@ -75,6 +236,45 @@ Game.prototype.playCard = function(playerId) {
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
+
+  if(!this.isStarted){
+    throw "Game hasn't started yet.";
+  }
+
+  var winFlag = false;
+
+  if(this.pile[this.pile.length - 1].value === 11){
+    winFlag = true;
+  } else if(this.pile[this.pile.length - 1].value === this.pile[this.pile.length - 2].value){
+    winFlag = true;
+  } else if(this.pile[this.pile.length - 1].value === this.pile[this.pile.length - 3].value){
+    winFlag = true;
+  }
+
+  if(winFlag){
+    while(this.pile.length > 0){
+      var card = this.pile.pop();
+      this.players[playerId].pile.push(card);
+    }
+
+    var win = this.isWinning(playerId);
+    return {winning: win, message: "got the pile!"};
+
+  } else{
+
+    for(var i=0; i<3; i++){
+      var card = this.players[playerId].pile.pop();
+      this.pile.shift(card);
+    }
+
+    // return {winning: false, message: "lost 3 cards!"};
+    return false;
+
+
+  }
+
+
+
 
 };
 
