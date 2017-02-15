@@ -17,20 +17,33 @@
     console.log('connected');
   });
 
-  socket.on('username', function(resp) {
+////////////////////////////////////////////////////// hi
 
+  socket.on('username', function(data) {
+    if(!data) {
+      username = prompt('Please enter a username!');
+      socket.emit('username', username);
+      // how do we save?
+    } else {
+      id = data;
+    }
   });
 
-  socket.on('playCard', function(data) {
+//////////////////////////////////////////////////////
 
+  socket.on('playCard', function(playCard) { // data should be myCard; already string
+    console.log(playCard);
+    playCard = playCard.replace(/ /g, '_') + '.svg'
+    $('#card').attr('src', '/cards/' + playCard);
   });
 
   socket.on('slap', function(data) {
-
+    console.log('data', data);
+    $('#messages-container').text(data);
   });
 
   socket.on('start', function(data) {
-
+    // $('#startGame').prop('onclick', null); ISN'T CURRENTLY NECESSARY
   });
 
   socket.on('message', function(data) {
