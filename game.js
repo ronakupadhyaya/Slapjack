@@ -246,38 +246,55 @@ Game.prototype.playCard = function(playerId) {
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
   console.log('this.isStarted: ', this.isStarted);
+  var obj = {};
   if(!this.isStarted) {
+    console.log('problem')
     throw 'Error: game has not started b'
   } else {
     console.log('fuck this ');
     var deckLength = this.pile.length;
+    console.log('decklength');
+    console.log(deckLength)
     if(this.pile[deckLength - 1].value === 11) {
+      console.log('ay');
       this.players[playerId].pile.unshift(this.pile);
-      return {
+      obj = {
          result: this.isWinning(playerId),
          message: "got the pile!"
        };
+       console.log('hi', obj)
+      return obj;
     } else if (this.pile[deckLength-1].value === this.pile[deckLength-2].value) {
+      console.log('ay');
       this.players[playerId].pile.unshift(this.pile);
-      return {
+      obj = {
          result: this.isWinning(playerId),
          message: "got the pile!"
        };
+       console.log('hi', obj)
+      return obj;
     } else if (this.pile[deckLength-1].value === this.pile[deckLength-3].value) {
+      console.log('ay');
       this.players[playerId].pile.unshift(this.pile);
-      return {
+      obj = {
          result: this.isWinning(playerId),
          message: "got the pile!"
        };
+       console.log('hi', obj)
+      return obj;
     } else {
+      console.log('ay');
       this.pile.push(this.players[playerId].pile.pop());
       this.pile.push(this.players[playerId].pile.pop());
       this.pile.push(this.players[playerId].pile.pop()); // use splice
-      return {
+      obj = {
          result: this.isWinning(playerId),
          message: "lost three cards!"
        };
+       console.log('hi', obj)
+      return obj;
     }
+    console.log('somehow out here');
   }
 
   console.log('Got herreeerrere');
