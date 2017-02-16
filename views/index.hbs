@@ -27,7 +27,6 @@
 
       id = data;
       $(".username").text(username);
-
     }
 
 
@@ -36,18 +35,57 @@
 
   socket.on('playCard', function(data) {
 
+    var splitDate = data.split(" ");
+    var newData = "";
+    
+    for(var i=0; i<splitDate.length; i++){
+      newData += splitDate[i];
+
+      if(i === splitDate.length-1){
+        break;
+      }
+
+      newData += "_";
+    }
+
+    newData += ".svg";
+
+    $('#card').attr("src", `cards/${newData}`);
 
   });
 
+
   socket.on('slap', function(data) {
+
+    // <div id="messages-container"></div>
+
+    console.log(data);
+
+    if(data.winning){
+      $('#messages-container').append("<p>You have won!</p>");
+    } else{
+
+      $('#messages-container').append(`<p id='fade'>${data.message}</p>`);
+
+      $("#fade").fadeOut("slow");
+    }
+
+
 
   });
 
   socket.on('start', function(data) {
 
+
+    $('#startGame').prop('disabled', true);
+
   });
 
   socket.on('message', function(data) {
+
+    $('#messages-container').append(`<p id='fade'>${data.message}</p>`);
+
+    $("#fade").fadeOut("slow");
 
   });
 

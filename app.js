@@ -42,7 +42,7 @@ io.on('connection', function(socket){
   socket.on('username', function(data) {
 
     try{
-      var userId = Game.addPlayer(data);
+      var userId = game.addPlayer(data);
       socket.playerId = userId;
     } catch(e){
       socket.emit('username', false);
@@ -64,7 +64,7 @@ io.on('connection', function(socket){
     }
     //Otherwise, emit a start event and broadcast a start event to all clients
     socket.emit('start', 'starting game');
-    socket.emit.broadcast('start', 'starting game');
+    socket.broadcast.emit('start', 'starting game');
 
     
   });
@@ -73,10 +73,46 @@ io.on('connection', function(socket){
   // call game.playCard, emit the result the broadcast it 
   socket.on('playCard', function() {
 
+    try{
+      var res = game.playCard(socket.playerId);
+
+    }catch(e){
+      socket.emit('message', 'Not your turn yet!');
+      return console.log(e);
+    }
+    
+    socket.emit('playCard', res);
+    socket.broadcast.emit('playCard', res);
+
+
+
   });
 
   // Try to slap! Emit, broadcast, and handle errors accordingly 
   socket.on('slap', function() {
+
+    try{
+      var ret = game.slap(socket.playerId);
+
+    }catch(e){
+
+      socket.emit('message', e.message);
+      return console.log(e);
+    }
+
+    socket.emit('slap', ret);
+
+    if(ret.winning){
+      var resultStr = game.players[socket.playerId].username + " just won the game.";
+      socket.emit('slap', ret);
+      socket.emit('message', resultStr);
+
+    }else{
+      
+      var resultStr = game.players[socket.playerId].username + " just " + ret.message;
+      socket.emit('slap', ret);
+    }
+
     
   });
 

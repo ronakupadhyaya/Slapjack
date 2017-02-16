@@ -12,13 +12,13 @@ Card.prototype.toString = function() {
   var valueStr = "";
 
   if(this.value === 1){
-    valueStr = "Ace";
+    valueStr = "ace";
   } else if(this.value === 11){
-    valueStr = "Jack";
+    valueStr = "jack";
   } else if(this.value === 12){
-    valueStr = "Queen";
+    valueStr = "queen";
   } else if(this.value === 13){
-    valueStr = "King";
+    valueStr = "king";
   } else{
     valueStr = this.value.toString();
   }
@@ -136,7 +136,7 @@ Game.prototype.startGame = function() {
   var deck = [];
 
   for(var j=0; j<4; j++){
-    for(var i=0; i<13; i++){
+    for(var i=1; i<14; i++){
 
       var suit = "";
       if(j === 0){
@@ -243,12 +243,31 @@ Game.prototype.slap = function(playerId) {
 
   var winFlag = false;
 
+  // console.log('********************');
+
+  // console.log(this.pile);
+  // console.log(this.pile[this.pile.length - 1]);
+  // console.log(this.pile[this.pile.length - 1].value);
+
+
+  // console.log('********************');
+
+
+
   if(this.pile[this.pile.length - 1].value === 11){
     winFlag = true;
-  } else if(this.pile[this.pile.length - 1].value === this.pile[this.pile.length - 2].value){
-    winFlag = true;
-  } else if(this.pile[this.pile.length - 1].value === this.pile[this.pile.length - 3].value){
-    winFlag = true;
+  }
+
+  if(this.pile.length >= 2){
+    if(this.pile[this.pile.length - 1].value === this.pile[this.pile.length - 2].value){
+      winFlag = true;
+    }
+  }
+
+  if(this.pile.length >= 3){
+    if(this.pile[this.pile.length - 1].value === this.pile[this.pile.length - 3].value){
+      winFlag = true;
+    }
   }
 
   if(winFlag){
@@ -267,8 +286,8 @@ Game.prototype.slap = function(playerId) {
       this.pile.shift(card);
     }
 
-    // return {winning: false, message: "lost 3 cards!"};
-    return false;
+    return {winning: false, message: "lost 3 cards!"};
+    // return false;
 
 
   }
