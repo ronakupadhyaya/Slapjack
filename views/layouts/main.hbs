@@ -10,30 +10,128 @@
   <script src="/bootstrap3-typeahead.min.js"></script>
   <style>
     body {
-      padding-top: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #d9d9d9;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .empty {
+      height: 5vh;
+    }
+
+    .large-empty {
+      height: 7vh;
+    }
+
+    #title {
+      height: 9vh;
+      width: 60vw;
+      /*border: 1px solid black;*/
+      font-size: 2em;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #card-container {
+      height: 40vh;
+      width: 60vw;
+      /*border: 1px solid black;*/
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #card {
+      height: 40vh;
+      flex: 1;
+    }
+
+    #stats {
+      flex: 1;
+    }
+
+    #button-container {
+      height: 15vh;
+      width: 70vw;
+      /*border: 1px solid black;*/
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button {
+      border-radius: 20px;
+      outline: none;
+      border: 0;
+      font-size: 100px;
+      color: white;
+    }
+
+    .button:active {
+      outline: none;
+    }
+
+    .button:hover {
+      cursor: pointer;
+    }
+
+    #start-container {
+      height: 15vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #startGame {
+      background-color: #3498db !important;
+      height: 15vh;
+      width: 70vw;
+    }
+
+    #play-container {
+      height: 15vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #play {
+      background-color: #3498db !important;
+      width: 32vw;
+      height: 15vh;
+    }
+
+    #space {
+      width: 6vw;
+    }
+
+    #slap {
+      background-color: #c0392b !important;
+      width: 32vw;
+      height: 15vh;
+    }
+
+    #messages-container {
+      height: 10vh;
+      /*border: 1px solid black;*/
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-default navbar-fixed-top" id="horizons-nav">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#">Slapjack</a>
-      </div>
-    </div>
-  </nav>
-  <div class="container">
-    <div class="row">
-      <div class="col-xs-8 col-xs-offset-2">
-        {{{body}}}
-      </div>
-    </div>
+  <div id="game-container">
+    {{{body}}}
   </div>
 </body>
 </html>

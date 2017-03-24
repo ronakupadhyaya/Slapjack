@@ -1,57 +1,112 @@
-<h1>Slapjack</h1>
+<div class="large-empty"></div>
 
-<button type="button" id="startGame" onclick="start()" class="btn btn-primary">Start Game</button>
-<button type="button" onclick="playCard()" class="btn btn-primary">Play Card</button>
-<button type="button" onclick="slap()" class="btn btn-success">Slap!</button>
+<div id="title"></div>
 
-<img id="card" src="" style="width: 200px; margin-top: 50px">
+<div class="empty"></div>
+
+<div id="card-container">
+  <div id="stats">
+    <p id="pile"></p>
+    <p id="yours"></p>
+  </div>
+  <img id="card" src="">
+</div>
+
+<div class="empty"></div>
+
+<div id="button-container">
+  <div id="start-container">
+    <button type="button" class="button" id="startGame" onclick="start()">Start Game</button>
+  </div>
+  <div id="play-container">
+    <button type="button" class="button" id="play" onclick="playCard()">P</button>
+    <span id="space"></span>
+    <button type="button" class="button" id="slap" onclick="slap()">S</button>
+  </div>
+</div>
+
+<div class="empty"></div>
+
 <div id="messages-container"></div>
+
+<div class="large-empty"></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  var socket = io();
-  var username = "";
-  var id = "";
+var socket = io();
+var username = "";
+var id = "";
 
-  socket.on('connect', function() {
-    console.log('connected');
-  });
+$('#play-container').hide();
 
-  socket.on('username', function(resp) {
+socket.on('connect', function() {
+  console.log('connected');
+});
 
-  });
-
-  socket.on('playCard', function(data) {
-
-  });
-
-  socket.on('slap', function(data) {
-
-  });
-
-  socket.on('start', function(data) {
-
-  });
-
-  socket.on('message', function(data) {
-
-  });
-
-  socket.on('disconnect', function() {
-    // refresh on disconnect
-    window.location = window.location;
-  });
-
-  function start() {
-    socket.emit('start');
+socket.on('username', function(data) {
+  if(!data.id) {
+    username = prompt("Please enter a username!")
+    socket.emit("username", username)
+  } else {
+    id = data.id;
+    $('#title').text(`Welcome to Slapjack, ${data.username}!`);
   }
+});
 
-  function playCard() {
-    socket.emit('playCard');
-  }
+socket.on('playCard', function(playCard) {
+  var svgCard = "/cards/".concat(playCard.replace(/ /g, "_").concat(".svg"));
+  $('#card').attr('src', svgCard);
+});
 
-  function slap() {
-    socket.emit('slap');
+socket.on('start', function() {
+  $('#start-container').hide();
+  $('#play-container').show();
+})
+
+socket.on('slap', function(result) {
+  if(result.result) {
+    $('#messages-container').prepend('<p>'+result.message+'</p>');
+    console.log(result.message);
+  } else {
+    var className = JSON.stringify(new Date());
+    className = className.replace(/[^0-9]/g, '');
+    console.log(className);
+    $('#messages-container').prepend(`<p id='${className}'>${result.message}</p>`);
+    className = '#' + className;
+    $(className).fadeOut(3000);
+    console.log(className);
   }
+});
+
+socket.on('clear', function() {
+  $('#card').attr('src', "");
+})
+
+socket.on('message', function(data) {
+  var className = JSON.stringify(new Date());
+  className = className.replace(/[^0-9]/g, '');
+  console.log(className);
+  $('#messages-container').prepend(`<p id='${className}'>${data}</p>`);
+  className = '#' + className;
+  $(className).fadeOut(3000);
+  console.log(className);
+});
+
+socket.on('disconnect', function() {
+  // refresh on disconnect
+  window.location = window.location;
+});
+
+function start() {
+  socket.emit('start');
+}
+
+function playCard() {
+  socket.emit('playCard');
+}
+
+function slap() {
+  socket.emit('slap');
+}
 
 </script>

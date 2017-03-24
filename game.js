@@ -8,6 +8,17 @@ var Card = function(suit, value) {
 };
 
 Card.prototype.toString = function() {
+  var val = this.value;
+  if(this.value === 1) {
+    val = "ace"
+  } else if(this.value === 11) {
+    val = "jack"
+  } else if (this.value === 12) {
+    val = "queen"
+  } else if (this.value === 13) {
+    val = "king"
+  }
+  return val + " of " + this.suit
 };
 
 var Player = function(username) {
@@ -40,15 +51,48 @@ var Game = function() {
 // Add Player to playerOlder
 // return player id
 Game.prototype.addPlayer = function(username) {
+  var match = false;
+  for(var i in this.players) {
+    if(username === this.players[i].username) {
+      match = true;
+    }
+  }
 
+  if(this.isStarted) {
+    throw "Error: game in progress"
+  } else if (username.length === 0) {
+    throw "Error: please enter a username"
+  } else if (match) {
+    throw "Error: username already exists"
+  } else {
+    var p = new Player(username);
+    this.playerOrder.push(p.id);
+    this.players[p.id] = p;
+    return p.id;
+  }
 };
 
 
 // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
 Game.prototype.nextPlayer = function() {
-
+  if(!this.isStarted) {
+    throw "Error: game not started!"
+  } else {
+    var self = this;
+    var findNextPlayer = function(playerId) {
+      var tempIndex = self.playerOrder.indexOf(playerId);
+      var nextId = (tempIndex === self.playerOrder.length-1 ? self.playerOrder[0] : self.playerOrder[tempIndex+1]);
+      var obj = self.players[nextId];
+      if (obj.pile.length !== 0) {
+        self.currentPlayer = nextId;
+        return;
+      } else {
+        findNextPlayer(nextId);
+      }
+    }
+    findNextPlayer(this.currentPlayer);
+  }
 };
-
 
 /* Make sure to
   1. Create the Deck
@@ -56,18 +100,80 @@ Game.prototype.nextPlayer = function() {
   3. Distribute cards from the pile
 */
 Game.prototype.startGame = function() {
+  if(this.isStarted) {
+    throw "Error: game is already started"
+  } else if (this.playerOrder.length < 2) {
+    throw "Error: not enough players"
+  } else {
+    this.isStarted = true;
+    this.currentPlayer = this.playerOrder[0];
 
+    //create deck
+    var deck = [];
+    var suits = ['hearts','diamonds','clubs','spades'];
+    var vals = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+    for(var i = 0; i < suits.length; i++) {
+      for(var j = 0; j < vals.length; j++) {
+        var card = new Card(suits[i], vals[j]);
+        deck.push(card);
+      }
+    }
+
+    //randomInt function
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    //shuffle deck
+    var shuffledDeck = [];
+
+    while(deck.length) {
+      shuffledDeck.push(deck.splice(getRandomInt(0, deck.length), 1)[0])
+    }
+    deck = shuffledDeck;
+
+    //distribute deck
+    var startingPile = deck.length%this.playerOrder.length
+    for(var i = 0; i < startingPile; i++) {
+      this.pile.push(deck.shift());
+    }
+    while(deck.length) {
+      for(var i in this.players) {
+        this.players[i].pile.push(deck.pop());
+      }
+    }
+  }
 };
 
 
 // Check if the player with playerId is winning. In this case, that means he has the whole deck.
 Game.prototype.isWinning = function(playerId) {
-
+  if(!this.isStarted) {
+    throw "Error: game not started!"
+  } else if (this.players[playerId].pile.length === 52) {
+    this.isStarted = false;
+    return true;
+  } else {
+    return false;
+  }
 };
 
 // Play a card from the end of the pile
 Game.prototype.playCard = function(playerId) {
-
+  if(!this.isStarted) {
+    throw "Error: game not started!"
+  } else if (this.currentPlayer !== playerId) {
+    throw "Error: not your turn!"
+  } else if (this.players[playerId].pile.length === 0) {
+    throw "Error: you have no cards!"
+  } else {
+    var newCard = this.players[playerId].pile.pop();
+    this.pile.push(newCard);
+    this.nextPlayer();
+    return newCard.toString();
+  }
 };
 
 
@@ -75,7 +181,26 @@ Game.prototype.playCard = function(playerId) {
 // clear the pile
 // remember invalid slap and you should lose 3 cards!!
 Game.prototype.slap = function(playerId) {
-
+  if(!this.isStarted) {
+    throw "Error: game not started!"
+  } else {
+    var deckLength = this.pile.length; //TODO: This can be more than 52 so we need to fix it when all the cards are in the pile
+    if(this.pile[deckLength-1].value === 11) {
+      this.players[playerId].pile.unshift(this.pile)
+      return {result: this.isWinning(playerId), message: "got the pile!"};
+    } else if (this.pile.length > 1 && this.pile[deckLength-1].value === this.pile[deckLength-2].value) {
+      this.players[playerId].pile.unshift(this.pile)
+      return {result: this.isWinning(playerId), message: "got the pile!"};
+    } else if (this.pile.length > 2 && this.pile[deckLength-1].value === this.pile[deckLength-3].value) {
+      this.players[playerId].pile.unshift(this.pile)
+      return {result: this.isWinning(playerId), message: "got the pile!"};
+    } else {
+      this.pile.push(this.players[playerId].pile.pop());
+      this.pile.push(this.players[playerId].pile.pop());
+      this.pile.push(this.players[playerId].pile.pop());
+      return {result: this.isWinning(playerId), message: "lost 3 cards!"};
+    }
+  }
 };
 
 
@@ -88,7 +213,7 @@ Game.prototype.slap = function(playerId) {
 
 // Determine in which gameplay functions above
 // you want to persist and save your data. We will
-// do a code-along later today to show you how 
+// do a code-along later today to show you how
 // to convert this from saving to a file to saving
 // to Redis, a persistent in-memory datastore!
 
