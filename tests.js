@@ -324,10 +324,10 @@ describe("The Game Object", function() {
 
       g.startGame();
       var ePile = ['hearts', 'spades'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       g.players[e].pile = ePile; // override
       g.players[j].pile = jPile; // override
@@ -347,10 +347,10 @@ describe("The Game Object", function() {
 
       g.startGame();
       var ePile = ['hearts', 'spades'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       g.players[e].pile = ePile; // override
       g.players[j].pile = jPile; // override
@@ -379,10 +379,10 @@ describe("The Game Object", function() {
 
       g.startGame();
       var ePile = ['hearts', 'spades'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       g.players[e].pile = ePile; // override
       g.players[j].pile = jPile; // override
@@ -409,10 +409,10 @@ describe("The Game Object", function() {
 
       g.startGame();
       var ePile = ['hearts', 'spades'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       // swap king and queen
       var temp = jPile[jPile.length - 1]; // king
@@ -443,10 +443,10 @@ describe("The Game Object", function() {
 
       g.startGame();
       var ePile = ['hearts', 'spades'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
-        return [...cache, ...[...Array(13).keys()].map(i => new g.Card(val, i + 1))]
+        return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       // swap king and queen
       var temp = jPile[jPile.length - 1]; // king
