@@ -63,8 +63,8 @@ io.on('connection', function(socket) {
     socket.emit('observeOnly');
   }
   count++;
+
   socket.on('disconnect', function () {
-    console.log('disconnect...count is' + count);
     count--;
     if (count === 0) {
       game = new Game();
@@ -73,28 +73,43 @@ io.on('connection', function(socket) {
   });
 
   socket.on('username', function(data) {
+    console.log(game.players);
     if (winner) {
-      socket.emit('errorMessage', `${winner} has won the game. Refresh the page to start a new game.`);
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    try {
-      var id = game.addPlayer(data);
-      socket.playerId = id;
+    if (typeof data === 'string') {
+      try {
+        var id = game.addPlayer(data);
+        console.log(game.players);
+        socket.playerId = id;
+        socket.emit('username', {
+          id: id,
+          username: data
+        });
+        io.emit('updateGame', getGameState()); // broadcast to everyone
+      } catch (e) {
+        socket.emit('errorMessage', e.message);
+      }
+    } else {
+      if (!game.players.hasOwnProperty(data.id)) {
+        socket.emit('username', false);
+        return;
+      }
+      socket.playerId = data.id;
+
       socket.emit('username', {
-        id: id,
-        username: data
+        id: data.id,
+        username: game.players[data.id].username
       });
       io.emit('updateGame', getGameState()); // broadcast to everyone
-      count++;
-    } catch (e) {
-      socket.emit('errorMessage', e.message);
     }
   });
 
   // Start the game & broadcast to entire socket
   socket.on('start', function() {
     if (winner) {
-      socket.emit('errorMessage', `${winner} has won the game. Refresh the page to start a new game.`);
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
     if (!socket.playerId) {
@@ -113,7 +128,7 @@ io.on('connection', function(socket) {
   // call game.playCard, emit the result the broadcast it
   socket.on('playCard', function() {
     if (winner) {
-      socket.emit('errorMessage', `${winner} has won the game. Refresh the page to start a new game.`);
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
     if (!socket.playerId) {
@@ -134,7 +149,7 @@ io.on('connection', function(socket) {
   // Try to slap! Emit, broadcast, and handle errors accordingly
   socket.on('slap', function() {
     if (winner) {
-      socket.emit('errorMessage', `${winner} has won the game. Refresh the page to start a new game.`);
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
     if (!socket.playerId) {
@@ -151,13 +166,16 @@ io.on('connection', function(socket) {
         io.emit('clearDeck');
       } else if (game.players[socket.playerId].pile.length === 0) { // has no more cards
         var count = 0; // how many players with 0 cards
+        var win = "";
         for (let player of _.values(game.players)) {
           if (player.pile.length === 0) {
             count++;
+          } else {
+            win = player.username;
           }
         }
         if (count === game.playerOrder.length - 1) {
-          winner = game.players[socket.playerId].username;
+          winner = win;
           game.isStarted = false;
         } else {
           game.nextPlayer();

@@ -15,11 +15,19 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
+    if (data === false) {
+      console.log('reset?')
+      localStorage.setItem('id', '');
+      join('player');
+      return;
+    }
     $('#joinGame').prop('disabled', true);
     $('#observeGame').prop('disabled', true);
     $('#usernameDisplay').text('Joined game as ' + data.username);
     $('#startGame').prop('disabled', false);
     user = data;
+    console.log(data);
+    localStorage.setItem('id', data.id);
   });
 
   socket.on('playCard', function(data) {
@@ -117,8 +125,13 @@ $(document).ready(function() {
   function join(data) {
     type = data;
     if (type === 'player') {
-      var name = prompt('Enter your username:');
-      socket.emit('username', name);
+      var id = localStorage.getItem('id') || '';
+      if (id === '') {
+        var name = prompt('Enter your username:');
+        socket.emit('username', name);
+      } else {
+        socket.emit('username', { id: id });
+      }
     } else { // observer
       $('#joinGame').prop('disabled', true);
       $('#observeGame').prop('disabled', true);

@@ -10,6 +10,7 @@ class Game {
     this.players = {};
     this.playerOrder = [];
     this.pile = [];
+    this.persist();
   }
 
   addPlayer(username) {
@@ -25,6 +26,7 @@ class Game {
     var player = new Player(username);
     this.playerOrder.push(player.id);
     this.players[player.id] = player;
+    this.persist();
     return player.id;
   }
 
@@ -55,6 +57,7 @@ class Game {
         }
       }
     }
+    this.persist();
   }
 
   // Use this.playerOrder and this.currentPlayer to figure out whose turn it is next!
@@ -66,6 +69,7 @@ class Game {
     while (this.players[this.playerOrder[0]].pile.length === 0) {
       this.playerOrder.push(this.playerOrder.shift());
     }
+    this.persist();
   }
 
   // Check if the player with playerId is winning. In this case, that means he has the whole deck.
@@ -74,9 +78,11 @@ class Game {
       throw new Error('Game has not started yet!');
     }
     if (this.players[playerId].pile.length !== 52) {
+      this.persist();
       return false;
     }
     this.isStarted = false;
+    this.persist();
     return true;
   }
 
@@ -107,6 +113,7 @@ class Game {
     }
     this.nextPlayer();
 
+    this.persist();
     return {
       card: newCard,
       cardString: newCard.toString()
@@ -130,6 +137,7 @@ class Game {
         (this.pile.length > 2 && this.pile[last].value === this.pile[last - 2].value)) {
       this.players[playerId].pile = [...this.pile, ...this.players[playerId].pile];
       this.pile = [];
+      this.persist();
       return {
         winning: this.isWinning(playerId),
         message: 'got the pile!'
@@ -143,6 +151,7 @@ class Game {
       }
       this.pile = [...toPop,
                    ...this.pile];
+      this.persist();
       return {
         winning: false,
         message: 'lost 3 cards!'
