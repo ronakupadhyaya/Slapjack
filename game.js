@@ -94,6 +94,17 @@ class Game {
     }
     var newCard = this.players[this.playerOrder[0]].pile.pop();
     this.pile.push(newCard);
+
+    var count = 0; // how many players with 0 cards
+    for (let player of _.values(this.players)) {
+      if (player.pile.length === 0) {
+        count++;
+      }
+    }
+    if (count === this.playerOrder.length) {
+      this.isStarted = false;
+      throw new Error(`It's a tie!`);
+    }
     this.nextPlayer();
 
     return {
@@ -109,6 +120,10 @@ class Game {
     if (!this.isStarted) {
       throw new Error('Game has not started yet!');
     }
+    console.log(this.players[playerId]);
+    if (this.players[playerId].pile.length === 0) {
+      throw new Error('You have lost the game!');
+    }
     var last = this.pile.length - 1;
     if ((this.pile.length > 0 && this.pile[last].value === 11) ||
         (this.pile.length > 1 && this.pile[last].value === this.pile[last - 1].value) ||
@@ -121,9 +136,12 @@ class Game {
       }
     } else {
       var playerPile = this.players[playerId].pile;
-      this.pile = [playerPile.pop(),
-                   playerPile.pop(),
-                   playerPile.pop(),
+      var len = playerPile.length;
+      var toPop = [];
+      for (var i = 0; i < Math.min(3, len); i++) {
+        toPop.push(playerPile.pop());
+      }
+      this.pile = [...toPop,
                    ...this.pile];
       return {
         winning: false,

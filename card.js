@@ -6,7 +6,7 @@ class Card {
 
   toString() {
     const symbols = { 1: 'Ace', 11: 'Jack', 12: 'Queen', 13: 'King' }
-    return `${symbols[this.value] || this.val} of ${this.suit[0].toUpperCase()}${this.suit.slice(1)}`;
+    return `${symbols[this.value] || this.value} of ${this.suit[0].toUpperCase()}${this.suit.slice(1)}`;
   }
 
   // PERSISTENCE FUNCTIONS
