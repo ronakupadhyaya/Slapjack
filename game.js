@@ -127,7 +127,7 @@ class Game {
     if (!this.isStarted) {
       throw new Error('Game has not started yet!');
     }
-    console.log(this.players[playerId]);
+    // console.log(this.players[playerId]);
     if (this.players[playerId].pile.length === 0) {
       throw new Error('You have lost the game!');
     }

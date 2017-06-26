@@ -1,5 +1,5 @@
 # Slapjack
-Today, we'll be doing a fun project - implementing the multiplayer card game _Slapjack_ in a way that will allow us to deploy to Heroku and play with your friends. 
+Today, we'll be doing a fun project - implementing the multiplayer card game _Slapjack_ using WebSockets!
 
 ## Table of Contents
 
@@ -7,115 +7,206 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Step 1:** Game Logic ♠️
 * **Step 2:** Displaying Your Game ♥️
 * **Step 3:** Persistence ♣️
-* **The End:** Deploy, deploy, deploy! ♦️
+* **Bonus:** Deploy, deploy, deploy! ♦️
 
 ## Rules of Slapjack 🃏
-In Slapjack, the objective of the game is to have the entire deck of cards.
+In Slapjack, the objective of the game is to have the entire deck of cards (52 cards).
 
-At the beginning of a game of Slapjack, each player is dealt an equal number of cards facedown (players are not able to see their own cards or anyone else's cards). 
+At the beginning of a game of Slapjack, each player is dealt an equal number of cards facedown (players are not able to see their own cards or anyone else's cards).
 
-The remaining cards go to a central pile. Players will then go in order, playing their cards to the pile until they reach 52 cards (_the winning condition of the game_) or have no more cards left to deal. 
+> If the number of players does not divide 52, then a few players might get additional cards. For example, players in a 3-player game will have 17, 17, and 18 cards.
+
+Players will then go in order, playing their cards to the pile until they reach 52 cards (_the winning condition of the game_) or have no more cards left to deal.
 
 Players can gain cards by "slapping" the pile - in which case they either gain the pile or lose 3 cards based on the following conditions:
 
 * If the top card of the pile is a Jack, the player gains the pile
 * If the top two cards of the pile are of the same value (i.e., two Aces, two 10's, two 2's), the player gains the pile
-* If the top card and third-to-top card are of the same value (sandwich - i.e. Ace 10 Ace, 10 Ace 10), the player gains the pile
-* Otherwise, the player loses 3 cards to the top of the pile
+* If the top card and third-to-top card are of the same value (sandwich - i.e. (Ace-10-Ace), (7-Queen-7)), the player gains the pile
+* Otherwise, the player loses 3 cards on top of his or her pile to the **bottom** of the central pile
 
 Additionally, only one person can slap a winning pile; all players slapping immediately after the first lose 3 cards.
 
 ## Step 1: Game Logic ♠️
-We will isolate all of your Slapjack game's logic into a single module inside of `game.js`. Before you begin, make sure to run `npm install` to get all the dependencies you need to both start and test the application. In this step, you won't ever need to `npm start` - just run `npm test` when prompted to! In the next step, we'll be serving up the game to your connected users.
+We will isolate all of your Slapjack game's logic into a single module inside of `game.js`. We will also have `player.js` and `card.js` to help create necessary objects. Before you begin, make sure to run `npm install` to get all the dependencies you need to both start and test the application. In this step, you won't ever need to `npm start` - just run `npm test` when prompted to! In the next step, we'll be serving up the game to your connected users.
 
-### Cards and Players 🦄 - `game.js`
-Begin with your `Card` object - we should only have two properties and a function for any given `Card` object:
+### Cards 🂥 - `card.js`
 
-* The value of the playing card, from 1-13 (where Ace is 1, Jack is 11, Queen is 12, King is 13)
-* The suit of the playing card, which any one of the following: _hearts_, _spades_, _clubs_, or _diamonds_.
+We should only have two properties and three functions for any given `Card` object:
+
+* The `value` of the playing card, from 1-13 (where Ace is 1, Jack is 11, Queen is 12, King is 13).
+* The `suit` of the playing card, which any one of the following: _hearts_, _spades_, _clubs_, or _diamonds_.
 * A `toString` function that allows us to get the human-readable description for the card, i.e. _Ace of Spades_, _8 of Hearts_, etc.
+* Two more persistence functions: `fromObject` and `toObject`. (We have already done this for you and we will look more into this at Step 3.)
 
-Next, build out your `Player` object - your `Player` object should have three properties:
+Complete the `Card` constructor which initializes those two properties and create the `toString` function which returns the human-readable description for the card as a string.
 
-* A unique username
-* A unique ID - generated upon construction
-* A pile/hand of cards represented by an Array of `Card` objects
+> Test: At this point, run `npm test` to check your progress and verify that the tests for `card.js` are working!
 
-You want to create some basic properties for your `Game` object as well - below is a brief explanation of each property you need to create and how you'll be using them:
+### Player 🐥 - `player.js`
 
-* A Boolean to check if the game is in progress or not
-* A String to store the ID of the current player whose turn it is to play a card
-* An Object to store the `Player` objects by the key of an ID and value of a `Player` object
-	* You should be able to access `Player`s from this object with `players[id]`.
-* An Array of IDs of players, representing their order in the game.
-* An Array of `Card` objects representing the central pile.
+Next, build out your `Player` object - your `Player` object should have three properties and three functions:
 
-Now that you have the fundamental properties for keeping track of Game state, add the definition for a `Game` prototype to allow for adding players into the game.
+* `username`.
+* `id` - generated upon construction.
+* `pile` - represented by an Array of `Card` objects.
+* A `generateId` function that helps to generate random strings.
+* Two more persistence functions: `fromObject` and `toObject`. (We have already done this for you and we will look more into this at Step 3.)
 
-* `Game.prototype.addPlayer` - should take a `username` as a String
+Complete the `Player` constructor which initializes those three properties stated above. You can use `this.generateId()` for `id`. Also, the `pile` should be an empty array initially.
+
+> Test: At this point, run `npm test` to check your progress and verify that the tests for `player.js` are working!
+
+### Game 🏅 - `game.js`
+
+We want to create some basic properties for our `Game` object as well. Below is a brief explanation of each property you need to create and how we'll be using them:
+
+* `isStarted` - A Boolean to check if the game is in progress or not. Initially, this will be `false`.
+* `players` - An Object to store the `Player` objects by the key of an ID and value of a `Player` object. We should be able to access `Player`s from this object with `players[id]`.
+* `playerOrder` - An Array of IDs of players, representing their order in the game. The current player will always be at index 0.
+
+	```
+	Initially, this.playerOrder is [0, 1, 2, 3]
+	// After player 0 has played, the array becomes
+	// [1, 2, 3, 0]
+	// After player 1 has played, the array becomes
+	// [2, 3, 0, 1]
+	// After player 2 has played, the array becomes
+	// [3, 0, 1, 2]
+	// After player 3 has played, the array becomes
+	// [0, 1, 2, 3]
+	// and the cycle goes on...
+	```
+
+* `pile` - An Array of `Card` objects representing the central pile.
+
+The `Game` class will also have 11 functions - 6 game-related functions, and 5 persistence-related functions. We have completed the persistence-related functions for you.
+
+> **Test:** Feel free to run `npm test` anytime to check your progress and verify that your methods are working!
+
+You have to complete 6 game-related functions:
+
+* `addPlayer(username)` - for adding players into the game
+	* should take a `username` as a String
 	* Throw an error if the game has already started
+		* **Hint:** `this.isStarted`
 	* Throw an error if the username is empty
+		* **Hint:** `trim()`
 	* Throw an error if the player's username is non-unique
-	* Otherwise, create a new `Player` object with a username and push its ID `playerOrder` Array and add the new `Player` to the `players` Object
-	* Return the ID of the new `Player`
+		* **Hint:** check `this.players`
+	* If no error was thrown:
+		* **create** a new `Player` object with a username
+		* **push** the new player's ID into `this.playerOrder` Array
+		* **add** the new `Player` to the `players` Object.
+			* **Hint:** `this.players[player.id] = player`
+		* **return** the ID of the new `Player`
 
-> **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
-
-
-### Game Starter 💥 - `game.js`
-
-Next, we'll tackle the game logic for setting up a game. Implement the following function to handle setting up a new game:
-
-* `Game.prototype.startGame` - begin game setup
+* `startGame()` - begin game setup
 	* Throw an error if the game has already started
+		* **Hint:** `this.isStarted`
 	* Throw an error if the game has fewer than two people added
-	* Otherwise, set your `isStarted` (or equivalent) boolean to `true`
-	* Create a standard deck of 52 playing cards and shuffle them
-		* **Hint:** You may find Underscore's `.shuffle` method helpful for implementing a Fisher-Yates shuffle!
-	* Distribute the cards evenly amongst all players and place the remaining cards in the game pile
-	* Set the current Player ID variable to the first person in the Player order
-	
-To finish setup, implement the following function to allow you to change your current Player ID variable as you move through your game in the functions to follow:
+		* **Hint:** `this.players`
+	* If no error was thrown:
+		* **set** `this.isStarted` to `true`
+		* **create** a standard deck of 52 playing cards (4 suits x 13 values) and shuffle them
+			* **Hint:** You may find Underscore's `.shuffle` method helpful for implementing a Fisher-Yates shuffle!
+		* **distribute** the cards evenly to all players
+			* **Hint:** If the number of players does not divide 52, then some players might get more cards.
 
-* `Game.prototype.nextPlayer` - move to next Player ID in Player order Array
-	* Throw an error if the game is not already started
-	* Find the next Player able to play (a Player with a non-zero pile length) in the Player order Array
-	* Set the next Player available to the current Player ID variable
+* `nextPlayer()` - move the current player to the next player. i.e. rotate `this.playerOrder` array by one to the left
+	* Throw an error if the game has **not** started yet
+		* **Hint:** `this.isStarted`
+	* If no error was thrown:
+		* **shift** the array by one to the left until the player at index 0 has a non-zero pile of cards.
 
-> **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
+			* **Hint:** All players have at least one card
 
-### Gameplay Functions 🚧 - `game.js`
-Time to implement the most important functions to support your Game - the gameplay functions! Use the following stubs to write your gameplay functions:
+				```
+				Initially, this.playerOrder is [0, 1, 2, 3]
+				// After player 0 has played, the array becomes
+				// [1, 2, 3, 0]
+				// After player 1 has played, the array becomes
+				// [2, 3, 0, 1]
+				// After player 2 has played, the array becomes
+				// [3, 0, 1, 2]
+				// After player 3 has played, the array becomes
+				// [0, 1, 2, 3]
+				// and the cycle goes on...
+				```
+			* **Hint:** Player 2 and 3 have no cards left
 
-* `Game.prototype.isWinning` - should take a Player ID and return whether or not the Player corresponding to that ID has won
-	* Throw an error if the game is not already started
-	* Check for a winning condition of a Player corresponding to the `playerId` passed in and, if a win occurred, set your `isStarted` Boolean or equivalent to `false` and return true.
-	* Otherwise, return `false` - the Player did not meet a winning condition.
-	
-* `Game.prototype.playCard` - should take a Player ID of the Player attempting to play a Card and return a String representation of the card played
-	* Throw an error if the game is not already started
-	* Throw an error if the current Player ID variable does not match the passed-in Player ID (this means a player is attempting to play a card out of turn)
+				```
+				Initially, this.playerOrder is [0, 1, 2, 3]
+				// After player 0 has played, the array becomes
+				// [1, 2, 3, 0]
+				// After player 1 has played, the array becomes
+				// [0, 1, 2, 3]
+				// (since 2 and 3 have no cards)
+				// and the cycle goes on...
+				```
+
+* `isWinning(playerId)` - should take a Player ID and return a boolean to determine whether or not the Player corresponding to that ID has won
+	* Throw an error if the game has **not** started yet
+		* **Hint:** `this.isStarted`
+	* If no error was thrown:
+		* Check for a winning condition of a Player corresponding to the `playerId` passed in and, if a win occurred, set `this.isStarted` to `false` and return true.
+		* Otherwise, return `false` - the Player did not meet a winning condition.
+
+* `playCard(playerId)` - should take a Player ID of the Player attempting to play a Card
+	* Throw an error if the game has **not** started yet
+		* **Hint:** `this.isStarted`
+	* Throw an error if the current Player ID does not match the passed-in Player ID (this means a player is attempting to play a card out of turn)
+		* **Hint:** `this.playerOrder[0]`
 	* Throw an error if the Player corresponding to the passed-in Player ID has a pile length of zero
-	* Otherwise, move the top card of a Player's pile onto the top card of the Game pile.
-	* Call `this.nextPlayer()` to set the next player's ID to the current Player ID variable.
-	* Return a String representation of the Card that was played.
+		* **Hint:** `this.players[playerId].pile.length`
+	* If no error was thrown:
+		* **move** the *top* card of a Player's pile onto the *top* card of the Game pile.
+			* **Hint:** The top card of the Player's pile refers to the last element in `this.players[playerId].pile`. Same goes to the Game pile.
+		* **count** the number of players with 0 cards
+			* If the number of players with 0 cards equals to the total number of players (i.e. everyone has no more cards), **set** `isStarted` to false and **throw** an error.
+		* **call** `this.nextPlayer()` to move the current player		* **return** an object with two keys `card` and `cardString`.
+			* **Hint:** (newCard refers to the card that was just placed on the top of the Game pile)
 
-* `Game.prototype.slap` - should take a Player ID of the Player attempting to slap and return an Object (format described below)
-	* Throw an error if the game is not already started
-	* Check for any of the winning slap conditions 
-		* If the top card of the pile is a Jack
-		* If the top two cards of the pile are of the same value
-		* If the top card and third-to-top card are of the same value (sandwich)
-	* If there is a winning slap condition, move the pile into the back of the pile of the Player corresponding to the passed-in Player ID
-		* Call `this.isWinning()` with the passed-in Player ID to check for a game win
-		* Return an object with property `winning` as the result of `this.isWinning` and property `message` of "got the pile!"
-	* Otherwise, take the top 3 cards from the pile of the Player corresponding to the passed-in Player ID and add it to the bottom of the game pile
-		* Return an object with property `winning` as `false` and property `message` of "lost 3 cards!"
+				```
+				{
+				  card: newCard,
+				  cardString: newCard.toString()
+				}
+				```
 
-> **Test:** At this point, run `npm test` to check your progress and verify that your methods are working!
+* `slap(playerId)` - should take a Player ID of the Player attempting to slap and return an Object (format described below)
+	* Throw an error if the game has **not** started yet
+		* **Hint:** `this.isStarted`
+	* If no error was thrown:
+		* Check for any of the winning slap conditions
+			* If the top card of the pile is a **Jack**
+			* If the top two cards of the pile are of the same **value**
+			* If the top card and third-to-top card are of the same value (sandwich)
+				* **Hint:**
+
+					```
+					var last = this.pile.length - 1;
+	        		this.pile.length > 2 && this.pile[last].value === this.pile[last - 2].value
+	        		```
+		* If there is a winning slap condition, **move** the pile into the **back of the pile** of the Player corresponding to the passed-in Player ID, and **set** `this.pile` to `[]`
+			* **Hint:**
+
+				```
+				this.players[playerId].pile = [...this.pile, ...this.players[playerId].pile];
+				```
+			* Return an object with the following key-value pairs:
+				* `winning: this.isWinning(playerId)`
+				* `message: 'got the pile!'`
+		* Otherwise, take the **top** 3 cards (at most) from the pile of the Player corresponding to the passed-in Player ID and add it to the **bottom** of the game pile
+			* If the player has less than 3 cards, take everything. (Hint: `Math.min(3, len)`)
+			* Return an object with the following key-value pairs:
+				* `winning: false`
+        		* `message: 'lost 3 cards!'`
+
+> **Test:** Feel free to run `npm test` anytime to check your progress and verify that your methods are working!
 
 ## Step 2: Displaying Your Game ♥️
-Now that your game is setup and running, we are going to build out the front end of it so that your game doesn't just live in a variable on your Node server, but communicating with all connected clients and updating their views simultaneously. 
+Now that your game is setup and running, we are going to build out the front end of it so that your game doesn't just live in a variable on your Node server, but communicating with all connected clients and updating their views simultaneously.
 
 ### Sending WebSockets Events ☝️ - `app.js`
 First, a little crash course on using the [socket.io](http://socket.io) library we are using to send and receive events between our clients and server with WebSockets:
@@ -130,7 +221,7 @@ socket.on("cake", function(data) {
 	// Alerts with "The server said thank you for cake"
 	alert("The server said " + data); // 4
 })
-``` 
+```
 <sub>Server</sub>
 
 ```javascript
@@ -140,7 +231,7 @@ socket.on("cake", function(data) {
 });
 ```
 
-Super simple, and fast! **Note that `socket.emit` only emits to one connected socket at a time** (where each client is represented by a single socket). 
+Super simple, and fast! **Note that `socket.emit` only emits to one connected socket at a time** (where each client is represented by a single socket).
 
 To **broadcast an event** to all connected clients, call `socket.broadcast.emit` with the same parameters.
 
@@ -159,25 +250,25 @@ Below is a spec of the events that we want to emit back to the client and respon
 	* Attempt to add the user to the game
 	* If the game throws an error, emit back `username` with `false`
 	* Otherwise, set `socket.playerId` equal to the new ID of the player and emit back `username` with the new ID (received back from `addPlayer`)
-	
+
 #### Starting the Game
 1. **Server Receive (`app.js`):** `start`
 	* Attempt to start the game
 	* If the game throws an error, emit back `message` with "Cannot start game yet!"
 	* Otherwise, emit a `start` event and broadcast a `start` event to all clients
-	
+
 * **Client Receive (`views/index.js`):** `start`
 	* Disable your Start Game button (_hint: you have jQuery!_)
-	
+
 #### Playing the Cards Right
 1. **Server Receive (`app.js`):** `playCard`
 	* Attempt to call `playCard` with `socket.playerId` (which you set earlier on the `username` event)
 	* If the game throws an error, emit back `message` with "Not your turn yet!"
 	* Otherwise, emit a `playCard` event and broadcast a `playCard` event with the return result of `game.playCard` (the new Card just played).
-	
+
 * **Client Receive (`views/index.js`):** `playCard` (receives a String representation of the Card just played)
-	* Update your view to display a card - you will be only showing one card in the pile at a time. 
-	* **Note:** We have placed some nice, open-source SVG graphics of cards named like `10_of_spades.svg`, `ace_of_hearts.svg`, etc. Update the `src` of an `<img>` element! - perhaps with the data you receive from a `playCard` event? Think about how you will turn "King of hearts" to simply "king_of_hearts.svg"!	
+	* Update your view to display a card - you will be only showing one card in the pile at a time.
+	* **Note:** We have placed some nice, open-source SVG graphics of cards named like `10_of_spades.svg`, `ace_of_hearts.svg`, etc. Update the `src` of an `<img>` element! - perhaps with the data you receive from a `playCard` event? Think about how you will turn "King of hearts" to simply "king_of_hearts.svg"!
 
 #### Slap!
 * **Server Receive (`app.js`):** `slap`
@@ -185,8 +276,8 @@ Below is a spec of the events that we want to emit back to the client and respon
 	* If the game throws an error, emit back `message` with the error (note: a failed slap does not throw an error!)
 	* Otherwise, emit a `slap` event with the return result of `game.slap` and broadcast a `message` event with "_their username_ just " + `[*return result game.slap*].message`, i.e. "Ethan just lost 3 cards!" or "Ethan just won the pile!"
 		* **Note:** if the return result of `game.slap` is `true`, broadcast a `message` event with "_their username_ just won the game!"
-		
-	
+
+
 * **Client Receive (`views/index.js`):** `slap`
 	* If the `response.winning` property is `true`, display a message saying that you won!
 	* Otherwise, display a temporary message on the screen with the data received (from the `response.message`) for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
@@ -196,7 +287,7 @@ Below is a spec of the events that we want to emit back to the client and respon
 #### Getting Messages
 * **Client Receive (`views/index.js`):** `message`
 	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it.
-	
+
 #### Updating Other Game State Properties
 
 First you will need to create a function at the beginning of your `app.js` file, after you define the `new Game()` called `getGameStatus()`. This should return an object with the fields below:
@@ -206,7 +297,7 @@ First you will need to create a function at the beginning of your `app.js` file,
 - `playersInGame`: A string with the name of all the players in the game
 - `cardsInDeck`: How many cards are in the current pile
 
-Next you will need to emit this information to the client by creating a new event called `updateGame`. `updateGame` will  back the above information to all clients so that each player is looking at the game in the same state. 
+Next you will need to emit this information to the client by creating a new event called `updateGame`. `updateGame` will  back the above information to all clients so that each player is looking at the game in the same state.
 
 * **Server Send (`views/index.js`):** `updateGame`
 	* Upon important user actions, such as `username` (a new Player entering the game), `playCard` (a Card being played by a user), and `slap` (any time a Player attempts a slap), we want to emit this event with the return result of `getGameStatus()`.
@@ -214,7 +305,7 @@ Next you will need to emit this information to the client by creating a new even
 
 * **Client Receive (`views/index.js`):** `updateGame`
 	* When receiving an `updateGame` event, you will use the information you received, to then populate the game state fields in html. Below is sample code of a helper function that takes  `state` passed from the received `updateGame` event and updates the content of the page accordingly.
-	
+
 	```javascript
 	function updateGameStatus(state){
 		$(".username").text(username);
@@ -226,7 +317,7 @@ Next you will need to emit this information to the client by creating a new even
 		window.state = state;
 	}
 	```
-	
+
 ## Step 3: Persistence ♣️
 
 ### Implementing Sessions
@@ -275,4 +366,9 @@ Your new `username` event halder should:
 ### Implementing Persistence
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
+
+
+ **Bonus:** Deploy, deploy, deploy!
+ before we deploy, we need to implement the reset button...
+ in a way that will allow us to deploy to Heroku and play with your friends.
 
