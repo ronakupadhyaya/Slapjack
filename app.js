@@ -1,6 +1,5 @@
 "use strict";
 
-var path = require('path');
 var morgan = require('morgan');
 var path = require('path');
 var express = require('express');
@@ -59,6 +58,7 @@ function getGameState() {
     winnerStatus = winner;
   }
   // return an object with 6 different properties
+  game.persist();
   return {
     isStarted: game.isStarted,
     numCards: numCards,
