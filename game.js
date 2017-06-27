@@ -150,7 +150,7 @@ class Game {
     }
     var decklen = this.pile.length;
     var iswin = false;
-    if(this.pile[decklen-1].value === 11){
+    if(decklen >=1 && this.pile[decklen-1].value === 11){
       iswin = true;
     } else if(decklen >=2 && this.pile[decklen-1].value === this.pile[decklen-2].value){
       iswin= true;

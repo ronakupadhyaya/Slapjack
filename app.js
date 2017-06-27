@@ -99,7 +99,7 @@ io.on('connection', function(socket) {
       }
 
     }else{
-      if(game.players.hasOwnProperty(data.id)){
+      if(data && game.players.hasOwnProperty(data.id)){
         socket.playerId = data.id;
         socket.emit('username', {
             id: data.id,
@@ -107,12 +107,11 @@ io.on('connection', function(socket) {
         });
 
         if(game.isStarted){
-
           socket.emit('start')
         }
         io.emit('updateGame', getGameState());
       }else{
-        console.log("player id not a player id in game.players");
+        // console.log("player id not a player id in game.players");
         socket.emit('username',false)
       }
     }
@@ -184,12 +183,6 @@ io.on('connection', function(socket) {
         }
 
         if(game.players[socket.playerId].pile.length === 0){
-          //CHECK IF THERE IS ONLY ONE PLAYER LEFT
-
-          // game.nextPlayer();
-          // var next = game.playerOrder[0];
-          // game.nextPlayer();
-          // var nextnext = game.playerOrder[0];
           var count = 0;
           var first;
           for(var key in game.players){
@@ -203,14 +196,7 @@ io.on('connection', function(socket) {
             game.isStarted = false;
           }
 
-          // if(next == nextnext){
-          //   winner = game.players[next].username;
-          //   game.isStarted= false;
-          // }
           else{
-            // for(var i = 0; i<game.playerOrder.length -2; i++){
-            //   game.nextPlayer();
-            // }
             game.nextPlayer();
           }
         }
