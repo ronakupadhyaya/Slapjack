@@ -1,11 +1,30 @@
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 class Card {
   constructor(suit, value) {
     // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
   }
 
   toString() {
     // YOUR CODE HERE
+    var wordvalue;
+    if(this.value === 1){
+      wordvalue = "Ace";
+    }else if (this.value === 11){
+      wordvalue= "Jack"
+    }else if (this.value === 12){
+      wordvalue= "Queen"
+    }else if (this.value === 13){
+      wordvalue= "King"
+    }
+    return wordvalue+" of "+capitalizeFirstLetter(this.suit)
   }
+
+
 
   // PERSISTENCE FUNCTIONS
   //
@@ -24,6 +43,8 @@ class Card {
       suit: this.suit
     };
   }
+
+
 }
 
 module.exports = Card;
