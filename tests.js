@@ -8,34 +8,34 @@ var Game = require('./game');
 describe("The Card Object", function() {
   describe(".constructor", function() {
     it("should set the value property upon object creation", function() {
-      var c = new Card('spades', 1);
+      var c = new Card('Spades', 1);
       expect(c.value).toBe(1);
     });
 
     it("should set the suit property upon object creation", function() {
-      var c = new Card('spades', 1);
-      expect(c.suit).toEqual('spades');
+      var c = new Card('Spades', 1);
+      expect(c.suit).toEqual('Spades');
     });
   });
 
   describe(".toString", function() {
-    it("should return Ace of Spades for card with value 1 and suit spades", function() {
-      var c = new Card('spades', 1);
+    it("should return Ace of Spades for card with value 1 and suit Spades", function() {
+      var c = new Card('Spades', 1);
       expect(c.toString()).toBe('Ace of Spades');
     });
 
-    it("should return Jack of Hearts for card with value 11 and suit hearts", function() {
-      var c = new Card('hearts', 11);
+    it("should return Jack of Hearts for card with value 11 and suit Hearts", function() {
+      var c = new Card('Hearts', 11);
       expect(c.toString()).toBe('Jack of Hearts');
     });
 
-    it("should return Queen of Spades for card with value 12 and suit clubs", function() {
-      var c = new Card('clubs', 12);
+    it("should return Queen of Spades for card with value 12 and suit Clubs", function() {
+      var c = new Card('Clubs', 12);
       expect(c.toString()).toBe('Queen of Clubs');
     });
 
-    it("should return King of Diamonds for card with value 13 and suit diamonds", function() {
-      var c = new Card('diamonds', 13);
+    it("should return King of Diamonds for card with value 13 and suit Diamonds", function() {
+      var c = new Card('Diamonds', 13);
       expect(c.toString()).toBe('King of Diamonds');
     });
   });
@@ -323,10 +323,10 @@ describe("The Game Object", function() {
       var j = g.addPlayer('Josh');
 
       g.startGame();
-      var ePile = ['hearts', 'spades'].reduce((cache, val) => {
+      var ePile = ['Hearts', 'Spades'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
-      var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
+      var jPile = ['Clubs', 'Diamonds'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       g.players[e].pile = ePile; // override
@@ -346,10 +346,10 @@ describe("The Game Object", function() {
       var j = g.addPlayer('Josh');
 
       g.startGame();
-      var ePile = ['hearts', 'spades'].reduce((cache, val) => {
+      var ePile = ['Hearts', 'Spades'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
-      var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
+      var jPile = ['Clubs', 'Diamonds'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       g.players[e].pile = ePile; // override
@@ -378,10 +378,10 @@ describe("The Game Object", function() {
       var j = g.addPlayer('Josh');
 
       g.startGame();
-      var ePile = ['hearts', 'spades'].reduce((cache, val) => {
+      var ePile = ['Hearts', 'Spades'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
-      var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
+      var jPile = ['Clubs', 'Diamonds'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       g.players[e].pile = ePile; // override
@@ -408,10 +408,10 @@ describe("The Game Object", function() {
       var j = g.addPlayer('Josh');
 
       g.startGame();
-      var ePile = ['hearts', 'spades'].reduce((cache, val) => {
+      var ePile = ['Hearts', 'Spades'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
-      var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
+      var jPile = ['Clubs', 'Diamonds'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       // swap king and queen
@@ -442,10 +442,10 @@ describe("The Game Object", function() {
       var j = g.addPlayer('Josh');
 
       g.startGame();
-      var ePile = ['hearts', 'spades'].reduce((cache, val) => {
+      var ePile = ['Hearts', 'Spades'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
-      var jPile = ['clubs', 'diamonds'].reduce((cache, val) => {
+      var jPile = ['Clubs', 'Diamonds'].reduce((cache, val) => {
         return [...cache, ...[...Array(13).keys()].map(i => new Card(val, i + 1))]
       }, []);
       // swap king and queen

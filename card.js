@@ -1,10 +1,21 @@
 class Card {
   constructor(suit, value) {
-    // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
   }
 
   toString() {
-    // YOUR CODE HERE
+    var card = String(this.value);
+    if (card === "1") {
+      card = "Ace"
+    } else if (card === "11") {
+      card = "Jack"
+    } else if (card === "12") {
+      card = "Queen"
+    } else if (card === "13") {
+      card = "King"
+    }
+    return card + " of " + this.suit;
   }
 
   // PERSISTENCE FUNCTIONS

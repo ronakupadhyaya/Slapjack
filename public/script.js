@@ -20,23 +20,48 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
+    if (data === false) {
+      localStorage.setItem('id', ''); // reset the id in localStorage
+      return;
+    }
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').text('Joined game as ' + data.username);
+    user = data;
   });
 
   socket.on('playCard', function(data) {
     // YOUR CODE HERE
+    var stringCard = data.cardString;
+    for (var i = 0; i < stringCard.length; i++) {
+      if (stringCard[i] === " ") {
+        stringCard = stringCard.substring(0, i) + "_" + stringCard.substring(i + 1, stringCard.length);
+      }
+    }
+    stringCard = "cards/" + stringCard.toLowerCase() + ".svg";
+    $("#card").attr('src', stringCard);
   });
 
   socket.on('start', function() {
     // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
   socket.on('message', function(data) {
     // YOUR CODE HERE
+
+    $('#messages-container').append(data);
+    setTimeout(function() {
+      $('#messages-container').empty();
+    }, 5000);
   });
 
   socket.on('clearDeck', function(){
     // YOUR CODE HERE
+    $("#card").attr('src', "");
   });
 
   socket.on("updateGame", function(gameState) {
@@ -103,27 +128,40 @@ $(document).ready(function() {
   // ==========================================
   $('#startGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('start');
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    if(!localStorage.getItem("id")) {
+      var username = prompt("Please enter your username");
+      localStorage.setItem("id", username);
+      socket.emit('username', localStorage.getItem("id"));
+    } else {
+      socket.emit('username', {
+        id: localStorage.getItem("id")
+      });
+    }
+
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text("Observing game...");
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit('slap')
   });
 
 });
