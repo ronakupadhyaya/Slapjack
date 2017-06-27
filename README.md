@@ -473,3 +473,4 @@ If you do so, remember to implement the restart feature so that the game can be 
 Deploy the entire application on Heroku and play with your friends.
 
 > A double bonus would be to implement custom rooms for each game.
+# slapjack
