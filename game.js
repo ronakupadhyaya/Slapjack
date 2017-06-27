@@ -93,7 +93,7 @@ class Game {
     if (!self.isStarted) {
       throw new Error('the game is already started');
     } else {
-      if (self.players[playerId].pile.length === 52) {
+      if (self.players[playerId].pile.length+self.pile.length === 52) {
         this.isStarted = false;
         return true;
       } else {

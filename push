@@ -1,0 +1,5 @@
+#!/bin/bash
+git add .
+git commit -m "DEBUG"
+git push heroku JingyW:master
+heroku open
