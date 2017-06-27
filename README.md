@@ -10,22 +10,25 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Bonus:** Deploy, deploy, deploy! ♦️
 
 ## Rules of Slapjack 🃏
-In Slapjack, the objective of the game is to have the entire deck of cards (52 cards).
+
+In Slapjack, the objective of the game is to win the entire deck of cards (52 cards).
 
 At the beginning of a game of Slapjack, each player is dealt an equal number of cards facedown (players are not able to see their own cards or anyone else's cards).
 
 > If the number of players does not divide 52, then a few players might get additional cards. For example, players in a 3-player game will have 17, 17, and 18 cards.
 
-Players will then go in order, playing their cards to the pile until they reach 52 cards (_the winning condition of the game_) or have no more cards left to deal.
+Players will then go in order, playing the top card in their deck to the top of the pile until somebody reaches 52 cards (_the winning condition of the game_).
 
-Players can gain cards by "slapping" the pile - in which case they either gain the pile or lose 3 cards based on the following conditions:
+At any time, players can gain cards by "slapping" the pile - in which case they either gain the pile or lose 3 cards based on the following conditions:
 
 * If the top card of the pile is a Jack, the player gains the pile
 * If the top two cards of the pile are of the same value (i.e., two Aces, two 10's, two 2's), the player gains the pile
 * If the top card and third-to-top card are of the same value (sandwich - i.e. (Ace-10-Ace), (7-Queen-7)), the player gains the pile
 * Otherwise, the player loses 3 cards on top of his or her pile to the **bottom** of the central pile
 
-Additionally, only one person can slap a winning pile; all players slapping immediately after the first lose 3 cards.
+Players can slap the pile even when it is not their turn.
+
+If multiple players slap the pile in close succession, all players except the first one lose 3 cards. The first player to slap will win or lose cards based on the conditions listed above.
 
 ## Step 1: Game Logic ♠️
 We will isolate all of your Slapjack game's logic into a single module inside of `game.js`. We will also have `player.js` and `card.js` to help create necessary objects. Before you begin, make sure to run `npm install` to get all the dependencies you need to both start and test the application. In this step, you won't ever need to `npm start` - just run `npm test` when prompted to! In the next step, we'll be serving up the game to your connected users.
