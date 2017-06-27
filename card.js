@@ -1,10 +1,28 @@
 class Card {
   constructor(suit, value) {
     // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
   }
 
   toString() {
     // YOUR CODE HERE
+    var myEnum = {
+      '1': 'Ace',
+      '2': '2',
+      '3': '3',
+      '4': '4',
+      '5': '5',
+      '6': '6',
+      '7': '7',
+      '8': '8',
+      '9': '9',
+      '10': '10',
+      '11': 'Jack',
+      '12': 'Queen',
+      '13': 'King'
+    }
+    return myEnum[this.value] + ' of ' + this.suit.charAt(0).toUpperCase() + this.suit.slice(1);
   }
 
   // PERSISTENCE FUNCTIONS

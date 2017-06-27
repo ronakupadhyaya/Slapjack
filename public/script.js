@@ -20,23 +20,50 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
+    if (data === false) {
+      localStorage.setItem('id', ''); // reset the id in localStorage
+
+      // prompt the user for a username and
+      // emit this value under the `username` event to the server
+      var username = prompt('Enter a username');
+      socket.emit('username', username);
+      return;
+    }
     // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').text('Joined game as ' + data.username);
+    localStorage.setItem('id', data.id);
+    user = data;
   });
 
   socket.on('playCard', function(data) {
     // YOUR CODE HERE
+    console.log(data);
+    $('#card').attr('src', './cards/' + data.cardString.split(' ').join('_').toLowerCase() + '.svg');
   });
 
   socket.on('start', function() {
     // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
   socket.on('message', function(data) {
     // YOUR CODE HERE
+    $('#messages-container').empty();
+    $('#messages-container').append(data);
+    $('#messages-container').fadeIn(1000);
+    setTimeout(function() {
+      $('#messages-container').fadeOut(1000);
+    }, 5000);
   });
 
   socket.on('clearDeck', function(){
     // YOUR CODE HERE
+    $('#card').attr('src', '');
   });
 
   socket.on("updateGame", function(gameState) {
@@ -104,26 +131,38 @@ $(document).ready(function() {
   $('#startGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit('start');
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    if (!localStorage.getItem('id')) {
+      var username = prompt('Enter a username');
+      socket.emit('username', username);
+    } else {
+      socket.emit('username', {id: localStorage.getItem('id')});
+    }
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    $('#observeGame').prop('disabled', true);
+    $('#joinGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing game...');
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit('slap');
   });
 
 });
