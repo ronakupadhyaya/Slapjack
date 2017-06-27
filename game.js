@@ -70,40 +70,84 @@ class Game {
   nextPlayer() {
     // YOUR CODE HERE
     if(!this.isStarted){
-      throw new Error('Game has already started');
+      throw new Error('Game has not started');
     }
 
-    // var currentPlayer=this.playerOrder.shift();
-    //currentPlayer is the first item in playerOrder, but playerOrder is updated to shift
-  //   var index = this.playerOrder.length;
-  //   for(var i=0;i<this.playerOrder;i++){
-  //       var currPlayer = _.findWhere(this.players, {id: this.playerOrder[i]});
-  //       if (currPlayer.pile.length===0){
-  //         index = i;
-  //         break;
-  //       }
-  //   }
-  //   this.playerOrder.splice(index,0,currentPlayer)
-
-  var firstPlayer;
-  do {
-    var currentPlayerId = this.playerOrder.shift();
-    this.playerOrder.push(currentPlayerId);
-    firstPlayer = _.findWhere(this.players, {id: this.playerOrder[0]});
-  } while(firstPlayer.pile.length === 0);
+    var firstPlayer;
+    do {
+      var currentPlayerId = this.playerOrder.shift();
+      this.playerOrder.push(currentPlayerId);
+      firstPlayer = _.findWhere(this.players, {id: this.playerOrder[0]});
+    } while(firstPlayer.pile.length === 0);
 
   }
 
   isWinning(playerId) {
-    // YOUR CODE HERE
+    if(!this.isStarted){
+      throw new Error('Game has not started');
+    }
+    var player = _.findWhere(this.players, {id: playerId});
+    if(player.pile.length === 52){
+      this.isStarted = false;
+      return true;
+    }
+    return false;
   }
 
   playCard(playerId) {
-    // YOUR CODE HERE
+    // catch errors
+    if(!this.isStarted){
+      throw new Error('Game has not started');
+    }
+    if(playerId !== this.playerOrder[0]){
+      throw new Error('Player is out of turn.');
+    }
+    var currPlayer = _.findWhere(this.players, {id: playerId});
+    if(currPlayer.pile.length === 0){
+      throw new Error('Player has no cards.');
+    }
+    // move players card to game pile
+    var currCard = currPlayer.pile.pop();
+    this.pile.push(currCard);
+    // error if tie
+    var playersWithZero = _.filter(this.playerOrder, (playerId) => (_.findWhere(this.players, {id: playerId}).pile.length === 0));
+    if(playersWithZero.length === this.playerOrder.length){
+      this.isStarted = false;
+      throw new Error('There is a tie!');
+    }
+    // move next player
+    this.nextPlayer();
+
+    return {card: currCard, cardString: currCard.toString()};
   }
 
   slap(playerId) {
-    // YOUR CODE HERE
+    // catch errors
+    if(!this.isStarted){
+      throw new Error('Game has not started');
+    }
+
+    // var numTop = Math.min(3, this.pile.length);
+    // check for winning conditions
+    var firstCard = this.pile[this.pile.length-1];
+    var secondCard = this.pile[this.pile.length-2];
+    var thirdCard = this.pile[this.pile.length-3];
+    // get current player
+    var currPlayer = this.players[playerId];
+
+    // concat piles
+    if( (firstCard && firstCard.value === 11) || (secondCard && firstCard.value === secondCard.value) || (thirdCard && firstCard.value === thirdCard.value) ){
+      currPlayer.pile = this.pile.concat(currPlayer.pile);
+      this.pile = [];
+      return {winning: this.isWinning(playerId), message: 'got the pile!'};
+    }
+
+    var numberToTake = Math.min(3, currPlayer.pile.length);
+    var tempArr = currPlayer.pile.splice(currPlayer.pile.length - numberToTake, numberToTake);
+
+    // move to pile
+    this.pile = tempArr.concat(this.pile);
+    return {winning: false, message: 'lost 3 cards!'};
   }
 
   // PERSISTENCE FUNCTIONS
