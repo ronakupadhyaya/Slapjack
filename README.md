@@ -30,6 +30,47 @@ Additionally, only one person can slap a winning pile; all players slapping imme
 ## Step 1: Game Logic ♠️
 We will isolate all of your Slapjack game's logic into a single module inside of `game.js`. We will also have `player.js` and `card.js` to help create necessary objects. Before you begin, make sure to run `npm install` to get all the dependencies you need to both start and test the application. In this step, you won't ever need to `npm start` - just run `npm test` when prompted to! In the next step, we'll be serving up the game to your connected users.
 
+### ES6 Classes
+
+The `Card`, `Player`, and `Game` objects are built using
+[ES6 classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
+The syntax might be unfamiliar but they behave just like constructor functions we saw in Week 1.
+
+In the following example `OldCounter` and `NewCounter` behave exactly the same. `OldCounter` is built using old-school JS syntax
+and `NewCounter` uses ES6 syntax. Same thing different look.
+
+```javascript
+function OldCounter() {
+  this.count = 0;
+}
+
+Counter.prototype.up = function() {
+  this.count++;
+  console.log(this.count);
+}
+```
+
+```javascript
+class NewCounter {
+  constructor() {
+    this.count = 0;
+  }
+  
+  up() {
+    this.count++;
+    console.log(this.count);
+  }
+}
+```
+
+You can use this object with the `new` keyword.
+
+```javascript
+var c = new NewCounter();
+c.up() // -> prints 1
+c.up() // -> prints 2
+```
+
 ### Cards 🂥 - `card.js`
 
 We should only have two properties and three functions for any given `Card` object:
