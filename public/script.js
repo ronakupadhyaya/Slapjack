@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
   // Initially, all the buttons except the join game ones are disabled
   $('#startGame').prop('disabled', true);
@@ -11,7 +11,7 @@ $(document).ready(function() {
   // Stores the current user
   var user = null;
 
-  socket.on('connect', function() {
+  socket.on('connect', function () {
     console.log('Connected');
 
     // hide the loading container and show the main container
@@ -19,27 +19,47 @@ $(document).ready(function() {
     $('.main-container').show();
   });
 
-  socket.on('username', function(data) {
+  socket.on('username', function (data) {
     // YOUR CODE HERE
+    $('#startGame').prop('disabled', false);
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Joined game as' + data.username);
+    user = data;
+    localStorage.setItem("id", data.id);
+    if (data === false) {
+      localStorage.setItem('id', '');
+    }
   });
 
-  socket.on('playCard', function(data) {
+  socket.on('playCard', function (data) {
     // YOUR CODE HERE
+    var pic = data.cardString.replace(/\s/g, "_");
+    pic = "cards/" + pic + ".svg";
+    $("#card").attr("src", pic);
   });
 
-  socket.on('start', function() {
+  socket.on('start', function () {
     // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
-  socket.on('message', function(data) {
+  socket.on('message', function (data) {
     // YOUR CODE HERE
+    $('#messages-container').append(data);
+    setTimeout(function () {
+      $('#messages-container').fadeOut();
+    }, 5000);
   });
 
-  socket.on('clearDeck', function(){
+  socket.on('clearDeck', function () {
     // YOUR CODE HERE
+    $("#card").attr("src", " ");
   });
 
-  socket.on("updateGame", function(gameState) {
+  socket.on("updateGame", function (gameState) {
     // If game has started, disable join buttons
     if (gameState.isStarted) {
       $('#joinGame').prop('disabled', true);
@@ -81,49 +101,63 @@ $(document).ready(function() {
     window.state = gameState;
   })
 
-  socket.on('disconnect', function() {
+  socket.on('disconnect', function () {
     // refresh on disconnect
     window.location = window.location;
   });
 
   // This handler is called when a player joins an already started game
-  socket.on('observeOnly', function() {
+  socket.on('observeOnly', function () {
     $('#joinGame').prop('disabled', true);
     $('#observeGame').prop('disabled', true);
     $('#usernameDisplay').text('Observing game...');
   })
 
   // A handler for error messages
-  socket.on('errorMessage', function(data) {
+  socket.on('errorMessage', function (data) {
     alert(data);
   })
 
   // ==========================================
   // Click handlers
   // ==========================================
-  $('#startGame').on('click', function(e) {
+  $('#startGame').on('click', function (e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit("start");
   });
 
-  $('#joinGame').on('click', function(e) {
+  $('#joinGame').on('click', function (e) {
     e.preventDefault();
     // YOUR CODE HERE
+    if (localStorage.getItem('id') === null) {
+      var person = prompt("Please enter your name");
+      socket.emit("username", person);
+    } else {
+      socket.emit("username", {
+        id: localStorage.getItem('id')
+      });
+    }
   });
 
-  $('#observeGame').on('click', function(e) {
+  $('#observeGame').on('click', function (e) {
     e.preventDefault();
     // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing game...');
   });
 
-  $('#playCard').on('click', function(e) {
+  $('#playCard').on('click', function (e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit("playCard");
   });
 
-  $('#slap').on('click', function(e) {
+  $('#slap').on('click', function (e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit("slap");
   });
 
 });
