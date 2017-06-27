@@ -64,20 +64,6 @@ class Game {
     } while (this.players[this.playerOrder[0]].pile.length === 0)
   }
 
-  // nextPlayer() {
-  //   if(!this.isStarted) throw new Error('Game has not yet begun!!')
-  //   console.log(this.playerOrder , "before")
-  //         this.playerOrder.push(this.playerOrder.shift())
-  //         console.log(this.playerOrder , "after first shift")
-  //     while(this.players[this.playerOrder[0]].pile.length === 0){
-  //         this.playerOrder.push(this.playerOrder.shift())
-  //         console.log(this.playerOrder , "in while")
-  //     }
-  //   console.log(this.playerOrder , "at the end")
-  // }
-
-
-
 
   isWinning(playerId) {
   if(!this.isStarted) throw new Error('game has not yet started!')
