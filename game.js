@@ -139,16 +139,11 @@ class Game {
     if (!self.isStarted) {
       throw new Error('the game is already started');
     } else {
-      console.log("game pile"+ self.pile)
       if ( (self.pile.length>0 && self.pile[self.pile.length-1].value === 11) ||
            (self.pile.length>1 && self.pile[self.pile.length-1].value === self.pile[self.pile.length-2].value) ||
            (self.pile.length>2 && self.pile[self.pile.length-1].value === self.pile[self.pile.length-3].value)
          ) {
-           console.log(self.pile[self.pile.length-1].value,self.pile[self.pile.length-2].value);
-           console.log(self.pile[self.pile.length-1].value === self.pile[self.pile.length-2].value && self.pile.length>1)
-          //  var concatArr = self.players[playerId].pile.concat(self.pile);
            var concatArr = self.pile.concat(self.players[playerId].pile);
-           console.log("concat",concatArr)
            self.players[playerId].pile = concatArr;
            self.pile =[];
            var returnObj = {winning:self.isWinning(playerId),message: 'got the pile!'};
