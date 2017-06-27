@@ -20,7 +20,19 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
+    // disable the buttons with id #joinGame and #observeGame
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+
+    // enable the button with id #startGame
+    $('#startGame').prop('disabled', false);
+
+    // set the text for #usernameDisplay to 'Joined game as ' + data.username
+    $('#usernameDisplay').set('Joined game as ' + data.username);
+
+    // Set the user
+    user = data;
+
   });
 
   socket.on('playCard', function(data) {
@@ -108,17 +120,26 @@ $(document).ready(function() {
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    // prompt the user for a username and emit a username event to the server with this prompt response.
+    //  Hint: You can use .prompt to get the input.
+    var user = prompt("Please enter a username!");
+    socket.emit('username', user);
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+
+    // Disable join game and observe game
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+
+    // Set the text for #usernameDisplay to Observing game...
+    $('#usernameDisplay').val('Observing Game...');
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+
   });
 
   $('#slap').on('click', function(e) {

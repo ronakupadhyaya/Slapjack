@@ -70,7 +70,14 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    // Try to add the user to the game
+    try {
+      socket.playerId = game.addPlayer(data);
+      socket.emit('username', {id: socket.playerId, username: data});
+      io.emit('gameUpdate', getGameStatus())
+    } catch (e){
+      socket.emit('errorMessage', e.message);
+    }
   });
 
   socket.on('start', function() {
