@@ -6,7 +6,7 @@ Today, we'll be doing a fun project - implementing the multiplayer card game _Sl
 * **Rules of Slapjack** 🃏
 * **Step 1:** Game Logic ♠️
 * **Step 2:** Displaying Your Game ♥️
-* **Step 3:** Persistence ♣️
+* **Step 3:** Persistence on Client and Server ♣️
 * **Bonus:** Deploy, deploy, deploy! ♦️
 
 ## Rules of Slapjack 🃏
@@ -163,7 +163,7 @@ You have to complete 6 game-related functions:
 		* **move** the *top* card of a Player's pile onto the *top* card of the Game pile.
 			* **Hint:** The top card of the Player's pile refers to the last element in `this.players[playerId].pile`. Same goes to the Game pile.
 		* **count** the number of players with 0 cards
-			* If the number of players with 0 cards equals to the total number of players (i.e. everyone has no more cards), **set** `isStarted` to false and **throw** an error.
+			* If the number of players with 0 cards equals to the total number of players (i.e. everyone has no more cards), **set** `isStarted` to false and **throw** an error. (It's a tie!)
 		* **call** `this.nextPlayer()` to move the current player		* **return** an object with two keys `card` and `cardString`.
 			* **Hint:** (newCard refers to the card that was just placed on the top of the Game pile)
 
@@ -186,8 +186,8 @@ You have to complete 6 game-related functions:
 
 					```
 					var last = this.pile.length - 1;
-	        		this.pile.length > 2 && this.pile[last].value === this.pile[last - 2].value
-	        		```
+					this.pile.length > 2 && this.pile[last].value === this.pile[last - 2].value
+					```
 		* If there is a winning slap condition, **move** the pile into the **back of the pile** of the Player corresponding to the passed-in Player ID, and **set** `this.pile` to `[]`
 			* **Hint:**
 
@@ -201,14 +201,14 @@ You have to complete 6 game-related functions:
 			* If the player has less than 3 cards, take everything. (Hint: `Math.min(3, len)`)
 			* Return an object with the following key-value pairs:
 				* `winning: false`
-        		* `message: 'lost 3 cards!'`
+				* `message: 'lost 3 cards!'`
 
 > **Test:** Feel free to run `npm test` anytime to check your progress and verify that your methods are working!
 
 ## Step 2: Displaying Your Game ♥️
 Now that your game is setup and running, we are going to build out the front end of it so that your game doesn't just live in a variable on your Node server, but communicating with all connected clients and updating their views simultaneously.
 
-### Sending WebSockets Events ☝️ - `app.js`
+### Sending WebSockets Events ☝️
 First, a little crash course on using the [socket.io](http://socket.io) library we are using to send and receive events between our clients and server with WebSockets:
 
 All messages sent between client and server on WebSockets happens in terms of "events" that are emitted and received. On both the client and server, `emit` sends an event back _to_ the other, and `.on` creates a handler to receive an event _from_ the other. For example:
@@ -218,112 +218,145 @@ All messages sent between client and server on WebSockets happens in terms of "e
 ```javascript
 socket.emit("cake", "Here is some strawberry cake"); // 1
 socket.on("cake", function(data) {
-	// Alerts with "The server said thank you for cake"
-	alert("The server said " + data); // 4
+  // Alerts with "The server said thank you for cake"
+  alert("The server said " + data); // 4
 })
 ```
 <sub>Server</sub>
 
 ```javascript
 socket.on("cake", function(data) {
-	console.log(data); // Logs "Here is some strawberry cake" // 2
-	socket.emit("cake", "thank you for cake"); // 3
+  console.log(data); // Logs "Here is some strawberry cake" // 2
+  socket.emit("cake", "thank you for cake"); // 3
 });
 ```
 
-Super simple, and fast! **Note that `socket.emit` only emits to one connected socket at a time** (where each client is represented by a single socket).
+Super simple, and fast! **Note that `socket.emit` only emits to one connected socket at a time** (where each client is represented by a single socket). In this case, `socket.emit('cake', ...)` broadcasts the `...` message to just one user (i.e. the user that invoked the `.on` handler).
 
-To **broadcast an event** to all connected clients, call `socket.broadcast.emit` with the same parameters.
+To **broadcast an event** to all connected clients (excluding the current socket connection), call `socket.broadcast.emit` with the same parameters.
 
-Below is a spec of the events that we want to emit back to the client and respond to from the client: use the scaffold to update game logic within these events and pass back to the client necessary game information.
+To **broadcast an event** to all connected clients (including the current socket connection), call `io.emit` with the same parameters.
 
-#### Getting and Setting the Username
+> Technically, `io.emit` is the same as doing both `socket.emit` and `socket.broadcast.emit` at the same time. Want more? Visit this link: [https://stackoverflow.com/a/10099325](https://stackoverflow.com/a/10099325)
 
-1. **Server Receive (`app.js`):** `connection` (when a client initially connects)
-	* Immediately emit a `username` event back to the client with `false`
+Our user interface looks like this. We have 5 buttons: Start Game, Join as Player, Join as Observer, Play Card, and Slap!
 
-* **Client Receive (`views/index.js`):** `username`
-	* If the data passed in is `false`, prompt (you can use `.prompt` to get input) the user for a username and save it. Then, emit a `username` event back with the saved username.
-	* Otherwise, save the response. If the response is not `false`, it is your client's player's ID.
+![img/buttons.png](img/buttons.png)
 
-* **Server Receive (`app.js`):** `username` (receives String, username)
-	* Attempt to add the user to the game
-	* If the game throws an error, emit back `username` with `false`
-	* Otherwise, set `socket.playerId` equal to the new ID of the player and emit back `username` with the new ID (received back from `addPlayer`)
+### Implementing those buttons 🔥 - `public/script.js`
 
-#### Starting the Game
-1. **Server Receive (`app.js`):** `start`
-	* Attempt to start the game
-	* If the game throws an error, emit back `message` with "Cannot start game yet!"
-	* Otherwise, emit a `start` event and broadcast a `start` event to all clients
+We will work on those buttons individually. Below is a spec of the events that we want to emit back to the client and respond to from the client: use the scaffold to update game logic within these events and pass back to the client necessary game information.
 
-* **Client Receive (`views/index.js`):** `start`
-	* Disable your Start Game button (_hint: you have jQuery!_)
+> The ids in the parenthesis corresponds to the ids for the buttons. We have already created click handlers for you.
 
-#### Playing the Cards Right
-1. **Server Receive (`app.js`):** `playCard`
-	* Attempt to call `playCard` with `socket.playerId` (which you set earlier on the `username` event)
-	* If the game throws an error, emit back `message` with "Not your turn yet!"
-	* Otherwise, emit a `playCard` event and broadcast a `playCard` event with the return result of `game.playCard` (the new Card just played).
+1. Join as Observer (`#observeGame`)
+	* In the click handler, **disable** the `#joinGame` and `#observeGame` buttons.
+		* **Hint:** look at the top of the file to see how the `#startGame` and `#playCard` buttons were disabled.
+	* **set** the text for `#usernameDisplay` to `Observing game...`
 
-* **Client Receive (`views/index.js`):** `playCard` (receives a String representation of the Card just played)
-	* Update your view to display a card - you will be only showing one card in the pile at a time.
-	* **Note:** We have placed some nice, open-source SVG graphics of cards named like `10_of_spades.svg`, `ace_of_hearts.svg`, etc. Update the `src` of an `<img>` element! - perhaps with the data you receive from a `playCard` event? Think about how you will turn "King of hearts" to simply "king_of_hearts.svg"!
+1. Join as Player (`#joinGame`)
+	* **prompt** the user for a username and **emit** a `username` event to the server with this prompt response.
+		* **Hint:** You can use `.prompt` to get the input.
+	* **`app.js`** - Since we are emitting a `username` event to the server, we need to handle this at the server as well. In the `username` handler (i.e. `socket.on('username', function(data) { ... }`), do the following:
+		* *data* is a String (i.e. the username)
+		* **try** to add the user to the game
+			* **Hint:** Use `game.addPlayer(data)`. A try-catch block may come in handy!
+		* If the attempt failed, i.e. `addPlayer` throws an error, emit back an `errorMessage` event with the error message as its contents
+			* **Hint:** `socket.emit('errorMessage', e.message);`
+		* If everything is good:
+			* **set** `socket.playerId` to be the id of the player. (Think about what `addPlayer` returns!).
+			* **emit** a `username` event to the same socket with an object with two properties: `id` and `username` of player.
+			* **emit** an `updateGame` event with the value of `getGameState()` to **everyone including the socket itself**.
+				* **Hint:** use `io.emit`
+				* We will code `getGameState()` later.
+	* **`script.js`** - Since we are emitting a `username` event from the server, we need to handle that on our client as well. (i.e. `socket.on('username', function(data) { ... })`).
+		* **disable** the buttons with id `#joinGame` and `#observeGame`
+		* **enable** the button with id `#startGame`
+		* **set** the text for `#usernameDisplay` to `'Joined game as ' + data.username`
+		* **set** `user = data`
 
-#### Slap!
-* **Server Receive (`app.js`):** `slap`
-	* Attempt to call `slap` with `socket.playerId` (which you set earlier on the `username` event)
-	* If the game throws an error, emit back `message` with the error (note: a failed slap does not throw an error!)
-	* Otherwise, emit a `slap` event with the return result of `game.slap` and broadcast a `message` event with "_their username_ just " + `[*return result game.slap*].message`, i.e. "Ethan just lost 3 cards!" or "Ethan just won the pile!"
-		* **Note:** if the return result of `game.slap` is `true`, broadcast a `message` event with "_their username_ just won the game!"
+1. Start Game (`#startGame`)
+	* **emit** a `start` event to the server with no data
+	* **`app.js`** - We will also need to handle the `start` event at the server. (i.e. `socket.on('start', function() { ... }`)
+		* If `socket.playerId` is undefined, **emit** an `errorMessage` event with the message `You are not a player of the game!`
+		* Otherwise, **try** to start the game using `game.startGame()`
+		* If the attempt failed, i.e. `startGame` throws an error, emit back an `errorMessage` event with the error message as its contents
+			* **Hint:** `socket.emit('errorMessage', e.message);`
+		* If everything is good:
+			* **emit** a `start` event with no data to **everyone including the socket itself**
+				* **Hint:** use `io.emit`
+			* **emit** an `updateGame` event with the value of `getGameState()` to **everyone including the socket itself**.
+				* **Hint:** use `io.emit`
+				* We will code `getGameState()` later.
+	* **`script.js`** - Since we are emitting a `start` event from the server, we need to handle that in the client too!
+		* **disable** the button with the id `#startGame`
+		* **enable** the buttons with ids `#playCard` and `#slap`
 
+1. Play Card (`#playCard`)
+	* **emit** a `playCard` event to the server with no data
+	* **`app.js`** - Let's handle the `playCard` event at the server.
+		* If `socket.playerId` is undefined, **emit** an `errorMessage` event with the message `You are not a player of the game!`
+		* Otherwise, **try** to get the current player to play a card. (`game.playCard(socket.playerId)`). Note that this function will return an object.
+		* If the attempt failed, i.e. `playCard` throws an error, emit back an `errorMessage` event with the error message as its contents
+			* **Hint:** `socket.emit('errorMessage', e.message);`
+		* If everything is good:
+			* **emit** a `playCard` event with that object that was returned from the `playCard` function to **everyone including the socket itself**. (**Hint:** use `io.emit`)
+	* **`script.js`** - Let's handle the `playCard` event at the client.
+		* Update your view to display a card - you will be only showing one card in the pile at a time.
+		* **Note:** We have placed some nice, open-source SVG graphics of cards named like `10_of_spades.svg`, `ace_of_hearts.svg`, etc. Update the `src` of `#card`, an `<img>` element! - perhaps with the data you receive from a `playCard` event? Think about how you will turn "King of Hearts" to simply `king_of_hearts.svg`!
 
-* **Client Receive (`views/index.js`):** `slap`
-	* If the `response.winning` property is `true`, display a message saying that you won!
-	* Otherwise, display a temporary message on the screen with the data received (from the `response.message`) for 5 seconds - if using jQuery, select the element and call `fadeOut` on it
-		* This message will be either "lost 3 cards!" or "won the pile!" - since you are the only one handling this event, you can append "You" to the message to make it "You lost 3 cards!" or "You won the pile!"
+1. Slap! (`#slap`)
+	*  **emit** a `slap` event to the server with no data
+	* **`app.js`** - Let's handle the `slap` event at the server.
+		* If `socket.playerId` is undefined, **emit** an `errorMessage` event with the message `You are not a player of the game!`
+		* Otherwise, **try** to get the current player to slap the pile. (`game.slap(socket.playerId)`). Note that this function will return an object. i.e.
 
+			```
+			{
+			  winning: this.isWinning(playerId),
+			  message: 'got the pile!'
+			}
 
-#### Getting Messages
-* **Client Receive (`views/index.js`):** `message`
-	* Display a temporary message on the screen with the data received for 5 seconds - if using jQuery, select the element and call `fadeOut` on it.
+			OR
+
+			{
+			  winning: false,
+			  message: 'lost 3 cards!'
+			}
+			```
+
+		* If the attempt failed, i.e. `slap` throws an error, emit back an `errorMessage` event with the error message as its contents
+			* **Hint:** `socket.emit('errorMessage', e.message);`
+		* If everything is good:
+			* **check** if the `winning` property in the object returned is true. If it is, **set** `winner` to be the username of the player who just slapped the pile.
+			* There are two conditions to check now:
+				* If the message returned is `got the pile!`, do `io.emit('clearDeck')`.
+				* If the current player has no more cards after slapping:
+					* Check if there is only one player left. If it is, set `winner` to be that player's username, and `game.isStarted` to be `false`.
+					* Otherwise, call `game.nextPlayer()`.
+			* Next, broadcast an `updateGame` event with the value of `getGameState()` to everyone including the current socket.
+			* Finally, emit two `message` events: one for the current player, and one for everyone else. For example, the current player receives `You lost 3 cards!` and everyone else receives `[Username] lost 3 cards!` (Use `socket.emit` for self and `socket.broadcast.emit` for everyone else)
+	* **`script.js`** - Note that we emitted two extra events: `clearDeck` and `message`.
+		* For `clearDeck`, remove the src attribute on the `#card` element.
+		* For `message`, append the data into the `#messages-container` element. You can set a timeout to fade the message out after 5 seconds.
 
 #### Updating Other Game State Properties
 
-First you will need to create a function at the beginning of your `app.js` file, after you define the `new Game()` called `getGameStatus()`. This should return an object with the fields below:
+We need to complete the `getGameState()` function inside `app.js`. This should return an object with the following fields:
 
+- `isStarted`: A boolean value indicating if the game has already started
 - `numCards`: an Object with the keys as playerIds and the value as the number of Cards
-- `currentPlayerUsername`: the username of the current players name
-- `playersInGame`: A string with the name of all the players in the game
+- `currentPlayerUsername`: the username of the current player's name. If the game has not started yet, return `Game has not started yet` as the `currentPlayerUsername`
+- `playersInGame`: A string with the name of all the players in the game (e.g. `Ricky, Moose, Abhi, Darwish`)
 - `cardsInDeck`: How many cards are in the current pile
+- `win`: the name of the winner if it exists, otherwise, undefined (see `winner`)
 
-Next you will need to emit this information to the client by creating a new event called `updateGame`. `updateGame` will  back the above information to all clients so that each player is looking at the game in the same state.
+## Step 3: Persistence on Client and Server ♣️
 
-* **Server Send (`views/index.js`):** `updateGame`
-	* Upon important user actions, such as `username` (a new Player entering the game), `playCard` (a Card being played by a user), and `slap` (any time a Player attempts a slap), we want to emit this event with the return result of `getGameStatus()`.
-	* Both emit and broadcast `updateGame` after these user actions so that all connected clients receive an up-to-date game state.
+### Implementing Sessions (Client)
 
-* **Client Receive (`views/index.js`):** `updateGame`
-	* When receiving an `updateGame` event, you will use the information you received, to then populate the game state fields in html. Below is sample code of a helper function that takes  `state` passed from the received `updateGame` event and updates the content of the page accordingly.
-
-	```javascript
-	function updateGameStatus(state){
-		$(".username").text(username);
-		$(".numCards").text(state.numCards[id]);
-		$(".playerNames").text(state.playersInGame);
-		$(".currentPlayerUsername").text(state.currentPlayerUsername);
-		$(".cardsInDeck").text(state.cardsInDeck);
-		$(".num").show();
-		window.state = state;
-	}
-	```
-
-## Step 3: Persistence ♣️
-
-### Implementing Sessions
-
-#### Persisting the ID for the Client - `views/index.hbs`
-You may have noticed during testing that every time you refreshed your browser while the server was running, it would prompt you for another username, not allowing you to jump back into the game as the same user you played with before. We will implement a simple form of sessions using unique IDs.
+#### Persisting the ID for the Client - `public/script.js`
+You may have noticed during testing that every time you refreshed your browser while the server was running, it would prompt you for another username if you click on `Join as Player`, not allowing you to jump back into the game as the same user you played with before. We will implement a simple form of sessions using unique IDs.
 
 We will store unique IDs in `LocalStorage`. [`LocalStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) is a mechanism for storing key-value pairs in the browser on a per-website basis. When we get back a unique User ID from the server with the `username` event, we will store it in `LocalStorage` rather than in a variable. To set something with a browser's `LocalStorage` looks like the following:
 
@@ -345,9 +378,9 @@ var id = localStorage.getItem("id") || "";
 
 Here, if `LocalStorage` does not have our item, `id` will be set to empty string.
 
-Wrap your existing `.on` event handler for a received `username` event into a conditional that checks if `localStorage.getItem("id")` is null - this means that the user has not played yet and we need to prompt for a username. Additionally, when we initially get an ID back from the `username` event now, **we want to make sure that we are saving it** to `LocalStorage` with `setItem`.
+Modify your `#joinGame` click handler so that it check if `localStorage.getItem('id')` is null - this means that the user has not played yet and we need to prompt for a username and emit the input entered. Additionally, when we initially get an ID back from the `username` event now, **we want to make sure that we are saving it** to `LocalStorage` with `setItem`.
 
-In the case where `localStorage.getItem("id")` is non-null, on the other hand, we need to send an event back to the server presenting an ID of a currently playing user. To make the distinction between a new player and an existing player attempting to re-join, we will emit a `username` event with an Object formatted like the following to the server:
+In the case where `localStorage.getItem("id")` is non-null, on the other hand, we need to send an event back to the server presenting an ID of a currently playing user. To make the distinction between a new player and an existing player attempting to re-join, we will emit a `username` event with an Object formatted like the following to the server in our click handler:
 
 `{ id: "XXXXXXXXX" }`
 
@@ -357,18 +390,42 @@ We'll deal with re-associating the new `socket` connection with the existing pla
 
 Modify the `username` event handler on the server to check if we are receiving a String (in which case, a new user is attempting to join the game) or if we are receiving an Object with an ID (in which case, an existing user is re-joining the game).
 
-Your new `username` event halder should:
+Your new `username` event handler should do the following:
 
 1. If the data received is a String, do the same thing as before.
-2. Otherwise, if the `data` we receive is an Object, set `socket.playerId` to `data.id`. Now, additional calls to `slap` or `playCard` will be using the correct Player ID. Finally, send (i.e. emit) back `start` and `updateGame` events to initialize the game state of the player who is re-joining.
+2. Otherwise, if the `data` we receive is an Object, check if `data.id` is actually a player id (key) in `game.players`.
+	* If it is not, do `socket.emit('username', false)`.
+	* If it is, set `socket.playerId` to `data.id`. Now, additional calls to `slap` or `playCard` will be using the correct Player ID. Finally, do the following to initialize the game state of the player who is re-joining.
+
+		```
+		socket.emit('username', {
+		  id: data.id,
+		  username: game.players[data.id].username
+		});
+		io.emit('updateGame', getGameState()); // broadcast to everyone
+		```
+3. Since we are emitting back a `username` event with `false` as a value if the ID is not registered on the server, we need to handle that accordingly in `script.js`.
+
+	```
+	if (data === false) {
+	  localStorage.setItem('id', ''); // reset the id in localStorage
 
 
-### Implementing Persistence
+	  // prompt the user for a username and
+	  // emit this value under the `username` event to the server
+
+	  return;
+	}
+	```
+
+### Bonus: Implementing Persistence on Server
 
 Go to the bottom of your `game.js` file and take a look at the persistence functions we have built in for you. Determine where you need to call `this.persist()` in your game to save the game state!
 
+If you do so, remember to implement the restart feature so that the game can be restarted through the client.
 
- **Bonus:** Deploy, deploy, deploy!
- before we deploy, we need to implement the reset button...
- in a way that will allow us to deploy to Heroku and play with your friends.
+## Bonus: Deploy, deploy, deploy! 📦
 
+Deploy the entire application on Heroku and play with your friends.
+
+> A double bonus would be to implement custom rooms for each game.
