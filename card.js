@@ -11,17 +11,17 @@ class Card {
 
   toString() {
     // YOUR CODE HERE
-    var wordvalue;
+    var wordvalue = this.value+" of ";
     if(this.value === 1){
-      wordvalue = "Ace";
+      wordvalue = "Ace of ";
     }else if (this.value === 11){
-      wordvalue= "Jack"
+      wordvalue= "Jack of "
     }else if (this.value === 12){
-      wordvalue= "Queen"
+      wordvalue= "Queen of "
     }else if (this.value === 13){
-      wordvalue= "King"
+      wordvalue= "King of "
     }
-    return wordvalue+" of "+capitalizeFirstLetter(this.suit)
+    return wordvalue+capitalizeFirstLetter(this.suit)
   }
 
 

@@ -16,23 +16,26 @@ class Game {
   addPlayer(username) {
     // YOUR CODE HERE
     if(this.isStarted){
+      console.log("game already start3ed in addplayer");
       throw new Error("cant add player game has already started");
     }
     if(!username.trim()){
+      console.log("error addplayuer no username");
       throw new Error("cant add player wtih no username");
     }
     // var uniq = true;
     for(var key in this.players){
       // console.log(key);
       if(this.players[key].username == username){
+        console.log("error username taken");
         throw new Error("username taken");
 
       }
     }
 
     var player = new Player(username);
-    this.playerOrder.push(player.id.toString());
-    this.players[player.id.toString()] = player;
+    this.playerOrder.push(player.id);
+    this.players[player.id] = player;
     return player.id;
   }
 
@@ -43,9 +46,12 @@ class Game {
   startGame() {
     // YOUR CODE HERE
     if(this.isStarted){
+      console.log("error game is already started");
       throw new Error("game already started");
+
     }
     if(Object.keys(this.players).length <2){
+      console.log(" error too few players");
       throw new Error("too few players");
     }
 
@@ -61,9 +67,7 @@ class Game {
     // console.log(deck);
     var numplayercards = parseInt(52/Object.keys(this.players).length);
     var leftovercards = 52%Object.keys(this.players).length;
-    // console.log(numplayercards,leftovercards);
-    // console.log(numplayercards);
-    // console.log(deck.length);
+
     for(var playerid in this.players){
       // console.log("player");
       this.players[playerid].pile = deck.splice(0,numplayercards)
@@ -77,7 +81,6 @@ class Game {
         }
       }
     }
-
 
 
   }
@@ -95,6 +98,7 @@ class Game {
       this.playerOrder.push(first);
     } while(this.players[this.playerOrder[0]].pile.length ===0)
   }
+
 
   isWinning(playerId) {
     // YOUR CODE HERE
