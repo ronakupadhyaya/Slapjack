@@ -6,7 +6,7 @@ $(document).ready(function() {
   $('#slap').prop('disabled', true);
 
   // Establish a connection with the server
-  var socket = io("localhost:3000");
+  var socket = io("https://calm-beach-59627.herokuapp.com/");
 
   socket.on('connect', function() {
     console.log('Connected');
