@@ -16,7 +16,7 @@ class Game {
   addPlayer(username) {
     // YOUR CODE HERE
     if(this.isStarted){
-      console.log("game already start3ed in addplayer");
+      // console.log("game already start3ed in addplayer");
       throw new Error("cant add player game has already started");
     }
     if(!username.trim()){
