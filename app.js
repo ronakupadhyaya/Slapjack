@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var _ = require('underscore');
 
 app.engine('hbs', exphbs({
   extname: 'hbs',
@@ -21,43 +22,84 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(morgan('combined'));
+app.use(morgan('tiny'));
 
 app.get('/', function(req, res) {
   res.render('index');
 });
 
 // Here is your new Game!
+var Card = require('./card');
+var Player = require('./player');
 var Game = require('./game');
 var game = new Game();
+var count = 0; // Number of active socket connections
+var winner = null; // Username of winner
 
-io.on('connection', function(socket){
-  
-  
-  socket.emit('username', false);
-  
-  // Try to add a player to the game. 
-  // If you can't, emit('username', false), return out of callback
-  // If you successfully add the player, emit ('username', id)
+function getGameState() {
+  var currentPlayerUsername;
+  var players = "";
+  var numCards = {};
+
+  // YOUR CODE HERE
+
+  // return an object with 6 different properties
+  return {
+
+  }
+}
+
+io.on('connection', function(socket) {
+
+  if (game.isStarted) {
+    // whenever a player joins an already started game, he or she becomes
+    // an observer automatically
+    socket.emit('observeOnly');
+  }
+  count++;
+  socket.on('disconnect', function () {
+    count--;
+    if (count === 0) {
+      game = new Game();
+      winner = null;
+    }
+  });
+
   socket.on('username', function(data) {
-    
+    if (winner) {
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
+      return;
+    }
+    // YOUR CODE HERE
   });
 
-
-  // Start the game & broadcast to entire socket 
   socket.on('start', function() {
-    
+    if (winner) {
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
+      return;
+    }
+    // YOUR CODE HERE
   });
-  
-  
-  // call game.playCard, emit the result the broadcast it 
+
   socket.on('playCard', function() {
+    if (winner) {
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
+      return;
+    }
+    // YOUR CODE HERE
 
+
+    // YOUR CODE ENDS HERE
+    // broadcast to everyone the game state
+    io.emit('updateGame', getGameState());
   });
 
-  // Try to slap! Emit, broadcast, and handle errors accordingly 
   socket.on('slap', function() {
-    
+    if (winner) {
+      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
+      return;
+    }
+    // YOUR CODE HERE
   });
 
 });
