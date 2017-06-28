@@ -190,7 +190,6 @@ io.on('connection', function(socket) {
   });
 
   socket.on('restart',function() {
-    game.clearDeck();
     game = new Game();
     io.emit('restartGame',getGameState());
   })
