@@ -20,7 +20,7 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    if (data === false) {
+    if (!data) {
       localStorage.setItem('id', ''); // reset the id in localStorage
 
       // prompt the user for a username and
