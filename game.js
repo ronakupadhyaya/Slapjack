@@ -6,31 +6,137 @@ var readGame = false;
 
 class Game {
   constructor() {
-    // YOUR CODE HERE
+    this.isStarted = false;
+    this.players = {};
+    this.playerOrder = [];
+    this.pile = [];
+    // this.persist();
   }
 
   addPlayer(username) {
-    // YOUR CODE HERE
+    var players = Object.keys(this.players).map((key) => {return this.players[key]})
+    players.forEach((userObj) =>
+    {if(userObj.username === username){
+      throw "Error: username is not unique"
+    }})
+
+    if(this.isStarted){
+      throw "Error: The game is already started"
+    }else if(!username.trim()){
+      throw "Error: invalid username entered";
+    }else{
+      var newPlayer = new Player(username);
+      this.playerOrder.push(newPlayer.id)
+      this.players[newPlayer.id] = newPlayer;
+      // this.persist();
+      return newPlayer.id;
+    }
   }
 
   startGame() {
-    // YOUR CODE HERE
+    if(this.isStarted){
+      throw "Error: The game is already started";
+    }else if(Object.keys(this.players).length < 2){
+      throw "Error: There are not enough players to play";
+    }else{
+      this.isStarted = true;
+      var deck =[];
+      var suits = ['hearts' , 'diamonds', 'spades', 'clubs'];
+      for(var suit = 0; suit < suits.length; suit++){
+        for(var value = 1; value < 14; value++){
+          deck.push(new Card(suits[suit],value))
+        }
+      }
+      deck = _.shuffle(deck);
+
+      while(deck.length > 0){
+        for(var player = 0; player < this.playerOrder.length; player++){
+          if(deck.length > 0){
+            var playerId = this.playerOrder[player];
+            var playerObj = this.players[playerId];
+            playerObj.pile.push(deck.pop());
+          }
+        }
+      }
+    }
+    // this.persist()
   }
 
   nextPlayer() {
-    // YOUR CODE HERE
+    if(!this.isStarted){
+      throw "Error: The game is already started";
+    }else{
+      do{
+        var currPlayer = this.playerOrder.shift();
+        this.playerOrder.push(currPlayer);
+      }
+      while(this.players[this.playerOrder[0]].pile.length === 0)
+    }
+    // this.persist()
   }
 
   isWinning(playerId) {
-    // YOUR CODE HERE
+    if(!this.isStarted){
+      throw "Error: The game is already started";
+    }else{
+      if(this.players[playerId].pile.length ===52){
+        this.isStarted = false;
+        return true;
+      }else{
+        return false;
+      }
+    }
   }
 
   playCard(playerId) {
-    // YOUR CODE HERE
+    if(!this.isStarted){
+      throw "Error: The game is already started";
+    }else if(this.playerOrder[0]!== playerId){
+      throw("Error: Boo it isnt your turn yet")
+    }else if(this.players[playerId].pile.length === 0){
+      throw("Error: You suck, you have no cards")
+    }else{
+      var currCard = this.players[playerId].pile.pop();
+      this.pile.push(currCard);
+      var count = 0;
+      this.playerOrder.forEach((Id) => {
+        if(this.players[Id].pile.length === 0){
+          count++
+        }
+      })
+      if(count === this.playerOrder.length){
+        this.isStarted = false;
+        throw('Error: Everybody loses MUAHAHA')
+      }
+      this.nextPlayer();
+      // this.persist()
+      return {card:currCard,cardString:currCard.toString()}
+
+    }
   }
 
   slap(playerId) {
-    // YOUR CODE HERE
+    if(!this.isStarted){
+      throw "Error: The game is already started";
+    }else{
+      var last = this.pile.length;
+      if(this.pile[last-1].value === 11 ||
+         (this.pile.length > 1 && this.pile[last-1].value === this.pile[last-2].value) ||
+         (this.pile.length > 2 && this.pile[last-1].value === this.pile[last-3].value)){
+           this.players[playerId].pile = this.pile.concat(this.players[playerId].pile);
+           this.pile = [];
+          //  this.persist()
+           return {winning: this.isWinning(playerId), message: 'got the pile!'}
+         }else{
+           var currPlayerPile = this.players[playerId].pile;
+           var len = currPlayerPile.length;
+           var loss = currPlayerPile.splice(len- 1 - Math.min(3,len),3);
+           this.pile = loss.concat(this.pile)
+          //  this.persist()
+           return {winning: false, message: 'lost 3 cards!'}
+
+         }
+    }
   }
 
   // PERSISTENCE FUNCTIONS
