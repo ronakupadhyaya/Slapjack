@@ -1,10 +1,26 @@
 class Card {
   constructor(suit, value) {
     // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
+
   }
 
   toString() {
     // YOUR CODE HERE
+    var dict = {1:'Ace',11:'Jack',12:'Queen',13:'King'};
+    var desc = ''
+    // console.info(this.suit)
+    // console.info(this)
+    var suit = this.suit[0].toUpperCase() + this.suit.substring(1)
+    if (this.value>=2 && this.value<=10){
+    desc = this.value +' of ';
+    }
+    else{
+      desc = dict[this.value] +' of ';
+    }
+    desc += suit;
+    return desc;
   }
 
   // PERSISTENCE FUNCTIONS
