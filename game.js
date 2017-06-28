@@ -6,31 +6,130 @@ var readGame = false;
 
 class Game {
   constructor() {
-    // YOUR CODE HERE
+    this.isStarted = false;
+    this.players = {};
+    this.playerOrder = [];
+    this.pile = [];
   }
 
   addPlayer(username) {
-    // YOUR CODE HERE
+    if (this.isStarted) {
+      throw Error;
+    } else if (username.trim().length === 0) {
+      throw Error;
+    } else {
+      _.forEach(this.players, function(elem) {
+        if (elem.username === username) {
+          throw Error;
+        }
+      })
+      var newPlayer = new Player(username);
+      this.playerOrder.push(newPlayer.id);
+      this.players[newPlayer.id] = newPlayer;
+      return newPlayer.id
+    }
   }
 
   startGame() {
-    // YOUR CODE HERE
+    if (this.isStarted) {
+      throw Error;
+    } else if (_.size(this.players) < 2) {
+      throw Error;
+    } else {
+      this.isStarted = true;
+      var suits = ['spades', 'hearts', 'diamonds', 'clubs'];
+      for (var val = 1; val <= 13; val++) {
+        suits.forEach((elem) => {
+          this.pile.push(new Card(elem, val));
+        })
+      }
+      this.pile = _.shuffle(this.pile);
+      for (var cardIdx = 0; cardIdx < this.pile.length; cardIdx++) {
+        this.players[this.playerOrder[cardIdx % this.playerOrder.length]].pile
+          .push(this.pile[cardIdx]);
+      }
+      this.pile = [];
+    }
   }
 
   nextPlayer() {
-    // YOUR CODE HERE
+    if (!this.isStarted) {
+      throw Error;
+    } else {
+      var shifted = this.playerOrder.shift();
+      this.playerOrder.push(shifted);
+      while (this.players[this.playerOrder[0]].pile.length === 0) {
+        var newShift = this.playerOrder.shift();
+        this.playerOrder.push(newShift);
+      }
+    }
   }
 
   isWinning(playerId) {
-    // YOUR CODE HERE
+    if (!this.isStarted) {
+      throw Error;
+    } else {
+      if (this.players[playerId].pile.length === 52) {
+        this.isStarted = false;
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   playCard(playerId) {
-    // YOUR CODE HERE
+    if (!this.isStarted) {
+      throw Error;
+    } else if (this.playerOrder[0] !== playerId) {
+      throw Error;
+    } else if (this.players[playerId].pile.length === 0) {
+      throw Error;
+    } else {
+        var top = this.players[playerId].pile.pop();
+        this.pile.push(top);
+        var numberOfZero = 0;
+        _.forEach(this.players, (elem) => {
+          if (elem.pile.length === 0) {
+            numberOfZero++;
+          }
+        });
+        if (numberOfZero === this.playerOrder.length) {
+          this.isStarted = false;
+          throw Error;
+        }
+        this.nextPlayer();
+        return {
+          card: top,
+          cardString: top.toString()
+        }
+    }
   }
 
   slap(playerId) {
-    // YOUR CODE HERE
+    if (!this.isStarted) {
+      throw Error;
+    } else {
+      var last = this.pile.length - 1;
+      var lastVal = this.pile[last].value;
+      if (this.pile.length > 2 && (lastVal === this.pile[last - 2].value || lastVal === this.pile[last - 1].value || lastVal === 11 )) {
+        this.players[playerId].pile = [...this.pile, ...this.players[playerId].pile];
+        this.pile = [];
+        return {
+          winning: this.isWinning(playerId),
+          message: 'got the pile!'
+        }
+      } else {
+        var playerPile = this.players[playerId].pile;
+        var numCards = Math.min(3, playerPile.length);
+        var cards = playerPile.splice(playerPile.length - numCards);
+        this.pile = [...cards, ...this.pile];
+        return {
+          winning: false,
+          message: 'lost 3 cards!'
+        }
+      }
+    }
   }
 
   // PERSISTENCE FUNCTIONS

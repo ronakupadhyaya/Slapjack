@@ -42,10 +42,27 @@ function getGameState() {
   var numCards = {};
 
   // YOUR CODE HERE
+  var numCards = {};
+  var players = ""
+  _.forEach(game.players, (player) => {
+    numCards[player.id] = player.pile.length;
+    players += player.username + ' '
+  })
+
+  players.replace(' ', ', ');
+
+  if (!game.isStarted) {
+    currentPlayerUsername = "Game has not started yet";
+  }
 
   // return an object with 6 different properties
   return {
-
+    isStarted: game.isStarted,
+    numCards: numCards,
+    currentPlayerUsername: currentPlayerUsername,
+    playersInGame: players,
+    cardsInDeck: game.pile.length,
+    win: winner
   }
 }
 
@@ -70,15 +87,46 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    try {
+      if (typeof data === 'string') {
+        var id = game.addPlayer(data);
+        socket.playerId = id;
+        socket.emit('username', {id: id, username: data});
+        io.emit('updateGame', getGameState());
+      } else {
+        if (game.players[data.id] === undefined) {
+          socket.emit('username', false);
+        } else {
+          socket.playerId = data.id;
+          socket.emit('username', {
+            id: data.id,
+            username: game.players[data.id].username
+          });
+          io.emit('updateGame', getGameState());
+        }
+      }
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
   });
 
   socket.on('start', function() {
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
+
     }
-    // YOUR CODE HERE
+    if (socket.playerId === undefined) {
+      socket.emit('errorMessage', 'You are not a player of the game!');
+    }
+
+    try {
+      game.startGame();
+      io.emit('start');
+      io.emit('updateGame', getGameState());
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
   });
 
   socket.on('playCard', function() {
@@ -86,7 +134,15 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if (socket.playerId === undefined) {
+      socket.emit('errorMessage', 'You are not a player of the game!');
+    }
+    try {
+      var card = game.playCard(socket.playerId);
+      io.emit('playCard', card);
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
 
 
     // YOUR CODE ENDS HERE
@@ -99,7 +155,36 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if (socket.playerId === undefined) {
+      socket.emit('errorMessage', 'You are not a player of the game!');
+    }
+    try {
+      var message = game.slap(socket.playerId);
+      if (message.winning) {
+        winner = game.players[playerId].username;
+      } else if (message.message === 'got the pile!'){
+        io.emit('clearDeck');
+      } else if (game.players[playerId].pile.length === 0) {
+        var counter = 0;
+        var usern = "";
+        _.forEach(game.players, (player) => {
+          if (player.pile.length !== 0) {
+            id = player.username;
+            counter++;
+          }
+        })
+        if (counter == 1) {
+          winner = usern;
+        } else {
+          game.nextPlayer();
+        }
+      }
+      io.emit('updateGame', getGameState());
+      socket.emit('message', 'You lost 3 cards!');
+      socket.broadcast.emit('message', game.players[playerId].username + ' lost 3 cards');
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
   });
 
 });

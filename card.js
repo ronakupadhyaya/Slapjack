@@ -1,10 +1,19 @@
 class Card {
   constructor(suit, value) {
-    // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value
   }
 
   toString() {
-    // YOUR CODE HERE
+    var valueDict = {1: 'Ace', 11: 'Jack', 12: 'Queen', 13: 'King'};
+    var desc = '';
+    if (this.value == 1 || this.value >= 11) {
+      desc = valueDict[this.value] + ' of ';
+    } else {
+      desc = this.value + ' of ';
+    }
+    desc += this.suit.charAt(0).toUpperCase()+this.suit.substring(1);
+    return desc;
   }
 
   // PERSISTENCE FUNCTIONS
