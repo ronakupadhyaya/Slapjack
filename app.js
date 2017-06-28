@@ -191,7 +191,7 @@ io.on('connection', function(socket) {
 
   socket.on('restart',function() {
     game = new Game();
-    io.emit('restartGame',getGameState());
+    io.emit('updateGame',getGameState());
   })
 });
 

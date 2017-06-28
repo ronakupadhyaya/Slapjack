@@ -119,9 +119,9 @@ $(document).ready(function() {
     alert(data);
   })
 
-  socket.on('restartGame',function(gameState) {
-    window.state = gameState;
-  })
+  // socket.on('restartGame',function(gameState) {
+  //   window.state = gameState;
+  // })
   // ==========================================
   // Click handlers
   // ==========================================
