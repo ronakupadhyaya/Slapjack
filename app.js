@@ -86,6 +86,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('username', function(data) {
+    game.persist();
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
