@@ -70,7 +70,12 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    socket.playerId = game.addPlayer(data)
+    socket.emit('username', {
+      id: socket.playerId,
+      username: data
+    })
+    io.emit('updateGame', getGameState())
   });
 
   socket.on('start', function() {
@@ -78,28 +83,76 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
-  });
+    if (!socket.playerId) {
+      socket.emit('errorMessage', 'youz aint not a playaz bitch')
+    }
+    else {
+
+      try {
+        game.startGame()
+      }
+      catch (e) {
+        socket.emit('errorMessage', e.message)
+        return
+      }
+      io.emit('start')
+      io.emit('updateGame', getGameState())
+    }
+  })
 
   socket.on('playCard', function() {
+    var playedCard = null
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if (!socket.playerId) {
+      socket.emit('errorMessage', 'youz aint not a playaz bitch')
+      return
+    }
+    else {
+      try {
+        var playedCard = game.playCard(socket.playerId)
+      }
+      catch (e) {
+        socket.emit('errorMessage', e.message)
+        return
+      }
+    var lowerCase = playedCard.cardString.toLowerCase()
+    var myString = lowerCase.replace(/ /g , "_");
+    var picture = '/cards/'+myString+'.svg'
+    console.log(myString+'.svg')
 
-
-    // YOUR CODE ENDS HERE
+    io.emit('playCard', picture)
+    }
     // broadcast to everyone the game state
     io.emit('updateGame', getGameState());
   });
 
-  socket.on('slap', function() {
+  socket.on('slap', function(user) {
+    var result = null
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if (!socket.playerId) {
+      socket.emit('errorMessage', 'youz aint not a playaz bitch')
+      return
+    }
+    else {
+      try {
+        var result = game.slap(socket.playerId)
+      }
+      catch(e) {
+        socket.emit('errorMessage', e.message)
+        return
+      }
+
+    if(result.winning) {
+      result.winning = user.username
+      io.emit('clearDeck')
+    }
+    if (Game)
   });
 
 });

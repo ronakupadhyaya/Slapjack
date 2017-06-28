@@ -338,6 +338,7 @@ describe("The Game Object", function() {
       g.playCard(j); // Queen of Diamonds
       g.playCard(e); // Jack of Spades
       g.slap(e);
+      console.log('test log', g.pile.length)
       expect(g.pile.length).toBe(0);
     });
 
