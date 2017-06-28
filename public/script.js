@@ -20,10 +20,19 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
+    if (data === false) {
+      localStorage.setItem('id', ''); // reset the id in localStorage
+      var name = prompt('Enter your username');
+      socket.emit('username',name);
+
+  return;
+}
+
     $('#joinGame').prop('disabled', true);
     $('#startGame').prop('disabled', false);
     $('#observeGame').prop('disabled', true);
     $('#usernameDisplay').text('Joined game as '+ data.username);
+    localStorage.setItem("id", data.id);
 
   });
 
@@ -125,9 +134,18 @@ $(document).ready(function() {
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
+    if(!localStorage.getItem('id')){
+      var name = prompt('Enter your username');
+      socket.emit('username',name);
 
-    var name = prompt('Enter your username');
-    socket.emit('username',name);
+    }else{
+
+      socket.emit('username',{id:localStorage.getItem('id')});
+
+    }
+
+
+
 
   });
 

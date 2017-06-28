@@ -100,10 +100,33 @@ io.on('connection', function(socket) {
       return;
     }
     try{
-      socket.playerId = game.addPlayer(data);
-      socket.emit('username',{'username':data,'id':socket.playerId});
-      var state=getGameState();
-      io.emit('updateGame',state)
+      if(typeof data ==="string"){
+        socket.playerId = game.addPlayer(data);
+
+        socket.emit('username',{'username':data,'id':socket.playerId});
+        var state=getGameState();
+        io.emit('updateGame',state)
+
+      }else if(typeof data ==="object"){
+        var allKeys=_.allKeys(game.players);
+       if(allKeys.indexOf(data.id)===-1){
+         socket.emit('username', false)
+       }else{
+         socket.playerId=data.id
+       }
+       socket.emit('username', {
+         id: data.id,
+         username: game.players[data.id].username
+        });
+      io.emit('updateGame', getGameState()); // broadcast to everyone
+
+
+
+      }
+
+
+
+
     }catch(e){
       socket.emit('errorMessage', e.message);
     }
@@ -177,7 +200,7 @@ io.on('connection', function(socket) {
       if(game.players[socket.playerId].pile.length===0){
        var zer=0;
        var wn="";
-        _.mapObject(this.players,function(val,key){
+        _.mapObject(game.players,function(val,key){
           if(val.pile.length===0){
             zer++;
           }else{
