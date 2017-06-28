@@ -70,7 +70,19 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if(typeof data === 'string'){
+      try{
+        socket.playerId = game.addPlayer(data);
+        socket.emit('username',{
+          id: socket.playerId,
+          username: data
+        })
+      } catch(err){
+        socket.emit('errorMessage', 'this went wrong: '+err);
+        return;
+      }
+    }
+    io.emit('updateGame', getGameState());
   });
 
   socket.on('start', function() {
@@ -79,6 +91,19 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
+    if(!socket.playerId){
+      socket.emit('errorMessage',"You're not a player");
+      return;
+    } else {
+      try{
+        game.startGame();
+      } catch(err) {
+        socket.emit('errorMessage', 'this went wrong: '+err);
+        return;
+      }
+      io.emit('start');
+      io.emit('updateGame',getGameState())
+    }
   });
 
   socket.on('playCard', function() {
@@ -87,8 +112,19 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
-
-
+    if(!socket.playerId){
+      socket.emit('errorMessage',"You're not a player");
+      return;
+    } else {
+      var returned;
+      try{
+        returned = game.playCard(socket.playerId)
+      } catch (err) {
+        socket.emit('errorMessage', 'this went wrong: '+err);
+        return;
+      }
+      io.emit('playCard',returned)
+    }
     // YOUR CODE ENDS HERE
     // broadcast to everyone the game state
     io.emit('updateGame', getGameState());
@@ -100,6 +136,26 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
+    if(!socket.playerId){
+      socket.emit('errorMessage',"You're not a player");
+      return;
+    } else {
+      var msg;
+      try {
+        msg=game.slap(socket.playerId);
+      } catch (err) {
+        socket.emit('errorMessage', 'this went wrong: '+err);
+        return;
+      }
+      if(msg.winning){
+        winner= game.players[playerId];
+        if(msg.message==='got the pile!'){
+          io.emit('clearDeck')
+        }
+      } else {
+        game.nextPlayer();
+      }
+    }
   });
 
 });
