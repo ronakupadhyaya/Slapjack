@@ -40,12 +40,34 @@ function getGameState() {
   var currentPlayerUsername;
   var players = "";
   var numCards = {};
-
-  // YOUR CODE HERE
-
-  // return an object with 6 different properties
+  // set up numCards
+  for (var playerId in game.players) {
+    numCards[playerId] = game.players[playerId].pile.length;
+  }
+  // set up currentPlayerUsername
+  if (!game.isStarted) {
+    currentPlayerUsername = 'Game has not started yet'
+  }
+  else {
+    currentPlayerUsername = game.players[game.playerOrder[0]].username;
+  }
+  // set up players string
+  var numPlayers = 1;
+  var totalPlayers = Object.keys(game.players).length;
+  for (var playerId in game.players) {
+    players = players + game.players[playerId].username;
+    if (numPlayers !== totalPlayers)  {
+      players += ', ';
+    }
+    numPlayers++;
+  }
   return {
-
+    isStarted: game.isStarted,
+    numCards: numCards,
+    currentPlayerUsername: currentPlayerUsername,
+    playersInGame: players,
+    cardsInDeck: game.pile.length,
+    winner: winner
   }
 }
 
@@ -66,11 +88,36 @@ io.on('connection', function(socket) {
   });
 
   socket.on('username', function(data) {
-    if (winner) {
-      socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
-      return;
+    if (typeof data === 'string') {
+      if (winner) {
+        socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
+        return;
+      }
+      try {
+        socket.playerId = game.addPlayer(data);
+        socket.emit('username', {id: socket.playerId, username: data})
+        io.emit('updateGame', getGameState());
+      }
+      catch(err) {
+        socket.emit('errorMessage', err.message);
+      }
     }
-    // YOUR CODE HERE
+    else {
+      if (game.players.hasOwnProperty(data.id)) {
+        socket.playerId = data.id;
+        socket.emit('username', {
+        id: data.id,
+        username: game.players[data.id].username
+      });
+ io.emit('updateGame', getGameState()); // broadcast to everyone
+      }
+      else {
+        socket.emit('username', false)
+      }
+    }
+
+
+
   });
 
   socket.on('start', function() {
@@ -78,7 +125,19 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if (!socket.playerId) {
+      socket.emit('errorMessage', 'You are not a player of the game')
+    }
+    else {
+      try {
+        game.startGame();
+        io.emit('start');
+        io.emit('updateGame', getGameState());
+      }
+      catch(err) {
+        socket.emit('errorMessage', err.message);
+      }
+    }
   });
 
   socket.on('playCard', function() {
@@ -86,10 +145,15 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
-
-
-    // YOUR CODE ENDS HERE
+    if (!socket.playerId) {
+      socket.emit('errorMessage', 'You are not a player of the game');
+    }
+    try {
+      io.emit('playCard', game.playCard(socket.playerId))
+    }
+    catch(err) {
+      socket.emit('errorMessage', err.message);
+    }
     // broadcast to everyone the game state
     io.emit('updateGame', getGameState());
   });
@@ -99,7 +163,35 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if (!socket.playerId) {
+      socket.emit('errorMessage', 'You are not a player of the game');
+    }
+    try {
+      var obj = game.slap(socket.playerId);
+      if (obj.winning) {
+        winner = game.players[game.playerOrder[0]].username;
+      }
+      else {
+        if (obj.message === 'got the pile!') {
+          io.emit('clearDeck')
+        }
+        if (game.playerOrder[0].pile === []) {
+          if (game.playerOrder.length === 1) {
+            winner = game.players[game.playerOrder[0]].username;
+            game.isStarted = false;
+          }
+          else {
+            game.nextPlayer();
+          }
+        }
+        io.emit('updateGame', getGameState());
+        socket.emit('message', 'You ' + obj.message)
+        socket.broadcast.emit('message', game.players[game.playerOrder[0]].username + obj.message)
+      }
+    }
+    catch(err) {
+      socket.emit('errorMessage', err.message);
+    }
   });
 
 });
