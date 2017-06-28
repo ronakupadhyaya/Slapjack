@@ -7,7 +7,7 @@ var readGame = false;
 class Game {
   constructor() {
     this.isStarted = false;
-    // id: object {username: }
+    // id: object
     this.players = {};
     this.playerOrder = [];
     this.pile = [];
