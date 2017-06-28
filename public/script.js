@@ -119,6 +119,9 @@ $(document).ready(function() {
     alert(data);
   })
 
+  socket.on('restartGame',function(gameState) {
+    window.state = gameState;
+  })
   // ==========================================
   // Click handlers
   // ==========================================
@@ -151,5 +154,10 @@ $(document).ready(function() {
     e.preventDefault();
     socket.emit("slap");
   });
+
+  $('#restart').on('click',function(e) {
+    e.preventDefault();
+    socket.emit("restart");
+  })
 
 });

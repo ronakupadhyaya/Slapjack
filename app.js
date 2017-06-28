@@ -187,6 +187,12 @@ io.on('connection', function(socket) {
       socket.broadcast.emit("message", game.players[socket.playerId].username + " " + obj.message);
     }
   });
+
+  socket.on('restart',function() {
+    game.clearDeck();
+    game = new Game();
+    io.emit('restartGame',getGameState());
+  })
 });
 
 var port = process.env.PORT || 3000;
