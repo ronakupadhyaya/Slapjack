@@ -1,10 +1,23 @@
 class Card {
   constructor(suit, value) {
     // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
   }
 
   toString() {
     // YOUR CODE HERE
+    if(this.value === 1){
+      return "Ace of " + this.suit.charAt(0).toUpperCase() + this.suit.substring(1);
+    }else if(this.value === 11){
+      return "Jack of " + this.suit.charAt(0).toUpperCase() + this.suit.substring(1);
+    }else if(this.value === 12){
+      return "Queen of " + this.suit.charAt(0).toUpperCase() + this.suit.substring(1);
+    }else if(this.value === 13){
+      return "King of " + this.suit.charAt(0).toUpperCase() + this.suit.substring(1);
+    }else{
+      return this.value + " of " + this.suit;
+    }
   }
 
   // PERSISTENCE FUNCTIONS
