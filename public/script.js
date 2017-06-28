@@ -4,6 +4,9 @@ $(document).ready(function() {
   $('#startGame').prop('disabled', true);
   $('#playCard').prop('disabled', true);
   $('#slap').prop('disabled', true);
+  $('#joinGame').prop('disabled', true);
+  $('#observeGame').prop('disabled', true);
+  $('#usernameDisplay').text('Observing game...');
 
   // Establish a connection with the server
   var socket = io();
