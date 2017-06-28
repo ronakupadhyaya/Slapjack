@@ -1,8 +1,11 @@
 var crypto = require("crypto");
+var _=require('underscore');
 
 class Player {
   constructor(username) {
-    // YOUR CODE HERE
+    this.username=username;
+    this.id=this.generateId();
+    this.pile=[];
   }
 
   generateId() {

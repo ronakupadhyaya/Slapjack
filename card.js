@@ -1,10 +1,47 @@
 class Card {
   constructor(suit, value) {
-    // YOUR CODE HERE
+    this.suit=suit
+    this.value=value
   }
 
   toString() {
-    // YOUR CODE HERE
+    var val="";
+    if(this.value===1){
+      val="Ace"
+    }else if(this.value===11){
+      val="Jack"
+    }else if(this.value===12){
+      val="Queen"
+    }else if(this.value===13){
+      val="King"
+    }else{
+      val=this.value;
+    }
+
+    var suit=this.suit.charAt(0).toUpperCase()+this.suit.slice(1);
+
+
+    return val + ' of ' + suit
+  }
+
+  toImglabel() {
+    var val="";
+    if(this.value===1){
+      val="ace"
+    }else if(this.value===11){
+      val="jack"
+    }else if(this.value===12){
+      val="queen"
+    }else if(this.value===13){
+      val="king"
+    }else{
+      val=this.value;
+    }
+
+    var suit=this.suit.charAt(0).toLowerCase()+this.suit.slice(1);
+
+
+    return val + '_of_' + suit+'.svg'
   }
 
   // PERSISTENCE FUNCTIONS
