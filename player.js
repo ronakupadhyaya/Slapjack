@@ -2,7 +2,9 @@ var crypto = require("crypto");
 
 class Player {
   constructor(username) {
-    // YOUR CODE HERE
+    this.username = username;
+    this.id = crypto.randomBytes(10).toString('hex')
+    this.pile = []; //Array.new(52,new Card())
   }
 
   generateId() {

@@ -1,10 +1,16 @@
 class Card {
   constructor(suit, value) {
-    // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
   }
 
   toString() {
-    // YOUR CODE HERE
+    var obj = {1:"Ace", 11:"Jack", 12:"Queen", 13: "King"};
+    if (this.value === 1 || this.value>10){
+      return obj[this.value] + " of " + this.suit;
+    }else{
+      return this.value + " of " + this.suit;
+    }
   }
 
   // PERSISTENCE FUNCTIONS

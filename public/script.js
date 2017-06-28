@@ -20,23 +20,36 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
+    if (data === false) {
+      localStorage.setItem('id', ''); // reset the id in localStorage
+      var username = prompt("Please enter a username");
+      socket.emit('username',username);
+      return;
+    }
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').text('Joined game as ' + data.username);
+    user = data;
   });
 
   socket.on('playCard', function(data) {
-    // YOUR CODE HERE
+    console.log(data.cardString);
+    $('#card').attr('src', './cards/'+data.cardString.toLowerCase().split(' ').join('_') + '.svg');
   });
 
   socket.on('start', function() {
-    // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
   socket.on('message', function(data) {
-    // YOUR CODE HERE
+    setTimeout(function(){$('#messages-container').append(`<div>${data}</div>`)},5000);
   });
 
   socket.on('clearDeck', function(){
-    // YOUR CODE HERE
+    $('#card').attr('src','');
   });
 
   socket.on("updateGame", function(gameState) {
@@ -103,27 +116,35 @@ $(document).ready(function() {
   // ==========================================
   $('#startGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('start');
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    if (!localStorage.getItem("id")){
+      var username = prompt("Please enter a username");
+      socket.emit('username',username)
+    }else{
+      var id = localStorage.getItem("id");
+      socket.emit('username', {id: id});
+    }
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing Game...')
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('slap');
   });
 
 });
