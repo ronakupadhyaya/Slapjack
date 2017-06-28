@@ -118,10 +118,6 @@ $(document).ready(function() {
   socket.on('errorMessage', function(data) {
     alert(data);
   })
-
-  // socket.on('restartGame',function(gameState) {
-  //   window.state = gameState;
-  // })
   // ==========================================
   // Click handlers
   // ==========================================
