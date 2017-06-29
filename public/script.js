@@ -20,23 +20,37 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').html(`Joined game as ${data.username}`)
+    user = data;
   });
 
   socket.on('playCard', function(data) {
-    // YOUR CODE HERE
+    //start working from here. everythign else is working properly!!!!
+    console.log('this is the move', data);
+    var cardString = data.cardString.toLowerCase().split(' ').join('_');
+    var imgSrc = `./cards/${cardString}.svg`;
+    $('#card').prop('src', imgSrc)
   });
 
   socket.on('start', function() {
-    // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
   socket.on('message', function(data) {
-    // YOUR CODE HERE
+    $('#message-container').append(data);
+    setTimeout(function(){
+      $('#message-container').empty()
+    }, 5000);
   });
 
   socket.on('clearDeck', function(){
-    // YOUR CODE HERE
+    console.log('fuck');
+    $('#card').prop('src', '');
   });
 
   socket.on("updateGame", function(gameState) {
@@ -103,27 +117,31 @@ $(document).ready(function() {
   // ==========================================
   $('#startGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('start', null);
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#observeGame').prop('disabled', true);
+    var username = prompt('Enter a username: ')
+    socket.emit('username', username)
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').html('Observing Game...');
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('slap')
+
   });
 
 });

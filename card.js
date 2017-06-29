@@ -1,10 +1,23 @@
 class Card {
   constructor(suit, value) {
-    // YOUR CODE HERE
+    this.value = value,
+    this.suit = suit
   }
 
   toString() {
-    // YOUR CODE HERE
+    var valueString = this.value;
+    var suitString;
+    if(this.value > 10 || this.value === 1) {
+      var cardAssignment = {1: 'Ace', 11: 'Jack', 12: 'Queen', 13: 'King'}
+      valueString = cardAssignment[this.value]
+    }
+
+    //capitalizes the first letter
+    var suitString = this.suit.charAt(0).toUpperCase() + this.suit.slice(1);
+
+
+    var str = `${valueString} of ${suitString}`;
+    return str;
   }
 
   // PERSISTENCE FUNCTIONS

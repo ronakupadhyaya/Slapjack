@@ -70,7 +70,16 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    try {
+      //playerId is randomly generated return
+      var playerId = game.addPlayer(data);
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
+    socket.playerId = playerId;
+    socket.emit('username', {id: playerId, username: data});
+    var gameState = getGameState();
+    io.emit('updateGame', gameState);
   });
 
   socket.on('start', function() {
@@ -78,7 +87,18 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if(!socket.playerId) {
+      socket.emit('errorMessage', `You are not the player of the game!`)
+    }
+    try {
+      game.startGame();
+    } catch (e) {
+      socket.emit('errorMessage', e.message)
+    }
+    io.emit('start')
+    var gameState = getGameState()
+    io.emit('updateGame', gameState)
+
   });
 
   socket.on('playCard', function() {
@@ -86,12 +106,17 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
-
-
-    // YOUR CODE ENDS HERE
+    if(!socket.playerId) {
+      socket.emit('errorMessage', `You are not the player of the game!`);
+      return
+    }
+    try {
+      var playCard = game.playCard(socket.playerId);
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
     // broadcast to everyone the game state
-    io.emit('updateGame', getGameState());
+    io.emit('playCard', playCard)
   });
 
   socket.on('slap', function() {
@@ -99,7 +124,47 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
-    // YOUR CODE HERE
+    if(!socket.playerId) {
+      socket.emit('errorMessage', `You are not the player of the game!`);
+      return
+    }
+    try {
+      var slapObj = game.slap(socket.playerId);
+    } catch (e) {
+      socket.emit('errorMessage', e.message);
+    }
+    if(slapObj.winner) {
+      winner = socket.playerId
+    }
+
+    if(slapObj.message === 'lost 3 cards!') {
+      io.emit('clearDeck');
+    }
+    console.log('i literally fucking stop here');
+    var activePlayers = [];
+    if(game.players[socket.playerId].pile.length === 0) {
+      console.log('or fucking right hers');
+      console.log(game.playerOrder);
+      // game.playerOrder.forEach(function(player) {
+      //   console.log('bruh');
+      //   if(game.players[player].pile.length > 0) {
+      //     activePlayers.push(player)
+      //   }
+      // })
+
+      console.log('im here boy');
+
+      if(activePlayers.length === 1) {
+        winner = this.players[activePlayers[0]].pile;
+        game.isStarted = false;
+      } else {
+        game.nextPlayer();
+      }
+      console.log('im here');
+      io.emit('updateGame');
+      socket.broadcast.emit('message', `User lost three cards`);
+      socket.emit('message', 'You just lost three cards')
+    }
   });
 
 });
