@@ -20,23 +20,35 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').text('Joined game as ' + data.username);
+    user = data;
   });
 
   socket.on('playCard', function(data) {
-    // YOUR CODE HERE
+    //update view to display a card
+    var cardString = data.cardString;
+    cardString = cardString.split(' ');
+    var imgString = '/cards/' + cardString[0] + '_' + cardString[1] + '_' + cardString[2].toLowerCase() + '.svg';
+    $('#card').attr('src', imgString);
   });
 
   socket.on('start', function() {
-    // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
   socket.on('message', function(data) {
-    // YOUR CODE HERE
+    setTimeout(() => {
+      $('#messages-container').val(data)
+    }, 5000);
   });
 
-  socket.on('clearDeck', function(){
-    // YOUR CODE HERE
+  socket.on('clearDeck', function() {
+    $('#card').removeAttr('src');
   });
 
   socket.on("updateGame", function(gameState) {
@@ -103,27 +115,36 @@ $(document).ready(function() {
   // ==========================================
   $('#startGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('start');
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    if (localStorage.getItem('id') === null) {
+      var username = prompt('Enter a username: ');
+      socket.emit('username', username);
+    } else {
+      socket.emit('username', {
+        id: localStorage.getItem('id')
+      });
+    }
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing game...');
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('slap');
   });
 
 });
