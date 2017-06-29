@@ -20,23 +20,46 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
-  });
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').text('Joined game as '+data.username);
+    if (data === false) {
+      localStorage.setItem('id', ''); // reset the id in localStorage
 
+      // var defaultUsername = "player"+Math.round(Math.random()*100);
+      // var username = window.prompt('Enter a username: ', defaultUsername);
+      // console.log('REACHED repetitive SCRIPT: unknown user');
+      // socket.emit('username', username);
+
+      return;
+    } else {
+      user = data;
+    }
+  });
+  //receive playCard event: data is a obj w/ card and cardString
   socket.on('playCard', function(data) {
-    // YOUR CODE HERE
+    var imgSrc = data.cardString.toLowerCase().split(" ").join("_") + ".svg";
+    console.log('IMAGE: ', imgSrc);
+    $('#card').attr("src", "./cards/"+imgSrc);
   });
-
+  //receive start: start game, disable some buttons
   socket.on('start', function() {
-    // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
-
+  //receive message: data is message
   socket.on('message', function(data) {
-    // YOUR CODE HERE
+    $('#messages-container').append( `
+      <h3 id="message_elem">${data}</h3>`);
+    setTimeout(function() {
+      $('#message_elem').remove();
+    }, 5000);
   });
-
+  //clear deck by remove image of card
   socket.on('clearDeck', function(){
-    // YOUR CODE HERE
+    $('#card').attr("src", "");
   });
 
   socket.on("updateGame", function(gameState) {
@@ -54,6 +77,7 @@ $(document).ready(function() {
     // Displays the username and number of cards the player has
     if (user) {
       $("#usernameDisplay").text('Playing as ' + user.username);
+      console.log("1: ",gameState," 2: ", gameState.numCards);
       $(".numCards").text(gameState.numCards[user.id] || 0);
     }
 
@@ -103,27 +127,39 @@ $(document).ready(function() {
   // ==========================================
   $('#startGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('start');
   });
-
+  //join game: check if already user, prompt for username if not
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    var id = localStorage.getItem("id");
+    if (!id) {
+      var defaultUsername = "player"+Math.round(Math.random()*100);
+      var username = window.prompt('Enter a username: ', defaultUsername);
+      console.log('REACHED JOIN GAME SCRIPT: unknown user');
+      socket.emit('username', username);
+    } else {
+      console.log('REACHED JOIN GAME SCRIPT: known user');
+      socket.emit('username', {id: id});
+    }
+
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing game ...');
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('slap');
   });
 
 });
