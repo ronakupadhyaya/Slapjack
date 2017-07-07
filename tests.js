@@ -88,17 +88,25 @@ describe("The Game Object", function() {
     it("should throw an error trying to add a player when the game has started", function() {
       g.addPlayer('Ethan');
       g.isStarted = true;
-      expect(function(){g.addPlayer('Ethan');}).toThrow();
+      expect(function() {
+        g.addPlayer('Ethan');
+      }).toThrow();
     });
 
     it("should throw an error when trying to add an empty username", function() {
-      expect(function(){g.addPlayer();}).toThrow();
-      expect(function(){g.addPlayer('');}).toThrow();
+      expect(function() {
+        g.addPlayer();
+      }).toThrow();
+      expect(function() {
+        g.addPlayer('');
+      }).toThrow();
     });
 
     it("should throw an error when trying to add a username of someone already playing", function() {
       g.addPlayer('Ethan');
-      expect(function(){g.addPlayer('Ethan');}).toThrow();
+      expect(function() {
+        g.addPlayer('Ethan');
+      }).toThrow();
     });
   });
 
@@ -113,13 +121,17 @@ describe("The Game Object", function() {
       g.addPlayer('Ethan');
       g.addPlayer('Josh');
       g.startGame();
-      expect(function(){g.startGame();}).toThrow();
+      expect(function() {
+        g.startGame();
+      }).toThrow();
     });
 
     it("should throw an error if there are less than two people playing", function() {
       expect(g.playerOrder.length).toBe(0);
       g.addPlayer('Ethan');
-      expect(function(){g.startGame();}).toThrow();
+      expect(function() {
+        g.startGame();
+      }).toThrow();
     });
 
     it("should start the game only if more than two people have been added", function() {
@@ -177,7 +189,9 @@ describe("The Game Object", function() {
     });
 
     it("should throw an error if game has not yet started", function() {
-      expect(function(){g.nextPlayer();}).toThrow();
+      expect(function() {
+        g.nextPlayer();
+      }).toThrow();
     });
 
     it("should move the current player to the end of the array for 2 players", function() {
@@ -224,7 +238,9 @@ describe("The Game Object", function() {
     });
 
     it("should throw an error if game has not yet started", function() {
-      expect(function(){g.isWinning('');}).toThrow();
+      expect(function() {
+        g.isWinning('');
+      }).toThrow();
     });
 
     it("should return a boolean", function() {
@@ -260,7 +276,9 @@ describe("The Game Object", function() {
     });
 
     it("should throw an error if game has not yet started", function() {
-      expect(function(){g.playCard('');}).toThrow();
+      expect(function() {
+        g.playCard('');
+      }).toThrow();
     });
 
     it("should throw an error if it's not that user's turn", function() {
@@ -270,7 +288,9 @@ describe("The Game Object", function() {
       g.addPlayer('Lane');
       g.startGame();
       g.nextPlayer();
-      expect(function(){g.playCard(id);}).toThrow();
+      expect(function() {
+        g.playCard(id);
+      }).toThrow();
     });
 
     it("should throw an error if the current player has no cards", function() {
@@ -281,7 +301,9 @@ describe("The Game Object", function() {
       g.startGame();
       g.nextPlayer();
       g.players[id2].pile = [];
-      expect(function(){g.playCard(id2);}).toThrow();
+      expect(function() {
+        g.playCard(id2);
+      }).toThrow();
     });
 
     it("should cycle to the next user after someone has been played a card", function() {
@@ -302,7 +324,9 @@ describe("The Game Object", function() {
     });
 
     it("should throw an error if game has not yet started", function() {
-      expect(function(){g.slap('');}).toThrow();
+      expect(function() {
+        g.slap('');
+      }).toThrow();
     });
 
     it("should return an Object", function() {
@@ -362,8 +386,12 @@ describe("The Game Object", function() {
       g.playCard(e); // Jack of Spades
       expect(_.last(g.players[e].pile).value).toEqual(10); // 10 of Spades
       var obj = g.slap(e);
-      expect(obj).toEqual(jasmine.objectContaining({ winning: false }));
-      expect(obj).toEqual(jasmine.objectContaining({ message: 'got the pile!' }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        winning: false
+      }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        message: 'got the pile!'
+      }));
       expect(g.players[e].pile[0].value).not.toEqual(1);
       expect(g.players[e].pile[1].value).not.toEqual(2);
       expect(g.players[e].pile[2].value).not.toEqual(3);
@@ -393,8 +421,12 @@ describe("The Game Object", function() {
       g.playCard(j); // Queen of Diamonds
       expect(_.last(g.players[e].pile).value).toEqual(11); // Jack of Spades
       var obj = g.slap(e);
-      expect(obj).toEqual(jasmine.objectContaining({ winning: false }));
-      expect(obj).toEqual(jasmine.objectContaining({ message: 'got the pile!' }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        winning: false
+      }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        message: 'got the pile!'
+      }));
       expect(g.players[e].pile[0].value).not.toEqual(1);
       expect(g.players[e].pile[1].value).not.toEqual(2);
       expect(g.players[e].pile[2].value).not.toEqual(3);
@@ -427,8 +459,12 @@ describe("The Game Object", function() {
       g.playCard(j); // Queen of Diamonds
       expect(_.last(g.players[e].pile).value).toEqual(11); // Jack of Spades
       var obj = g.slap(e);
-      expect(obj).toEqual(jasmine.objectContaining({ winning: false }));
-      expect(obj).toEqual(jasmine.objectContaining({ message: 'got the pile!' }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        winning: false
+      }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        message: 'got the pile!'
+      }));
       expect(g.players[e].pile[0].value).not.toEqual(1);
       expect(g.players[e].pile[1].value).not.toEqual(2);
       expect(g.players[e].pile[2].value).not.toEqual(3);
@@ -459,8 +495,12 @@ describe("The Game Object", function() {
       g.playCard(j); // Queen of Spades
       expect(g.players[j].pile.length).toBe(25);
       var obj = g.slap(j);
-      expect(obj).toEqual(jasmine.objectContaining({ winning: false }));
-      expect(obj).toEqual(jasmine.objectContaining({ message: 'lost 3 cards!' }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        winning: false
+      }));
+      expect(obj).toEqual(jasmine.objectContaining({
+        message: 'lost 3 cards!'
+      }));
       expect(g.players[j].pile.length).toBe(22);
       expect(g.pile.length).toBe(5);
       expect(g.pile[4].value).toEqual(12);
@@ -469,8 +509,12 @@ describe("The Game Object", function() {
       expect(g.pile.length).toBe(6);
       expect(g.players[e].pile.length).toBe(24);
       var obj1 = g.slap(e);
-      expect(obj1).toEqual(jasmine.objectContaining({ winning: false }));
-      expect(obj1).toEqual(jasmine.objectContaining({ message: 'got the pile!' }));
+      expect(obj1).toEqual(jasmine.objectContaining({
+        winning: false
+      }));
+      expect(obj1).toEqual(jasmine.objectContaining({
+        message: 'got the pile!'
+      }));
       expect(g.players[e].pile.length).toBe(30);
       expect(g.pile.length).toBe(0);
     });
