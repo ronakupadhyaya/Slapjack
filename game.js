@@ -38,7 +38,7 @@ class Game {
       throw new Error('Game does not have enough players');
 
     this.isStarted = true;
-    for (var k = 0; k < 13; k++) {
+    for (var k = 1; k <= 13; k++) {
       for (var i = 0; i < 4; i++) {
         var suit;
         switch (i) {
