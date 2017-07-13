@@ -7,10 +7,32 @@ var readGame = false;
 class Game {
   constructor() {
     // YOUR CODE HERE
+    this.isStarted = false;
+    this.players = {}
+    this.playerOrder = [];
+    this.pile = [];
   }
 
   addPlayer(username) {
     // YOUR CODE HERE
+    if (this.isStarted) { // If game already started, throw an error
+      throw Error('Game has already started!')
+    }
+    var trimmedUser = username.trim()
+    if (!trimmedUser) { // If no username inputted, throw an error
+      throw Error("Username is empty!")
+    }
+    for (var key in this.players) { // Iterate through all players
+      if (this.players[key].username === username ) { // if username already exists, throw an error
+        throw Error("Username already exists!")
+      }
+    }
+    // No Error Thrown
+    var newPlayer = new Player(username) // Create new Player object
+    this.playerOrder.push(newPlayer.id) // Push Player ID into playerOrder
+    this.players[newPlayer.id] = newPlayer // Put Player Object in this.player
+    return newPlayer.id // return Player ID
+
   }
 
   startGame() {
