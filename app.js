@@ -65,12 +65,19 @@ io.on('connection', function(socket) {
     }
   });
 
-  socket.on('username', function(data) {
+  socket.on('username', function(username) {
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
     // YOUR CODE HERE
+    try {
+      socket.playerId = game.addPlayer(username);
+      socket.emit("username", {id: socket.playerId, username: username})
+      io.emit("updateGame", getGameState())
+    } catch(err) {
+      socket.emit('errorMessage', err.message)
+    }
   });
 
   socket.on('start', function() {
@@ -79,6 +86,16 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
+    if (! socket.playerId) {
+      socket.emit('errorMessage', "You are not a player of the game!")
+    }
+    try {
+      game.startGame()
+      io.emit('start')
+      io.emit('updateGame', getGameState())
+    } catch(err) {
+      socket.emit('errorMessage', err.message)
+    }
   });
 
   socket.on('playCard', function() {
@@ -87,7 +104,14 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
-
+    if (! socket.playerId) {
+      socket.emit('errorMessage', "You are not a player of the game")
+    }
+    try {
+      io.emit('playCard', game.playCard(socket.playerId))
+    } catch (err) {
+      socket.emit('errorMessage', err.message)
+    }
 
     // YOUR CODE ENDS HERE
     // broadcast to everyone the game state
@@ -100,6 +124,36 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
+    if (! socket.playerId) {
+      socket.emit('errorMessage', "You are not a player of the game")
+    }
+    try {
+      var slapResponse = game.slap(socket.playerId);
+      if (slapResponse.winning) {
+        winner = game.players[game.playerOrder[socket.playerId]].username;
+      }
+      if (slapResponse.message === "got the pile!") {
+        io.emit('clearDeck')
+      }
+      var oneLeft = false
+      game.playerOrder.forEach(function(playerId) {
+        if game.isWinning(playerId) {
+          oneLeft = playerId
+        }
+      })
+      if (oneLeft) {
+        winner = game.players[game.playerOrder[oneLeft]].username;
+      } else {
+        game.nextPlayer()
+      }
+      io.emit('updateGame', getGameState())
+      socket.emit('message', "You " + slapResponse.message);
+      var username = game.players[game.playerOrder[socket.playerId]].username;
+      socket.broadcast.emit('message', username + " " + slapResponse.message);
+
+    } catch (err) {
+      socket.emit('errorMessage', err.message)
+    }
   });
 
 });
