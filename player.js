@@ -3,10 +3,15 @@ var crypto = require("crypto");
 class Player {
   constructor(username) {
     // YOUR CODE HERE
+    this.username = username,
+    this.id = this.generateId(),
+    this.pile = []
   }
 
   generateId() {
-    return crypto.randomBytes(10).toString('hex');
+    if(!this.id) {
+      return crypto.randomBytes(10).toString('hex');
+    }
   }
 
   // PERSISTENCE FUNCTIONS
