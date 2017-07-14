@@ -31,12 +31,8 @@ $(document).ready(function() {
 
   socket.on('playCard', function(data) {
     // YOUR CODE HERE
-    var card = data.split(' ')
-    for (var i = 0; i < card.length; i++) {
-    	card[i] = card[i].toLowerCase()
-    }
-    card = card.join('_') + '.svg'
-    $('#card').attr('src', card)
+    var card = data.cardString.toLowerCase().split(' ').join('_') + '.svg';
+    $('#card').attr('src', '../cards/' + card);
   });
 
   socket.on('start', function() {

@@ -24,28 +24,6 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(morgan('tiny'));
 
-
-
-// function test() {
-//   var numbCards = {}
-//   var currentUser = game.players[socket.playerId].username;
-//   var currentPlayers = []
-//   game.playerOrder.forEach(function(item) {
-//     numbCards[item] = game.players[item].pile.length
-//     currentPlayers.push(game.players[item].username)
-//   })
-//   if (!game.isStarted) {
-//     currentUser = 'Game has not started yet'
-//   }
-//   currentPlayers = currentPlayers.join(', ')
-//   var obj = {hi: "johnathan"}
-//   console.log(obj)
-//   return obj;
-//
-// }
-
-//console.log(test());
-
 app.get('/', function(req, res) {
   res.render('index');
 });
@@ -59,13 +37,8 @@ var count = 0; // Number of active socket connections
 var winner = null; // Username of winner
 
 function getGameState() {
-  // var currentPlayerUsername;
-  // var players = "";
-  // var numCards = {};
-
-  // YOUR CODE HERE
   var numbCards = {}
-  var currentUser = game.players[socket.playerId].username;
+  var currentUser = game.players[game.playerOrder[0]].username;
   var currentPlayers = []
   game.playerOrder.forEach(function(item) {
     numbCards[item] = game.players[item].pile.length
@@ -117,13 +90,13 @@ io.on('connection', function(socket) {
     var playerId;
     try {
       playerId = game.addPlayer(username)
-      console.log(playerId + ' ' + JSON.stringify(game.players))
-      socket.playerId = playerId
+    //  console.log(playerId + ' ' + JSON.stringify(game.players))
+      socket.playerId = playerId;
       socket.emit('username', {
         id: playerId,
         username: username
       })
-      console.log("gettting game state: ", getGameState())
+    //  console.log("gettting game state: ", getGameState())
       io.emit('updateGame', getGameState())
     }
     catch(error) {
@@ -161,16 +134,16 @@ io.on('connection', function(socket) {
     // YOUR CODE HERE
     console.log('card played');
     if (!socket.playerId) {
-      socket.emit('errorMessage', 'You are not a player of the game')
+      socket.emit('errorMessage', 'You are not a player of the game');
     }
     else {
       var playedCard;
       try {
-        playedCard = game.playCard(socket.playerId)
-        io.emit('playCard', playedCard)
+        playedCard = game.playCard(socket.playerId);
+        io.emit('playCard', playedCard);
       }
       catch(error) {
-        socket.emit('errorMessage', error.message)
+        socket.emit('errorMessage', 'It is not your turn yet!');
       }
     }
     // YOUR CODE ENDS HERE
