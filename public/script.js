@@ -109,11 +109,18 @@ $(document).ready(function() {
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    var username = prompt('Enter your username');
+    socket.emit('username', username);
+
+
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing game...');
   });
 
   $('#playCard').on('click', function(e) {

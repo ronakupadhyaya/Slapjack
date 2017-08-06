@@ -70,7 +70,14 @@ io.on('connection', function(socket) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
+    console.log(data);
+    try{
+      var id = game.addPlayer(data);
+    } catch(e){
+      socket.emit('errorMessage', e.message);
+    }
     // YOUR CODE HERE
+    socket.playerId = id;
   });
 
   socket.on('start', function() {
