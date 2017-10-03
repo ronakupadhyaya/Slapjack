@@ -6,31 +6,151 @@ var readGame = false;
 
 class Game {
   constructor() {
-    // YOUR CODE HERE
+    this.isStarted = false;
+    this.players = {};
+    this.playerOrder = [];
+    //central pile
+    this.pile = [];
+
   }
 
   addPlayer(username) {
-    // YOUR CODE HERE
+    if(this.isStarted){
+      throw("Game has already started");
+    }
+    if(!username.trim()){
+      throw("Please enter a valid username");
+    }
+    for(var key in this.players){
+      if(this.players[key].username === username){
+        throw("User already added");
+      }
+    }
+    var newPlayer = new Player(username);
+    this.playerOrder.push(newPlayer.id);
+    this.players[newPlayer.id] = newPlayer;
+    return newPlayer.id;
   }
 
   startGame() {
-    // YOUR CODE HERE
+    if(this.isStarted){
+      throw("Game has already started");
+    }
+    if(this.playerOrder.length < 2){
+      throw("Not enough players!")
+    }
+    this.isStarted = true;
+    var suits = ["diamonds", "clubs", "hearts", "spades"];
+    var values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    var deck = [];
+    values.forEach((value) => {
+      suits.forEach((suit) => {
+        var newObj = new Card(suit, value);
+        deck.push(newObj);
+      })
+    });
+    deck = _.shuffle(deck);
+    var counter = 0;
+    while(deck.length !== 0){
+      this.players[this.playerOrder[counter]].pile.push(deck.pop());
+      counter = (counter + 1) % this.playerOrder.length;
+    }
+
   }
 
   nextPlayer() {
     // YOUR CODE HERE
+    if(!this.isStarted){
+      throw("It hasn't started yet");
+    }
+    var currentplayer = this.playerOrder[0];
+    this.playerOrder.shift();
+    this.playerOrder.push(currentplayer);
+    currentplayer = this.playerOrder[0];
+    while(this.players[currentplayer].pile.length === 0){
+      this.playerOrder.shift();
+      this.playerOrder.push(currentplayer);
+      currentplayer = this.playerOrder[0];
+    }
+
+
   }
 
   isWinning(playerId) {
+    if(!this.isStarted){
+      throw("It hasn't started yet");
+    }
     // YOUR CODE HERE
+    if(this.players[playerId].pile.length === 52){
+      this.isStarted = false;
+      return true;
+    } else{
+      return false;
+    }
   }
 
   playCard(playerId) {
-    // YOUR CODE HERE
+    if(!this.isStarted){
+      throw("It hasn't started yet");
+    }
+    if(playerId !== this.playerOrder[0]){
+      throw("It's not your turn yet");
+    }
+    if(this.players[playerId].pile.length === 0){
+      throw("You've lost");
+    }
+    this.pile.push(this.players[playerId].pile.pop());
+    var hasZeroCards = false;
+    for(var key in this.players){
+      if(this.players[key].pile.length > 0){
+        hasZeroCards = true;
+        break;
+      }
+    }
+    if(!hasZeroCards){
+      throw("It's a tie");
+    }
+    this.nextPlayer();
+    return {
+      card: this.pile[this.pile.length-1],
+      cardString: this.pile[this.pile.length-1].toString()
+    }
+
   }
 
   slap(playerId) {
     // YOUR CODE HERE
+    if(!this.isStarted){
+      throw("It hasn't started yet");
+    }
+    var topCard = this.pile[this.pile.length-1];
+    var secondCardCheck = this.pile.length >= 2 ? this.pile[this.pile.length-2].value === topCard.value : false;
+    var thirdCardCheck = this.pile.length >= 3 ? this.pile[this.pile.length-3].value === topCard.value : false;
+    if(topCard.value === 11 || secondCardCheck || thirdCardCheck){
+      this.players[playerId].pile = [...this.pile, ...this.players[playerId].pile];
+      this.pile = [];
+      return {
+        winning: this.isWinning(playerId),
+        message: 'got the pile!'
+      }
+    } else{
+      var playerPile = this.players[playerId].pile;
+      if(playerPile.length >3){
+        var topThreeCards = this.players[playerId].pile.splice(playerPile.length -3, 3);
+        this.pile = [...topThreeCards, ...this.pile];
+      } else{
+        //Deaded
+        this.pile = [...this.pile, ...this.players[playerId].pile];
+        this.players[playerId].pile = [];
+
+      }
+      return {
+        winning: false,
+        message: 'lost 3 cards!'
+      }
+
+    }
+
   }
 
   // PERSISTENCE FUNCTIONS
