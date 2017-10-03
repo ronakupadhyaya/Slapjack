@@ -78,12 +78,29 @@ io.on('connection', function(socket) {
     }
     // YOUR CODE HERE
     try{
-      socket.playerId = game.addPlayer(data);
-      socket.emit('username', {
-        id: socket.playerId,
-        username: data
-      });
+      if(typeof data === 'string'){
+        socket.playerId = game.addPlayer(data);
+        localStorage.setItem(playerId, socket.playerId);
+        socket.emit('username', {
+          id: socket.playerId,
+          username: data
+        });
+
+      } else{
+        if(game.players[data.id]){
+          socket.playerId = data.id;
+          socket.emit('username', {
+            id: data.id,
+            username: game.players[data.id].username
+          })
+        }
+        else{
+          socket.emit('username', false);
+        }
+
+      }
       io.emit('updateGame', getGameState())
+
     }
     catch(err){
       socket.emit("errorMessage", err.message);

@@ -21,10 +21,17 @@ $(document).ready(function() {
 
   socket.on('username', function(data) {
     // YOUR CODE HERE
+    if(data === false){
+      localStorage.setItem("playerId", '');
+      var username = window.prompt("Enter your username");
+      socket.emit('username', username);
+      return;
+    }
     $('#joinGame, #observeGame').prop('disabled', true);
     $('#startGame').prop('disabled', false);
     $('#usernameDisplay').text('Joined Game as ' + data.username);
     user = data;
+
   });
 
   socket.on('playCard', function(data) {
@@ -126,7 +133,12 @@ $(document).ready(function() {
     e.preventDefault();
     // YOUR CODE HERE
     var username = window.prompt("Enter your username");
-    socket.emit('username', username);
+    if(localStorage.getItem('playerId')){
+      socket.emit('username', {id: localStorage.getItem('playerId')});
+    } else{
+      socket.emit('username', username);
+    }
+
   });
 
   $('#observeGame').on('click', function(e) {
