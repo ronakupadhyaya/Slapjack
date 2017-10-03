@@ -152,6 +152,7 @@ io.on('connection', function(socket) {
       var slapObj = game.slap(socket.playerId);
       if(slapObj.winning){
         winner = game.players[socket.playerId].username;
+        io.emit('message', winner + ' has won! The rest of you suck.')
       }
       if(slapObj.message ==='got the pile!'){
         io.emit('clearDeck');
@@ -166,6 +167,7 @@ io.on('connection', function(socket) {
 
         if(playerArr.length === 1){
           winner = playerArr[0].username;
+          socket.broadcast.emit('message', 'You won! Congratulations :)');
           game.isStarted = false;
         } else{
           game.nextPlayer();

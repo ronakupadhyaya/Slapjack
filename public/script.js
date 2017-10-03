@@ -40,15 +40,17 @@ $(document).ready(function() {
   });
 
   socket.on('message', function(data) {
-    $('#message-container').append(`
+    console.log("DATA", data);
+    $('#messages-container').append(`
         <p class="to-be-removed">`+ data + `</p>
-
       `)
-    setTimeOut(function(){
-      $('.to-be-removed').remove();
-    }, 5000)
+      $.doTimeOut(5000, function(){
+        $('.to-be-removed').remove();
+      })
   });
-
+  setInterval(function(){
+    $('.to-be-removed').remove();
+  }, 10000);
   socket.on('clearDeck', function(){
     $('#card').attr('img', '');
   });
