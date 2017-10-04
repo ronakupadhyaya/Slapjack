@@ -67,8 +67,9 @@ class Game {
   playCard(playerId) {
     if (!this.isStarted)
       throw "Game has not yet started";
-    if (playerId !== this.playerOrder[0])
-      throw "Not this player's turn.";
+    if (playerId !== this.playerOrder[0]) {
+      throw "Not this player's turn," + playerId + ' is not ' + this.playerOrder[0];
+    }
     if (!this.players[playerId].pile.length)
       throw "This player is pileless!";
     var newCard = this.players[playerId].pile.pop();
@@ -98,13 +99,13 @@ class Game {
     if (topThree[len - 1].value === 11 ||
       (len >= 2 && topThree[len - 2].value === topThree[len - 1].value) ||
       (len >= 3 && topThree[len - 3].value === topThree[len - 1].value)) {
-        this.players[playerId].pile = [...this.pile, ...this.players[playerId].pile];
-        this.pile = [];
-        return {
-          winning: this.isWinning(playerId),
-          message: 'got the pile!'
-        }
+      this.players[playerId].pile = [...this.pile, ...this.players[playerId].pile];
+      this.pile = [];
+      return {
+        winning: this.isWinning(playerId),
+        message: 'got the pile!'
       }
+    }
     var cardsToTake = this.players[playerId].pile.length < 3 ? this.players[playerId].pile.length : 3;
     for (var i = 0; i < cardsToTake; i++) {
       this.pile.unshift(this.players[playerId].pile.pop());
@@ -123,6 +124,17 @@ class Game {
       }
     }
     return false
+  }
+
+  numActivePlayers() {
+    var active = []
+    for (var id in this.players) {
+      if (this.players[id].pile.length !== 0) {
+        active.push(this.players[id].username)
+        // console.log('Added:', this.players[id].username)
+      }
+    }
+    return active;
   }
 
   // PERSISTENCE FUNCTIONS
