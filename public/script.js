@@ -6,7 +6,7 @@ $(document).ready(function () {
   $('#slap').prop('disabled', true);
 
   // Establish a connection with the server
-  var socket = io('10.2.106.85:3000');
+  var socket = io();
 
   // Stores the current user
   var user = null;
@@ -21,11 +21,22 @@ $(document).ready(function () {
 
   socket.on('username', function (data) {
     // YOUR CODE HERE
-    $('#joinGame').prop('disabled', true);
-    $('#observeGame').prop('disabled', true);
-    $('#startGame').prop('disabled', false);
-    $('#usernameDisplay').text('Joined game as ' + data.username)
-    user = data
+    console.log("4", data);
+    if (data === false) {
+      localStorage.setItem('id', ''); // reset the id in localStorage
+      var username = prompt('Welcome back. Please enter a new username.')
+      socket.emit('username', username)
+      // prompt the user for a username and
+      // emit this value under the `username` event to the server
+    }
+    else {
+      $('#joinGame').prop('disabled', true);
+      $('#observeGame').prop('disabled', true);
+      $('#startGame').prop('disabled', false);
+      $('#usernameDisplay').text('Joined game as ' + data.username)
+      user = data
+      localStorage.setItem('id', user.id)
+    }
   });
 
   socket.on('playCard', function (data) {
@@ -129,7 +140,16 @@ $(document).ready(function () {
   $('#joinGame').on('click', function (e) {
     e.preventDefault();
     // YOUR CODE HERE
-    var username = prompt('Please enter a username');
+    var id = localStorage.getItem("id") || "";
+    console.log("id", id);
+    if (id === "") {
+      var username = prompt('Please enter a username');
+      console.log('1', username)
+    }
+    else {
+      var username = {id: id}
+      console.log('2', username)
+    }
     socket.emit('username', username)
   });
 

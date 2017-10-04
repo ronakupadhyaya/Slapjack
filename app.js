@@ -85,18 +85,37 @@ io.on('connection', function (socket) {
   });
 
   socket.on('username', function (data) {
+    console.log('1', data);
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);
       return;
     }
     // YOUR CODE HERE
     try {
-      socket.playerId = game.addPlayer(data)
-      socket.emit('username', {
-        id: socket.playerId,
-        username: data
-      });
-      io.emit('updateGame', getGameState())
+      if (typeof data === "string") {
+        socket.playerId = game.addPlayer(data)
+        socket.emit('username', {
+          id: socket.playerId,
+          username: data
+        });
+        io.emit('updateGame', getGameState())
+      }
+      else if (typeof data === "object") {
+        if (!(data.id in game.players)) {
+          console.log("hey", data)
+          socket.emit('username', false)
+        }
+        else {
+          socket.playerId = data.id
+          console.log("3", game.players, data.id)
+          socket.emit('username', {
+            id: data.id,
+            username: game.players[data.id].username
+           });
+           console.log("66", data)
+           io.emit('updateGame', getGameState()); // broadcast to everyone
+        }
+      }
     }
     catch (e) {
       socket.emit('errorMessage', e.message)
