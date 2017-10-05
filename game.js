@@ -7,30 +7,90 @@ var readGame = false;
 class Game {
   constructor() {
     // YOUR CODE HERE
+    this.isStarted = false
+    this.players = {}
+    this.playerOrder = []
+    this.pile = []
   }
 
   addPlayer(username) {
     // YOUR CODE HERE
+    if (this.isStarted) throw "Game has already started"
+    if (!username.trim()) throw "Username must not be empty"
+    for (var id in this.players)
+      if (this.players[id].username === username)
+        throw "Username must be unique"
+    var player = new Player(username);
+    this.playerOrder.push(player.id)
+    this.players[player.id] = player
+    return player.id
   }
 
   startGame() {
     // YOUR CODE HERE
+    if (this.isStarted) throw "Game has already started"
+    if (Object.keys(this.players).length < 2) throw "Need at least 1 player to player"
+    this.isStarted = true
+
+    const suits = ["Clubs", "Diamonds", "Spades", "Hearts"]
+    const nums = _.range(1, 14)
+    let deck = [];
+    suits.forEach((s) => {
+      nums.forEach((n) => {
+        deck.push(new Card(s, n))
+      });
+    })
+    this.pile = deck
+    this.pile = _.shuffle(this.pile)
+
+    while (Object.keys(this.pile).length)
+      for (var id in this.players)
+        if (this.pile[0])
+          this.players[id].pile.push(this.pile.pop())
   }
 
   nextPlayer() {
     // YOUR CODE HERE
+    if (!this.isStarted) throw "Game has not yet started"
+    let shft = this.playerOrder.shift()
+    this.playerOrder.push(shft)
   }
 
   isWinning(playerId) {
     // YOUR CODE HERE
+    if (!this.isStarted) throw "Game has not yet started"
+    if (this.players[playerId].pile.length === 52) {
+      this.isStarted = false
+      return true
+    }
+    return false
   }
 
   playCard(playerId) {
     // YOUR CODE HERE
+    if (!this.isStarted) throw "Game has not yet started"
+    if (this.playerOrder[0] !== playerId) throw "Not your turn"
+    if (!this.players[playerId].pile.length) throw "Your pile is empty - move not allowed"
+
+    const newCard = this.players[playerId].pile.pop()
+    this.pile.push(newCard)
+    let counter = 0;
+    for (var id in this.players)
+      if (this.players[id].pile.length === 0) counter++
+    if (counter === Object.keys(this.players).length) {
+      this.isStarted = false
+      throw "It's a tie!"
+    }
+    this.nextPlayer()
+    return {
+      card: newCard,
+      cardString: newCard.toString()
+    }
   }
 
   slap(playerId) {
     // YOUR CODE HERE
+    if (!this.isStarted) throw "Game has not yet started"
   }
 
   // PERSISTENCE FUNCTIONS

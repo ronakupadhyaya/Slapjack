@@ -1,10 +1,31 @@
 class Card {
   constructor(suit, value) {
     // YOUR CODE HERE
+    this.suit = suit;
+    this.value = value;
   }
 
   toString() {
     // YOUR CODE HERE
+    let str;
+    switch (this.value) {
+      case 11:
+        str = 'Jack'
+        break
+      case 12:
+        str = 'Queen'
+        break
+      case 13:
+        str = 'King'
+        break
+      case 1:
+        str = 'Ace'
+        break
+      default:
+        str = this.suit
+        break
+    }
+    return str + " of " + this.suit[0].toUpperCase() + this.suit.slice(1);
   }
 
   // PERSISTENCE FUNCTIONS
