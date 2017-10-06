@@ -71,6 +71,14 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
+    try {
+      socket.playerId = game.addPlayer(data)
+      socket.emit('username', {id: socket.playerId, username: data})
+      io.emit('updateGame', getGameState())
+    }
+    catch (e) {
+      socket.emit('errorMessage', e)
+    }
   });
 
   socket.on('start', function() {
@@ -79,8 +87,23 @@ io.on('connection', function(socket) {
       return;
     }
     // YOUR CODE HERE
+    if (!socket.playerId) {
+      socket.emit('errorMessage', e)
+    }
+    try {
+      game.startGame()
+      io.emit('start')
+      io.emit('updateGame', getGameState())
+    }
+    catch (e) {
+      socket.emit('errorMessage', e)
+    }
   });
-
+    /* try { */
+    /* } */
+    /* catch (e) { */
+    /*   socket.emit('errorMessage', e) */
+    /* } */
   socket.on('playCard', function() {
     if (winner) {
       socket.emit('errorMessage', `${winner} has won the game. Restart the server to start a new game.`);

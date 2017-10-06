@@ -91,6 +91,30 @@ class Game {
   slap(playerId) {
     // YOUR CODE HERE
     if (!this.isStarted) throw "Game has not yet started"
+
+    const last = this.pile.length - 1
+    let playerPile = this.players[playerId].pile
+    console.log('\n\n', this.pile[last], this.pile[last].value === 11)
+    if (this.pile[last].value === 11 ||
+        this.pile[last].value === this.pile[last-1].value ||
+        this.pile.length > 2 && this.pile[last].value === this.pile[last-2].value) {
+      this.players[playerId].pile = [...this.pile, this.players[playerId].pile]
+      this.pile = []
+      return {
+        winning: this.isWinning(playerId),
+        message: 'got the pile!'
+      }
+    }
+    else {
+      const topCards = playerPile.slice(-3)
+      for (var i = 0; i < topCards.length; i++) {
+        this.pile.unshift(playerPile.pop())
+      }
+      return {
+        winning: false,
+        message: 'lost 3 cards!'
+      }
+    }
   }
 
   // PERSISTENCE FUNCTIONS

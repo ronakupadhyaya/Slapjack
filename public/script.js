@@ -6,7 +6,7 @@ $(document).ready(function() {
   $('#slap').prop('disabled', true);
 
   // Establish a connection with the server
-  var socket = io();
+  var socket = io(); // TODO where does io() come from?
 
   // Stores the current user
   var user = null;
@@ -21,6 +21,11 @@ $(document).ready(function() {
 
   socket.on('username', function(data) {
     // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#startGame').prop('disabled', false);
+    $('#usernameDisplay').text('Joined game as ' + data.username)
+    user = data
   });
 
   socket.on('playCard', function(data) {
@@ -29,6 +34,9 @@ $(document).ready(function() {
 
   socket.on('start', function() {
     // YOUR CODE HERE
+    $('#startGame').prop('disabled', true);
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
   });
 
   socket.on('message', function(data) {
@@ -104,16 +112,21 @@ $(document).ready(function() {
   $('#startGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    socket.emit('start')
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    io.emit('username', prompt('Enter username'))
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
     // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true)
+    $('#observeGame').prop('disabled', true)
+    $('#usernameDisplay').text('Observing game...')
   });
 
   $('#playCard').on('click', function(e) {
