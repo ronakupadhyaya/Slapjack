@@ -2,7 +2,9 @@ var crypto = require("crypto");
 
 class Player {
   constructor(username) {
-    // YOUR CODE HERE
+    this.username = username;
+    this.pile = [];
+    this.id = this.generateId();
   }
 
   generateId() {

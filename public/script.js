@@ -20,23 +20,48 @@ $(document).ready(function() {
   });
 
   socket.on('username', function(data) {
-    // YOUR CODE HERE
+    if(data===false){
+      localStorage.setItem('id','');
+      var username = window.prompt("Please enter a new username.");
+      socket.emit('username',username);
+      return;
+    }
+    else{
+      $('#joinGame').prop('disabled', true);
+      $('#observeGame').prop('disabled', true);
+      $('#startGame').prop('disabled', false);
+      $('#usernameDisplay').text(`Joined game as ${data.username}`);
+      localStorage.setItem("id",data.id);
+      user = data;
+    }
   });
 
-  socket.on('playCard', function(data) {
-    // YOUR CODE HERE
+  socket.on('playCard', function(card) {
+    var cardString = card.cardString;
+    var newString = '';
+    var valString = cardString.split(' ');
+    valString = valString[0];
+    valString = valString.toLowerCase();
+    var src = `/cards/${valString}_of_${card.card.suit}.svg`;
+    $('#card').attr('src',src);
   });
 
   socket.on('start', function() {
-    // YOUR CODE HERE
+    $('#playCard').prop('disabled', false);
+    $('#slap').prop('disabled', false);
+    $('#startGame').prop('disabled', true);
   });
 
-  socket.on('message', function(data) {
-    // YOUR CODE HERE
+  socket.on('message', function(message) {
+    $('#messages-container').html(`<p>${message}</p>`);
+    var fadeout = function(){
+      $('#messages-container').html('');
+    }
+    setTimeout(fadeout,5000);
   });
 
   socket.on('clearDeck', function(){
-    // YOUR CODE HERE
+    $('#card').attr('src','');
   });
 
   socket.on("updateGame", function(gameState) {
@@ -103,27 +128,37 @@ $(document).ready(function() {
   // ==========================================
   $('#startGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('start');
   });
 
   $('#joinGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    var localId = localStorage.getItem('id') || "";
+    //console.log('Local Id:',localId);
+    if(localId === ""){
+      var username = window.prompt("Please enter a new username.");
+      socket.emit('username',username);
+    }
+    else{
+      socket.emit('username',{id: localId});
+    }
   });
 
   $('#observeGame').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    $('#joinGame').prop('disabled', true);
+    $('#observeGame').prop('disabled', true);
+    $('#usernameDisplay').text('Observing game...');
   });
 
   $('#playCard').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('playCard');
   });
 
   $('#slap').on('click', function(e) {
     e.preventDefault();
-    // YOUR CODE HERE
+    socket.emit('slap');
   });
 
 });
